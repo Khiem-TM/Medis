@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+.env/
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Database (nếu có)
+*.sqlite3
