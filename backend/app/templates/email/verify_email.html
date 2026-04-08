@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xác thực email — MediSmart</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
+
+  <!-- Wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;padding:40px 16px;">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#2563EB;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:700;letter-spacing:-0.5px;">
+                💊 Medis
+              </h1>
+              <p style="margin:8px 0 0;color:#bfdbfe;font-size:14px;">Hệ thống quản lý thuốc thông minh</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 16px;color:#111827;font-size:22px;font-weight:600;">
+                Xin chào, {{ full_name }}!
+              </h2>
+              <p style="margin:0 0 16px;color:#374151;font-size:15px;line-height:1.6;">
+                Cảm ơn bạn đã đăng ký tài khoản tại <strong>MediSmart</strong>. Để hoàn tất quá trình đăng ký và kích
+                hoạt tài khoản, vui lòng xác thực địa chỉ email của bạn bằng cách nhấn vào nút bên dưới.
+              </p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" style="margin:28px 0;">
+                <tr>
+                  <td style="background-color:#2563EB;border-radius:8px;">
+                    <a href="{{ verify_link }}"
+                      style="display:inline-block;padding:14px 32px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;letter-spacing:0.2px;">
+                      Xác thực email ngay
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback link -->
+              <p style="margin:0 0 8px;color:#6b7280;font-size:13px;">
+                Nếu nút trên không hoạt động, hãy sao chép đường dẫn sau vào trình duyệt:
+              </p>
+              <p style="margin:0 0 24px;word-break:break-all;">
+                <a href="{{ verify_link }}" style="color:#2563EB;font-size:13px;">{{ verify_link }}</a>
+              </p>
+
+              <!-- Warning -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="background-color:#fef9c3;border:1px solid #fde047;border-radius:8px;margin-bottom:16px;">
+                <tr>
+                  <td style="padding:14px 16px;">
+                    <p style="margin:0;color:#713f12;font-size:14px;line-height:1.5;">
+                      ⚠️ <strong>Lưu ý:</strong> Đường dẫn xác thực này sẽ hết hạn sau
+                      <strong>{{ expire_hours }} giờ</strong>. Nếu hết hạn, bạn có thể yêu cầu gửi lại email xác thực.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;color:#9ca3af;font-size:13px;line-height:1.5;">
+                Nếu bạn không đăng ký tài khoản MediSmart, vui lòng bỏ qua email này. Tài khoản sẽ không được kích hoạt
+                nếu không có xác thực.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px;text-align:center;">
+              <p style="margin:0 0 4px;color:#9ca3af;font-size:12px;">
+                © 2026 Medis. Bảo lưu mọi quyền.
+              </p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;">
+                Nếu cần hỗ trợ, liên hệ <a href="mailto:support@medis.vn" style="color:#2563EB;">support@medis.vn</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

@@ -69,16 +69,37 @@ class RefreshTokenRequest(BaseModel):
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
 # Định nghĩa DTO cho reset password
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
-    confirm_new_password: str
+    confirm_password: str
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        errors = []
+        if len(v) < 14:
+            errors.append("Password must be at least 14 characters")
+        if not re.search(r"[A-Z]", v):
+            errors.append("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            errors.append("Password must contain at least one lowercase letter")
+        if not re.search(r"[0-9]", v):
+            errors.append("Password must contain at least one digit")
+        if not re.search(r"[@$!%*?&]", v):
+            errors.append("Password must contain at least one special character (@$!%*?&)")
+        if errors:
+            raise ValueError(" ".join(errors))
+        return v
 
     @model_validator(mode='after')
     def check_passwords_match(self):
-        if self.new_password != self.confirm_new_password:
-            raise ValueError("New passwords do not match")
+        if self.new_password != self.confirm_password:
+            raise ValueError("Passwords do not match")
         return self
     
 class ChangePasswordRequest(BaseModel):

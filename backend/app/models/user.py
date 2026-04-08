@@ -33,12 +33,25 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.user, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 
     # Relationships — sẽ thêm dần khi có các bảng liên quan
     # prescriptions = relationship("Prescription", back_populates="user")
     # health_profiles = relationship("HealthProfile", back_populates="user")
 
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "full_name": self.full_name,
+            "phone": self.phone,
+            "role": self.role,
+            "auth_provider": self.auth_provider,
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
 
     def __repr__(self):
         return f"<User id={self.id} username={self.username}>"
