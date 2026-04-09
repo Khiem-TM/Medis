@@ -15,3 +15,5 @@ alembic upgrade head
 # 4. Rollback nếu cần:
 
 alembic downgrade -1
+
+Schemas tương đương DTO trong NestJS

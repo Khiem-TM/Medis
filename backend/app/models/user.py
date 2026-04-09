@@ -35,9 +35,11 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 
-    # Relationships — sẽ thêm dần khi có các bảng liên quan
-    # prescriptions = relationship("Prescription", back_populates="user")
-    # health_profiles = relationship("HealthProfile", back_populates="user")
+    # Relationships
+    prescriptions = relationship("Prescription", back_populates="user", lazy="select")
+    health_profiles = relationship("HealthProfile", back_populates="user", lazy="select")
+    activity_logs = relationship("ActivityLog", back_populates="user", lazy="select")
+    chat_messages = relationship("ChatMessage", back_populates="user", lazy="select")
 
 
     def to_dict(self) -> dict:

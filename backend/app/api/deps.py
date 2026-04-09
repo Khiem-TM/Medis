@@ -52,6 +52,28 @@ async def get_current_user(
 
     return user
 
+async def get_optional_user(
+    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False)),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+) -> User | None:
+    """Return the authenticated user if a valid Bearer token is provided, else None."""
+    if not credentials:
+        return None
+    payload = decode_token(credentials.credentials)
+    if not payload:
+        return None
+    jti = payload.get("jti")
+    if jti and await redis.exists(f"blacklist:{jti}"):
+        return None
+    user_id = payload.get("sub")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        return None
+    return user
+
+
 async def get_current_admin(
     current_user: User = Depends(get_current_user),
 ) -> User:
