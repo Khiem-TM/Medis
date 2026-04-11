@@ -1,15 +1,15 @@
-from pydantic import BaseModel, EmailStr, field_validator, model_validator  
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from typing import Optional
 import re
 
 # Định nghĩa DTO cho đăng ký
-class RegisterRequest(BaseModel): 
+class RegisterRequest(BaseModel):
     full_name: str
     phone: str
     email: EmailStr
     username: str
     password: str
-    confirm_password: str   
+    confirm_password: Optional[str] = None
 
     @field_validator('full_name')
     @classmethod
@@ -49,7 +49,7 @@ class RegisterRequest(BaseModel):
     
     @model_validator(mode='after')
     def check_passwords_match(self):
-        if self.password != self.confirm_password:
+        if self.confirm_password is not None and self.password != self.confirm_password:
             raise ValueError("Passwords do not match")
         return self
 
@@ -81,6 +81,9 @@ class ResetPasswordRequest(BaseModel):
             raise ValueError("New passwords do not match")
         return self
     
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str

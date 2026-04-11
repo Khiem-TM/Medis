@@ -1,19 +1,26 @@
-ok guys
+# Di vào thư mục backend
 
-Workflow Alembic khi update Table
+cd /Users/UET/VDHD/Medis/backend
 
-# 1. Thêm/sửa model trong app/models/
+# Activate virtual environment
 
-# 2. Tạo migration mới:
+source venv/bin/activate
 
-alembic revision --autogenerate -m "add_prescriptions_table"
+# Chạy server (development)
 
-# 3. Chạy:
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+Lưu ý: Dùng --reload khi dev để server tự restart khi thay đổi code. Khi Postgres.app hiện dialog xin quyền kết nối → click Allow.
+
+Các lệnh hữu ích khác:
+
+# Chạy tests
+
+python test/test_e2e_full.py
+
+# Migration DB
 
 alembic upgrade head
 
-# 4. Rollback nếu cần:
+# Seed data
 
-alembic downgrade -1
-
-Schemas tương đương DTO trong NestJS
+python seed_data.py

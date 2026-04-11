@@ -453,8 +453,16 @@ class HealthProfileService:
         for field, value in update_data.items():
             setattr(profile, field, value)
 
+        await self.db.flush()
+
+        # Reload with relationship to avoid MissingGreenlet during serialization
+        result = await self.db.execute(
+            select(HealthProfile)
+            .where(HealthProfile.id == profile_id)
+            .options(selectinload(HealthProfile.prescription))
+        )
         logger.info(f"HealthProfile {profile_id} updated for user {user_id}")
-        return profile
+        return result.scalar_one()
 
     async def delete(self, user_id: int, profile_id: int) -> None:
         profile = await self._get_and_verify(user_id, profile_id)

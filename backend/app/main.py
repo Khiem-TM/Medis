@@ -7,7 +7,7 @@ from redis.asyncio import Redis
 
 from app.config import settings
 from app.api.v1 import api_router
-from app.database import AsyncSessionLocal
+
 from app.redis_client import get_redis_pool
 import logging
 
@@ -21,11 +21,16 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.APP_ENV}")
     logger.info("Swagger UI: http://localhost:8000/docs")
 
-    # Test PostgreSQL
+    # Test PostgreSQL + pre-warm all pool connections
     try:
-        async with AsyncSessionLocal() as db:
-            await db.execute(text("SELECT 1"))
-        logger.info("PostgreSQL connected")
+        from app.database import engine
+        import asyncio
+        # Pre-warm all pool connections concurrently to avoid Postgres.app auth issue
+        async def _ping():
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+        await asyncio.gather(*[_ping() for _ in range(5)])
+        logger.info("PostgreSQL connected (pool pre-warmed)")
     except Exception as e:
         logger.error(f"PostgreSQL connection failed: {e}")
 
@@ -65,10 +70,16 @@ app.include_router(api_router, prefix="/api/v1")
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
+    origin = request.headers.get("origin", "")
+    allowed = [settings.FRONTEND_URL, "http://localhost:5173"]
+    response = JSONResponse(
         status_code=500,
         content={"detail": "Lỗi hệ thống. Vui lòng thử lại sau."},
     )
+    if origin in allowed:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 
 @app.get("/", tags=["Health Check"])

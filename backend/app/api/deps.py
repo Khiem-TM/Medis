@@ -34,10 +34,9 @@ async def get_current_user(
             detail="Token đã bị thu hồi. Vui lòng đăng nhập lại.",
         )
     
-    user_id = payload.get("sub")
+    user_id = int(payload.get("sub"))
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-
 
     if not user:
         raise HTTPException(
@@ -66,7 +65,7 @@ async def get_optional_user(
     jti = payload.get("jti")
     if jti and await redis.exists(f"blacklist:{jti}"):
         return None
-    user_id = payload.get("sub")
+    user_id = int(payload.get("sub"))
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user or not user.is_active:

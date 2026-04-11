@@ -4,9 +4,10 @@ from app.config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=settings.APP_ENV == "development",  # Chỉ bật log SQL khi ở development
-    pool_size=10, # 10 kết nối đồng thời --> connection pooling
-    max_overflow=20, # Cho phép tạo thêm 20 kết nối tạm thời --> bonus
+    echo=settings.APP_ENV == "development",
+    pool_size=5,
+    max_overflow=0,
+    pool_timeout=30,
 )
 
 AsyncSessionLocal = async_sessionmaker(

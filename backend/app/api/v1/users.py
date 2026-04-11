@@ -75,6 +75,7 @@ async def update_profile(
 ):
     svc = _user_svc(db, redis)
     user = await svc.update_profile(current_user.id, data)
+    await db.commit()
     return user
 
 
@@ -92,6 +93,7 @@ async def change_password(
 ):
     svc = _user_svc(db, redis)
     await svc.change_password(current_user.id, data, background_tasks)
+    await db.commit()
     return {"message": "Mật khẩu đã được thay đổi thành công. Vui lòng đăng nhập lại."}
 
 
@@ -109,6 +111,7 @@ async def upload_avatar(
 ):
     svc = _user_svc(db, redis)
     url = await svc.upload_avatar(current_user.id, file)
+    await db.commit()
     return {"avatar_url": url}
 
 
@@ -145,7 +148,9 @@ async def create_prescription(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _prescription_svc(db)
-    return await svc.create(current_user.id, data)
+    result = await svc.create(current_user.id, data)
+    await db.commit()
+    return result
 
 
 @router.get(
@@ -174,7 +179,9 @@ async def update_prescription(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _prescription_svc(db)
-    return await svc.update(current_user.id, prescription_id, data)
+    result = await svc.update(current_user.id, prescription_id, data)
+    await db.commit()
+    return result
 
 
 @router.delete(
@@ -190,6 +197,7 @@ async def delete_prescription(
 ):
     svc = _prescription_svc(db)
     await svc.delete(current_user.id, prescription_id)
+    await db.commit()
     return {"message": "Đơn thuốc đã được xóa"}
 
 
@@ -204,7 +212,9 @@ async def delete_many_prescriptions(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _prescription_svc(db)
-    return await svc.delete_many(current_user.id, body.ids)
+    result = await svc.delete_many(current_user.id, body.ids)
+    await db.commit()
+    return result
 
 
 @router.get(
@@ -254,7 +264,9 @@ async def create_health_profile(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _health_svc(db)
-    return await svc.create(current_user.id, data)
+    result = await svc.create(current_user.id, data)
+    await db.commit()
+    return result
 
 
 @router.get(
@@ -283,7 +295,9 @@ async def update_health_profile(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _health_svc(db)
-    return await svc.update(current_user.id, profile_id, data)
+    result = await svc.update(current_user.id, profile_id, data)
+    await db.commit()
+    return result
 
 
 @router.delete(
@@ -298,6 +312,7 @@ async def delete_health_profile(
 ):
     svc = _health_svc(db)
     await svc.delete(current_user.id, profile_id)
+    await db.commit()
     return {"message": "Hồ sơ sức khỏe đã được xóa"}
 
 
@@ -312,4 +327,6 @@ async def delete_many_health_profiles(
     db: AsyncSession = Depends(get_db),
 ):
     svc = _health_svc(db)
-    return await svc.delete_many(current_user.id, body.ids)
+    result = await svc.delete_many(current_user.id, body.ids)
+    await db.commit()
+    return result

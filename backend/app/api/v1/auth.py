@@ -38,6 +38,7 @@ async def register(
 ):
     service = _auth_service(db, redis)
     await service.register(req, background_tasks)
+    await db.commit()
     return {"message": "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản."}
 
 
@@ -49,6 +50,7 @@ async def verify_email(
 ):
     service = _auth_service(db, redis)
     await service.verify_email(token)
+    await db.commit()
     return {"message": "Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ."}
 
 
@@ -126,6 +128,7 @@ async def reset_password(
 ):
     service = _auth_service(db, redis)
     await service.reset_password(req.token, req.new_password, background_tasks)
+    await db.commit()
     return {"message": "Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập lại."}
 
 
