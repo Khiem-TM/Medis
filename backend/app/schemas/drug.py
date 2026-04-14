@@ -5,22 +5,23 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.models.drug import InteractionSeverity
 
+# ── Drug Brand Name ────────────────────────────────────────────────────────
 
-# ── Drug ───────────────────────────────────────────────────────────────────
-
-class DrugProductResponse(BaseModel):
+class DrugBrandNameResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     drug_id: str
-    trade_name: str
-    route: str
-    dosage: str
-    formulation: str
-    origin: str
+    name: str
+    route: Optional[str] = None
+    strength: Optional[str] = None
+    dosage_form: Optional[str] = None
+    country: Optional[str] = None
+    image_url: Optional[str] = None
 
+
+# ── Drug Warning ────────────────────────────────────────────────────────────
 
 class DrugWarningResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -30,42 +31,57 @@ class DrugWarningResponse(BaseModel):
     warning_text: str
 
 
+# ── Drug Interaction ────────────────────────────────────────────────────────
+
 class DrugInteractionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    drug_id_1: str
-    drug_id_2: str
-    interaction_type: Optional[str] = None
-    severity: InteractionSeverity
-    description: Optional[str] = None
-    recommendation: Optional[str] = None
-    # Populated by service layer (not on ORM model directly)
-    drug_1_name: Optional[str] = None
-    drug_2_name: Optional[str] = None
+    drug_id: str
+    interacts_with_id: str
+    interacts_with_name: Optional[str] = None
+    # Populated by service layer
+    drug_name: Optional[str] = None
 
+
+# ── Drug List / Detail ──────────────────────────────────────────────────────
 
 class DrugListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    name: str
-    atc_code: Optional[str] = None
-    dosage_form: Optional[str] = None
+    generic_name: str
 
 
 class DrugDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    name: str
-    atc_code: Optional[str] = None
-    dosage_form: Optional[str] = None
+    generic_name: str
     description: Optional[str] = None
-    classification: Optional[str] = None
-    products: List[DrugProductResponse] = []
+    chemical_formula: Optional[str] = None
+    molecular_formula: Optional[str] = None
+    brand_names: List[DrugBrandNameResponse] = []
     warnings: List[DrugWarningResponse] = []
+    dosage_forms: List[str] = []
+    categories: List[str] = []
+    atc_codes: List[str] = []
     created_at: datetime
+
+    @classmethod
+    def from_orm_drug(cls, drug) -> "DrugDetailResponse":
+        return cls(
+            id=drug.id,
+            generic_name=drug.generic_name,
+            description=drug.description,
+            chemical_formula=drug.chemical_formula,
+            molecular_formula=drug.molecular_formula,
+            brand_names=[DrugBrandNameResponse.model_validate(p) for p in drug.brand_names],
+            warnings=[DrugWarningResponse.model_validate(w) for w in drug.warnings],
+            dosage_forms=[df.dosage_form for df in drug.dosage_forms],
+            categories=[c.category_name for c in drug.categories],
+            atc_codes=[a.atc_code for a in drug.atc_codes],
+            created_at=drug.created_at,
+        )
 
 
 # ── Interaction check ──────────────────────────────────────────────────────

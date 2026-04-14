@@ -17,14 +17,14 @@ from app.schemas.admin import (
     AdminDrugUpdate,
     AdminInteractionCreate,
     AdminInteractionUpdate,
-    AdminProductCreate,
-    AdminProductUpdate,
+    AdminBrandNameCreate,
+    AdminBrandNameUpdate,
     AdminUpdateUser,
     AdminUserDetail,
     AdminUserListItem,
     AdminWarningCreate,
 )
-from app.schemas.drug import DrugDetailResponse, DrugInteractionResponse, DrugProductResponse, DrugWarningResponse
+from app.schemas.drug import DrugBrandNameResponse, DrugInteractionResponse, DrugWarningResponse
 from app.schemas.user import PaginatedResponse, UserResponse
 from app.services.admin_service import AdminDrugService, AdminInteractionService, AdminUserService
 from app.services.log_service import ActivityLogService, SystemLogService
@@ -127,19 +127,19 @@ async def create_drug(
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    from sqlalchemy.orm import selectinload
-    from sqlalchemy import select
-    from app.models.drug import Drug
-
     drug = await AdminDrugService(db, redis).create(data)
     await _sys_log(db, admin.id, "created", "drug", drug.id)
     await db.commit()
-    # Reload with relationships
-    await db.refresh(drug)
     return {
         "success": True,
         "message": "Thêm thuốc thành công",
-        "data": DrugDetailResponse.model_validate(drug).model_dump(),
+        "data": {
+            "id": drug.id,
+            "generic_name": drug.generic_name,
+            "description": drug.description,
+            "chemical_formula": drug.chemical_formula,
+            "molecular_formula": drug.molecular_formula,
+        },
     }
 
 
@@ -157,11 +157,16 @@ async def update_drug(
     drug = await AdminDrugService(db, redis).update(drug_id, data)
     await _sys_log(db, admin.id, "updated", "drug", drug_id)
     await db.commit()
-    await db.refresh(drug)
     return {
         "success": True,
         "message": "Cập nhật thành công",
-        "data": DrugDetailResponse.model_validate(drug).model_dump(),
+        "data": {
+            "id": drug.id,
+            "generic_name": drug.generic_name,
+            "description": drug.description,
+            "chemical_formula": drug.chemical_formula,
+            "molecular_formula": drug.molecular_formula,
+        },
     }
 
 
@@ -182,56 +187,56 @@ async def delete_drug(
 
 
 @router.post(
-    "/drugs/{drug_id}/products",
+    "/drugs/{drug_id}/brand-names",
     status_code=status.HTTP_201_CREATED,
-    summary="Thêm thông tin sản phẩm",
+    summary="Thêm sản phẩm thương mại",
 )
-async def add_product(
+async def add_brand_name(
     drug_id: str,
-    data: AdminProductCreate,
+    data: AdminBrandNameCreate,
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    product = await AdminDrugService(db, redis).add_product(drug_id, data)
-    await _sys_log(db, admin.id, "created", "product", product.id)
+    brand = await AdminDrugService(db, redis).add_brand_name(drug_id, data)
+    await _sys_log(db, admin.id, "created", "brand_name", brand.id)
     await db.commit()
-    return {"success": True, "data": DrugProductResponse.model_validate(product).model_dump()}
+    return {"success": True, "data": DrugBrandNameResponse.model_validate(brand).model_dump()}
 
 
 @router.put(
-    "/drugs/{drug_id}/products/{product_id}",
-    summary="Cập nhật thông tin sản phẩm",
+    "/drugs/{drug_id}/brand-names/{brand_id}",
+    summary="Cập nhật sản phẩm thương mại",
 )
-async def update_product(
+async def update_brand_name(
     drug_id: str,
-    product_id: int,
-    data: AdminProductUpdate,
+    brand_id: int,
+    data: AdminBrandNameUpdate,
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    product = await AdminDrugService(db, redis).update_product(drug_id, product_id, data)
-    await _sys_log(db, admin.id, "updated", "product", product_id)
+    brand = await AdminDrugService(db, redis).update_brand_name(drug_id, brand_id, data)
+    await _sys_log(db, admin.id, "updated", "brand_name", brand_id)
     await db.commit()
-    return {"success": True, "data": DrugProductResponse.model_validate(product).model_dump()}
+    return {"success": True, "data": DrugBrandNameResponse.model_validate(brand).model_dump()}
 
 
 @router.delete(
-    "/drugs/{drug_id}/products/{product_id}",
-    summary="Xóa thông tin sản phẩm",
+    "/drugs/{drug_id}/brand-names/{brand_id}",
+    summary="Xóa sản phẩm thương mại",
 )
-async def delete_product(
+async def delete_brand_name(
     drug_id: str,
-    product_id: int,
+    brand_id: int,
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    await AdminDrugService(db, redis).delete_product(drug_id, product_id)
-    await _sys_log(db, admin.id, "deleted", "product", product_id)
+    await AdminDrugService(db, redis).delete_brand_name(drug_id, brand_id)
+    await _sys_log(db, admin.id, "deleted", "brand_name", brand_id)
     await db.commit()
-    return {"success": True, "message": "Đã xóa thông tin sản phẩm", "data": None}
+    return {"success": True, "message": "Đã xóa sản phẩm thương mại", "data": None}
 
 
 @router.post(
@@ -282,12 +287,11 @@ async def list_interactions(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
     drug_id: Optional[str] = Query(None),
-    severity: Optional[str] = Query(None),
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    return await AdminInteractionService(db, redis).get_list(page, size, drug_id, severity)
+    return await AdminInteractionService(db, redis).get_list(page, size, drug_id)
 
 
 @router.post(
@@ -302,62 +306,56 @@ async def create_interaction(
     redis=Depends(get_redis),
 ):
     interaction = await AdminInteractionService(db, redis).create(data)
-    await _sys_log(db, admin.id, "created", "interaction", interaction.id)
+    await _sys_log(db, admin.id, "created", "interaction", f"{interaction.drug_id}:{interaction.interacts_with_id}")
     await db.commit()
     return {
         "success": True,
         "data": DrugInteractionResponse(
-            id=interaction.id,
-            drug_id_1=interaction.drug_id_1,
-            drug_id_2=interaction.drug_id_2,
-            interaction_type=interaction.interaction_type,
-            severity=interaction.severity,
-            description=interaction.description,
-            recommendation=interaction.recommendation,
+            drug_id=interaction.drug_id,
+            interacts_with_id=interaction.interacts_with_id,
+            interacts_with_name=interaction.interacts_with_name,
         ).model_dump(),
     }
 
 
 @router.put(
-    "/interactions/{interaction_id}",
+    "/interactions/{drug_id}/{interacts_with_id}",
     summary="Cập nhật tương tác thuốc",
 )
 async def update_interaction(
-    interaction_id: int,
+    drug_id: str,
+    interacts_with_id: str,
     data: AdminInteractionUpdate,
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    interaction = await AdminInteractionService(db, redis).update(interaction_id, data)
-    await _sys_log(db, admin.id, "updated", "interaction", interaction_id)
+    interaction = await AdminInteractionService(db, redis).update(drug_id, interacts_with_id, data)
+    await _sys_log(db, admin.id, "updated", "interaction", f"{drug_id}:{interacts_with_id}")
     await db.commit()
     return {
         "success": True,
         "data": DrugInteractionResponse(
-            id=interaction.id,
-            drug_id_1=interaction.drug_id_1,
-            drug_id_2=interaction.drug_id_2,
-            interaction_type=interaction.interaction_type,
-            severity=interaction.severity,
-            description=interaction.description,
-            recommendation=interaction.recommendation,
+            drug_id=interaction.drug_id,
+            interacts_with_id=interaction.interacts_with_id,
+            interacts_with_name=interaction.interacts_with_name,
         ).model_dump(),
     }
 
 
 @router.delete(
-    "/interactions/{interaction_id}",
+    "/interactions/{drug_id}/{interacts_with_id}",
     summary="Xóa tương tác thuốc",
 )
 async def delete_interaction(
-    interaction_id: int,
+    drug_id: str,
+    interacts_with_id: str,
     admin: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
     redis=Depends(get_redis),
 ):
-    await AdminInteractionService(db, redis).delete(interaction_id)
-    await _sys_log(db, admin.id, "deleted", "interaction", interaction_id)
+    await AdminInteractionService(db, redis).delete(drug_id, interacts_with_id)
+    await _sys_log(db, admin.id, "deleted", "interaction", f"{drug_id}:{interacts_with_id}")
     await db.commit()
     return {"success": True, "message": "Đã xóa tương tác thuốc", "data": None}
 

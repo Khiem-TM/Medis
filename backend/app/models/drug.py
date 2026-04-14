@@ -1,62 +1,75 @@
 from sqlalchemy import (
     Column, String, Text, DateTime,
-    Integer, ForeignKey, Enum as SAEnum
+    Integer, ForeignKey, UniqueConstraint, PrimaryKeyConstraint
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
-import enum
 
-class InteractionSeverity(str, enum.Enum):
-    minor = "minor"
-    moderate = "moderate"
-    major = "major"
 
 class Drug(Base):
     __tablename__ = "drugs"
 
-    id = Column(String(10), primary_key=True, index=True)
-    name = Column(String(100), nullable=False, index=True)
-    atc_code = Column(String(20), nullable=True, index=True) # mã ATC (Anatomical Therapeutic Chemical Classification System)
+    id = Column(String(50), primary_key=True, index=True)
+    generic_name = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=True)
-    dosage_form = Column(String(50), nullable=True) # viên nén, siro, tiêm, v.v.
-    classification = Column(String(100), nullable=True) # thuốc kê đơn, không kê đơn, v.v.
+    chemical_formula = Column(String(255), nullable=True)
+    molecular_formula = Column(String(255), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationships
-    products = relationship(
-        "DrugProduct",
+    brand_names = relationship(
+        "DrugBrandName",
         back_populates="drug",
-        cascade="all, delete-orphan"  # Xóa drug → tự xóa products
+        cascade="all, delete-orphan"
     )
-
     warnings = relationship(
         "DrugWarning",
         back_populates="drug",
         cascade="all, delete-orphan"
     )
+    dosage_forms = relationship(
+        "DrugDosageForm",
+        back_populates="drug",
+        cascade="all, delete-orphan"
+    )
+    categories = relationship(
+        "DrugCategory",
+        back_populates="drug",
+        cascade="all, delete-orphan"
+    )
+    atc_codes = relationship(
+        "DrugAtcCode",
+        back_populates="drug",
+        cascade="all, delete-orphan"
+    )
+    interactions = relationship(
+        "DrugInteraction",
+        back_populates="drug",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
-        return f"<Drug id={self.id} name={self.name}>"
-    
+        return f"<Drug id={self.id} generic_name={self.generic_name}>"
 
-# Thuốc cụ thương - sản phẩm thương mại
-class DrugProduct(Base):
-    __tablename__ = "drug_products"
+
+# Sản phẩm thương mại của thuốc
+class DrugBrandName(Base):
+    __tablename__ = "drug_brand_names"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    drug_id = Column(String(10), ForeignKey("drugs.id"), nullable=False, index=True)
-    trade_name = Column(String(200), nullable=False)   # Tên thương mại
-    route = Column(String(100), nullable=False)         # Đường dùng
-    dosage = Column(String(100), nullable=False)        # Hàm lượng
-    formulation = Column(String(100), nullable=False)   # Dạng bào chế
-    origin = Column(String(100), nullable=False)        # Xuất xứ
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(255), nullable=False, index=True)   # Tên thương mại
+    route = Column(String(255), nullable=True)               # Đường dùng
+    strength = Column(String(255), nullable=True)            # Hàm lượng
+    dosage_form = Column(String(255), nullable=True)         # Dạng bào chế
+    country = Column(String(100), nullable=True)             # Xuất xứ
+    image_url = Column(String(500), nullable=True)           # URL ảnh (Cloudinary)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    drug = relationship("Drug", back_populates="products")
+    drug = relationship("Drug", back_populates="brand_names")
 
 
 # Cảnh báo về thuốc
@@ -64,7 +77,7 @@ class DrugWarning(Base):
     __tablename__ = "drug_warnings"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    drug_id = Column(String(10), ForeignKey("drugs.id"), nullable=False, index=True)
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
     warning_text = Column(Text, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -72,28 +85,62 @@ class DrugWarning(Base):
     drug = relationship("Drug", back_populates="warnings")
 
 
-# Tương tác giữa 2 thuốc — sẽ dùng để kiểm tra khi người dùng nhập đơn thuốc
+# Dạng bào chế (1 thuốc - nhiều dạng)
+class DrugDosageForm(Base):
+    __tablename__ = "drug_dosage_forms"
+
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
+    dosage_form = Column(String(255), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("drug_id", "dosage_form"),
+    )
+
+    drug = relationship("Drug", back_populates="dosage_forms")
+
+
+# Nhóm dược lý / phân loại (1 thuốc - nhiều nhóm)
+class DrugCategory(Base):
+    __tablename__ = "drug_categories"
+
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
+    category_name = Column(String(255), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("drug_id", "category_name"),
+    )
+
+    drug = relationship("Drug", back_populates="categories")
+
+
+# Mã ATC (1 thuốc - nhiều mã ATC)
+class DrugAtcCode(Base):
+    __tablename__ = "drug_atc_codes"
+
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
+    atc_code = Column(String(50), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("drug_id", "atc_code"),
+    )
+
+    drug = relationship("Drug", back_populates="atc_codes")
+
+
+# Tương tác giữa 2 thuốc
+# interacts_with_id KHÔNG có FK vì data nguồn có thể chứa ID chưa có trong DB
 class DrugInteraction(Base):
-    """Tương tác giữa 2 thuốc"""
     __tablename__ = "drug_interactions"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    # drug_id_1 luôn < drug_id_2 (lexicographic) để tránh duplicate
-    # VD: (DB000001, DB000002) — không bao giờ có (DB000002, DB000001)
-    drug_id_1 = Column(String(10), ForeignKey("drugs.id"), nullable=False)
-    drug_id_2 = Column(String(10), ForeignKey("drugs.id"), nullable=False)
-    interaction_type = Column(String(100), nullable=True)  # Loại tương tác
-    severity = Column(
-        SAEnum(InteractionSeverity),
-        nullable=False,
-        default=InteractionSeverity.moderate
-    )
-    description = Column(Text, nullable=True)     # Mô tả tương tác
-    recommendation = Column(Text, nullable=True)   # Khuyến nghị
+    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
+    interacts_with_id = Column(String(50), nullable=False, index=True)
+    interacts_with_name = Column(String(255), nullable=True)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now()
+    __table_args__ = (
+        PrimaryKeyConstraint("drug_id", "interacts_with_id"),
     )
+
+    drug = relationship("Drug", back_populates="interactions")
+
+    def __repr__(self):
+        return f"<DrugInteraction {self.drug_id} ↔ {self.interacts_with_id}>"

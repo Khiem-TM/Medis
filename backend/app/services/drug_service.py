@@ -14,7 +14,7 @@ from sqlalchemy import func, or_, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.drug import Drug, DrugInteraction, DrugProduct, DrugWarning
+from app.models.drug import Drug, DrugInteraction
 from app.schemas.drug import (
     DrugDetailResponse,
     DrugInteractionResponse,
@@ -45,9 +45,8 @@ class DrugService:
         page: int,
         size: int,
         search: Optional[str] = None,
-        dosage_form: Optional[str] = None,
     ) -> PaginatedResponse:
-        cache_key = f"cache:drugs:list:{page}:{size}:{search or ''}:{dosage_form or ''}"
+        cache_key = f"cache:drugs:list:{page}:{size}:{search or ''}"
         cached = await self.redis.get(cache_key)
         if cached:
             return PaginatedResponse.model_validate_json(cached)
@@ -57,16 +56,13 @@ class DrugService:
             term = f"%{search}%"
             stmt = stmt.where(
                 or_(
-                    Drug.name.ilike(term),
+                    Drug.generic_name.ilike(term),
                     Drug.id.ilike(term),
-                    Drug.atc_code.ilike(term),
                 )
             )
-        if dosage_form:
-            stmt = stmt.where(Drug.dosage_form.ilike(f"%{dosage_form}%"))
 
         total = await self.db.scalar(select(func.count()).select_from(stmt.subquery()))
-        stmt = stmt.order_by(Drug.name.asc()).offset((page - 1) * size).limit(size)
+        stmt = stmt.order_by(Drug.generic_name.asc()).offset((page - 1) * size).limit(size)
         result = await self.db.execute(stmt)
         drugs = result.scalars().all()
 
@@ -92,54 +88,54 @@ class DrugService:
             select(Drug)
             .where(Drug.id == drug_id)
             .options(
-                selectinload(Drug.products),
+                selectinload(Drug.brand_names),
                 selectinload(Drug.warnings),
+                selectinload(Drug.dosage_forms),
+                selectinload(Drug.categories),
+                selectinload(Drug.atc_codes),
             )
         )
         drug = result.scalar_one_or_none()
         if not drug:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Thuốc '{drug_id}' không tìm thấy")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thuốc '{drug_id}' không tìm thấy",
+            )
 
-        response = DrugDetailResponse.model_validate(drug)
+        response = DrugDetailResponse.from_orm_drug(drug)
         await self.redis.setex(cache_key, _DETAIL_TTL, response.model_dump_json())
         return response
 
     async def get_drug_interactions(
         self, drug_id: str, page: int, size: int
     ) -> PaginatedResponse:
-        # Verify drug exists
         exists = await self.db.scalar(select(func.count()).where(Drug.id == drug_id))
         if not exists:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Thuốc '{drug_id}' không tìm thấy")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thuốc '{drug_id}' không tìm thấy",
+            )
 
-        stmt = select(DrugInteraction).where(
-            or_(DrugInteraction.drug_id_1 == drug_id, DrugInteraction.drug_id_2 == drug_id)
-        )
+        stmt = select(DrugInteraction).where(DrugInteraction.drug_id == drug_id)
         total = await self.db.scalar(select(func.count()).select_from(stmt.subquery()))
 
         result = await self.db.execute(
-            stmt.order_by(DrugInteraction.severity.desc())
+            stmt.order_by(DrugInteraction.interacts_with_id.asc())
             .offset((page - 1) * size)
             .limit(size)
         )
         interactions = result.scalars().all()
 
-        # Fetch drug names in one query
-        all_ids = {i.drug_id_1 for i in interactions} | {i.drug_id_2 for i in interactions}
-        drugs_result = await self.db.execute(select(Drug).where(Drug.id.in_(all_ids)))
-        drug_names = {d.id: d.name for d in drugs_result.scalars().all()}
+        # Fetch tên thuốc chính
+        drug_result = await self.db.scalar(select(Drug).where(Drug.id == drug_id))
+        drug_name = drug_result.generic_name if drug_result else None
 
         items = [
             DrugInteractionResponse(
-                id=i.id,
-                drug_id_1=i.drug_id_1,
-                drug_id_2=i.drug_id_2,
-                interaction_type=i.interaction_type,
-                severity=i.severity,
-                description=i.description,
-                recommendation=i.recommendation,
-                drug_1_name=drug_names.get(i.drug_id_1),
-                drug_2_name=drug_names.get(i.drug_id_2),
+                drug_id=i.drug_id,
+                interacts_with_id=i.interacts_with_id,
+                interacts_with_name=i.interacts_with_name,
+                drug_name=drug_name,
             )
             for i in interactions
         ]
@@ -170,7 +166,7 @@ class InteractionService:
     async def check_interactions(self, drug_ids: List[str]) -> InteractionCheckResult:
         # 1. Validate all drug_ids exist
         drugs_result = await self.db.execute(select(Drug).where(Drug.id.in_(drug_ids)))
-        found_drugs = {d.id: d.name for d in drugs_result.scalars().all()}
+        found_drugs = {d.id: d.generic_name for d in drugs_result.scalars().all()}
         missing = [d for d in drug_ids if d not in found_drugs]
         if missing:
             raise HTTPException(
@@ -178,10 +174,15 @@ class InteractionService:
                 detail=f"Thuốc không tìm thấy trong hệ thống: {', '.join(missing)}",
             )
 
-        # 2. Generate all pairs (always store as min < max)
-        pairs = [(min(a, b), max(a, b)) for a, b in combinations(drug_ids, 2)]
+        # 2. Generate all ordered pairs (drug_id → interacts_with_id)
+        # Mỗi cặp (A,B) kiểm tra cả A→B và B→A vì drug_interactions không đảm bảo 2 chiều
+        pair_set: set[tuple] = set()
+        for a, b in combinations(drug_ids, 2):
+            pair_set.add((a, b))
+            pair_set.add((b, a))
+        pairs = list(pair_set)
 
-        # 3. Check cache per pair, collect uncached pairs
+        # 3. Check cache per pair, collect uncached
         pair_results: dict[tuple, Optional[dict]] = {}
         uncached_pairs: list[tuple] = []
 
@@ -196,26 +197,28 @@ class InteractionService:
         # 4. Batch query DB for uncached pairs
         if uncached_pairs:
             conditions = [
-                and_(DrugInteraction.drug_id_1 == a, DrugInteraction.drug_id_2 == b)
+                and_(
+                    DrugInteraction.drug_id == a,
+                    DrugInteraction.interacts_with_id == b,
+                )
                 for a, b in uncached_pairs
             ]
             result = await self.db.execute(
                 select(DrugInteraction).where(or_(*conditions))
             )
-            db_map = {(i.drug_id_1, i.drug_id_2): i for i in result.scalars().all()}
+            db_map = {
+                (i.drug_id, i.interacts_with_id): i
+                for i in result.scalars().all()
+            }
 
             for pair in uncached_pairs:
                 cache_key = f"cache:interaction:{pair[0]}:{pair[1]}"
                 interaction = db_map.get(pair)
                 if interaction:
                     data = {
-                        "id": interaction.id,
-                        "drug_id_1": interaction.drug_id_1,
-                        "drug_id_2": interaction.drug_id_2,
-                        "interaction_type": interaction.interaction_type,
-                        "severity": interaction.severity,
-                        "description": interaction.description,
-                        "recommendation": interaction.recommendation,
+                        "drug_id": interaction.drug_id,
+                        "interacts_with_id": interaction.interacts_with_id,
+                        "interacts_with_name": interaction.interacts_with_name,
                     }
                     await self.redis.setex(cache_key, _PAIR_TTL, json.dumps(data))
                     pair_results[pair] = data
@@ -223,29 +226,43 @@ class InteractionService:
                     await self.redis.setex(cache_key, _PAIR_TTL, "null")
                     pair_results[pair] = None
 
-        # 5. Build result
+        # 5. Dedup: nếu A→B tồn tại, không cần thêm B→A vào kết quả
+        seen_pairs: set[frozenset] = set()
         interactions: list[DrugInteractionResponse] = []
-        safe_pairs: list[SafePairInfo] = []
+        interacting_drug_sets: set[frozenset] = set()
 
         for pair in pairs:
             data = pair_results.get(pair)
-            if data:
-                interactions.append(DrugInteractionResponse(
-                    **data,
-                    drug_1_name=found_drugs.get(data["drug_id_1"]),
-                    drug_2_name=found_drugs.get(data["drug_id_2"]),
-                ))
-            else:
-                safe_pairs.append(SafePairInfo(
-                    drug_id_1=pair[0],
-                    drug_id_2=pair[1],
-                    drug_1_name=found_drugs.get(pair[0]),
-                    drug_2_name=found_drugs.get(pair[1]),
-                ))
+            if not data:
+                continue
+            key = frozenset([pair[0], pair[1]])
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+            interacting_drug_sets.add(key)
+            interactions.append(DrugInteractionResponse(
+                drug_id=data["drug_id"],
+                interacts_with_id=data["interacts_with_id"],
+                interacts_with_name=data.get("interacts_with_name"),
+                drug_name=found_drugs.get(data["drug_id"]),
+            ))
+
+        # 6. Safe pairs — original combinations, not in interacting sets
+        original_pairs = list(combinations(drug_ids, 2))
+        safe_pairs: list[SafePairInfo] = [
+            SafePairInfo(
+                drug_id_1=a,
+                drug_id_2=b,
+                drug_1_name=found_drugs.get(a),
+                drug_2_name=found_drugs.get(b),
+            )
+            for a, b in original_pairs
+            if frozenset([a, b]) not in interacting_drug_sets
+        ]
 
         return InteractionCheckResult(
             checked_drugs=drug_ids,
-            total_pairs=len(pairs),
+            total_pairs=len(original_pairs),
             has_interaction=len(interactions) > 0,
             interactions=interactions,
             safe_pairs=safe_pairs,
@@ -258,25 +275,19 @@ class InteractionService:
         ws = wb.active
         ws.title = "Tương tác thuốc"
 
-        # Header
-        headers = ["STT", "Thuốc A", "Thuốc B", "Loại tương tác", "Mức độ", "Mô tả", "Khuyến nghị"]
+        headers = ["STT", "Thuốc A (ID)", "Thuốc B (ID)", "Tên thuốc B"]
         ws.append(headers)
-        for col, header in enumerate(headers, 1):
+        for col, _ in enumerate(headers, 1):
             ws.cell(row=1, column=col).font = openpyxl.styles.Font(bold=True)
 
-        # Interaction rows
         for i, interaction in enumerate(result.interactions, 1):
             ws.append([
                 i,
-                interaction.drug_1_name or interaction.drug_id_1,
-                interaction.drug_2_name or interaction.drug_id_2,
-                interaction.interaction_type or "",
-                interaction.severity.value if hasattr(interaction.severity, "value") else str(interaction.severity),
-                interaction.description or "",
-                interaction.recommendation or "",
+                interaction.drug_id,
+                interaction.interacts_with_id,
+                interaction.interacts_with_name or "",
             ])
 
-        # Auto-width
         for col in ws.columns:
             max_len = max((len(str(cell.value or "")) for cell in col), default=10)
             ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 60)

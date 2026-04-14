@@ -73,14 +73,13 @@ async def list_drugs(
     request: Request,
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
-    search: Optional[str] = Query(None, description="Tìm theo tên / mã DB / ATC"),
-    dosage_form: Optional[str] = Query(None, description="Lọc theo dạng bào chế"),
+    search: Optional[str] = Query(None, description="Tìm theo tên hoặc mã DB"),
     current_user: Optional[User] = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
 ):
     svc = _drug_svc(db, redis)
-    result = await svc.get_list(page, size, search, dosage_form)
+    result = await svc.get_list(page, size, search)
 
     if current_user and search:
         await _log(db, current_user.id, "DRUG_SEARCH",

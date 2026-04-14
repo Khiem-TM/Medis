@@ -46,35 +46,35 @@ class AdminUpdateUser(BaseModel):
 
 class AdminDrugCreate(BaseModel):
     id: Optional[str] = None
-    name: str
-    atc_code: Optional[str] = None
-    dosage_form: Optional[str] = None
+    generic_name: str
     description: Optional[str] = None
-    classification: Optional[str] = None
+    chemical_formula: Optional[str] = None
+    molecular_formula: Optional[str] = None
 
 
 class AdminDrugUpdate(BaseModel):
-    name: Optional[str] = None
-    atc_code: Optional[str] = None
-    dosage_form: Optional[str] = None
+    generic_name: Optional[str] = None
     description: Optional[str] = None
-    classification: Optional[str] = None
+    chemical_formula: Optional[str] = None
+    molecular_formula: Optional[str] = None
 
 
-class AdminProductCreate(BaseModel):
-    trade_name: str
-    route: str
-    dosage: str
-    formulation: str
-    origin: str
-
-
-class AdminProductUpdate(BaseModel):
-    trade_name: Optional[str] = None
+class AdminBrandNameCreate(BaseModel):
+    name: str
     route: Optional[str] = None
-    dosage: Optional[str] = None
-    formulation: Optional[str] = None
-    origin: Optional[str] = None
+    strength: Optional[str] = None
+    dosage_form: Optional[str] = None
+    country: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class AdminBrandNameUpdate(BaseModel):
+    name: Optional[str] = None
+    route: Optional[str] = None
+    strength: Optional[str] = None
+    dosage_form: Optional[str] = None
+    country: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class AdminWarningCreate(BaseModel):
@@ -91,31 +91,20 @@ class AdminWarningCreate(BaseModel):
 # ── Interaction management ─────────────────────────────────────────────────
 
 class AdminInteractionCreate(BaseModel):
-    drug_id_1: str
-    drug_id_2: str
-    interaction_type: Optional[str] = None
-    severity: str
-    description: Optional[str] = None
-    recommendation: Optional[str] = None
+    drug_id: str
+    interacts_with_id: str
+    interacts_with_name: Optional[str] = None
 
-    @field_validator("drug_id_2")
+    @field_validator("interacts_with_id")
     @classmethod
     def validate_different_drugs(cls, v: str, info) -> str:
-        if "drug_id_1" in info.data and v == info.data["drug_id_1"]:
+        if "drug_id" in info.data and v == info.data["drug_id"]:
             raise ValueError("Hai thuốc không được trùng nhau")
         return v
 
-    def model_post_init(self, __context) -> None:
-        # Enforce lexicographic ordering
-        if self.drug_id_1 > self.drug_id_2:
-            self.drug_id_1, self.drug_id_2 = self.drug_id_2, self.drug_id_1
-
 
 class AdminInteractionUpdate(BaseModel):
-    interaction_type: Optional[str] = None
-    severity: Optional[str] = None
-    description: Optional[str] = None
-    recommendation: Optional[str] = None
+    interacts_with_name: Optional[str] = None
 
 
 # ── Stats ──────────────────────────────────────────────────────────────────
