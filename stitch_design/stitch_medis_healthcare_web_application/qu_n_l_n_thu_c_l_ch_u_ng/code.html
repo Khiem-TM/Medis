@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quản lý Thuốc &amp; Đơn thuốc - The Clinical Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#00210f",
+                    "surface-container-high": "#dee8ff",
+                    "secondary-fixed-dim": "#a8c8ff",
+                    "secondary-container": "#87b5fe",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#006a3d",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#e7eeff",
+                    "primary-container": "#007bb9",
+                    "primary-fixed": "#cce5ff",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#d5e3ff",
+                    "on-secondary-container": "#004587",
+                    "on-surface": "#001c3b",
+                    "outline-variant": "#bfc7d2",
+                    "inverse-surface": "#183152",
+                    "on-tertiary-container": "#f6fff5",
+                    "secondary-fixed": "#d5e3ff",
+                    "surface-dim": "#c7dbff",
+                    "primary": "#006193",
+                    "on-background": "#001c3b",
+                    "inverse-primary": "#92ccff",
+                    "surface-bright": "#f9f9ff",
+                    "surface-container-low": "#f0f3ff",
+                    "surface": "#f9f9ff",
+                    "surface-container-highest": "#d5e3ff",
+                    "on-primary-fixed": "#001d31",
+                    "tertiary-fixed": "#68fda9",
+                    "background": "#f9f9ff",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#fdfcff",
+                    "secondary": "#2c5fa2",
+                    "on-secondary-fixed-variant": "#034688",
+                    "on-primary-fixed-variant": "#004b73",
+                    "tertiary-fixed-dim": "#47e08f",
+                    "tertiary-container": "#00864e",
+                    "surface-tint": "#006497",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-tertiary-fixed-variant": "#00522e",
+                    "outline": "#6f7881",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#3f4850",
+                    "on-secondary-fixed": "#001b3c",
+                    "primary-fixed-dim": "#92ccff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clinical-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 w-full clinical-glass flex justify-between items-center px-8 py-4 border-b border-opacity-10 border-[#001c3b]">
+<div class="flex items-center gap-8">
+<h1 class="text-xl font-bold tracking-tight text-primary">The Clinical Sanctuary</h1>
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-xl pl-10 pr-4 py-2 w-80 focus:ring-2 focus:ring-primary-container text-sm" placeholder="Tìm kiếm tên thuốc hoặc hoạt chất..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="help">help</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border-2 border-primary-fixed ml-2">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional healthcare provider with a warm, empathetic expression in a bright clinical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkdw0PwtfgJPgOZvPQebbXYyGLE-RSTN--Mrvn_xEyDUe3VF3x6ryC8CnRsB52rWt574DbliqnJqwsx-uTnyflrydzS6YHqfQsKdIzlnNs_UOg-B1OJLbdEJty0w8zBv3NlnuOfsC26eH63sWmLISi6Q3CM5pzVzmc_m2krmHDyV4zbzBMdnV3IZt-W5ki9p2vPdoCBkddA6nSAPM6bJBS-XoqOWP8xSdLz7cx-gEG8t0lJt06rxvdzq45GsrEaZfFQBfT_-J013k"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="flex flex-col h-screen fixed left-0 top-0 w-72 bg-white border-r border-opacity-5 border-[#001c3b] pt-24 z-40">
+<div class="px-8 mb-8">
+<h2 class="headline text-on-surface font-bold text-lg">Xin chào, Bác sĩ</h2>
+<p class="text-on-surface-variant text-sm">Hôm nay bạn cảm thấy thế nào?</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="px-6 py-4 flex items-center gap-4 text-on-surface-variant hover:bg-surface-container-low/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Bảng điều khiển</span>
+</a>
+<a class="px-6 py-4 flex items-center gap-4 text-primary font-bold bg-surface-container-low rounded-r-full" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="text-sm">Lịch uống thuốc</span>
+</a>
+<a class="px-6 py-4 flex items-center gap-4 text-on-surface-variant hover:bg-surface-container-low/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="text-sm font-medium">Hồ sơ sức khỏe</span>
+</a>
+<a class="px-6 py-4 flex items-center gap-4 text-on-surface-variant hover:bg-surface-container-low/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="text-sm font-medium">Trợ lý AI</span>
+</a>
+<a class="px-6 py-4 flex items-center gap-4 text-on-surface-variant hover:bg-surface-container-low/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="text-sm font-medium">Tương tác thuốc</span>
+</a>
+</nav>
+<div class="p-8">
+<button class="w-full py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                Đặt lịch tư vấn
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-72 pt-24 pb-20 px-8 min-h-screen">
+<!-- Hero Section: Daily Timeline -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="headline text-2xl font-extrabold text-on-surface mb-1">Lịch trình Hôm nay</h2>
+<p class="text-on-surface-variant">Thứ Tư, ngày 23 tháng 10 năm 2024</p>
+</div>
+<button class="px-4 py-2 bg-surface-container-low text-primary rounded-xl font-semibold flex items-center gap-2 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+                    Xem lịch sử
+                </button>
+</div>
+<!-- Health Timeline Asymmetric Layout -->
+<div class="relative flex items-center gap-4 py-6 overflow-x-auto no-scrollbar">
+<div class="flex-none w-48 p-4 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
+<span class="text-xs font-bold uppercase tracking-widest opacity-80 mb-2 block">Đã hoàn thành</span>
+<h3 class="font-bold text-lg leading-tight">08:00 AM</h3>
+<p class="text-xs mt-1">Metformin (500mg)</p>
+<div class="mt-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle" data-weight="fill">check_circle</span>
+<span class="text-[10px]">Đã ghi nhận</span>
+</div>
+</div>
+<div class="flex-none w-64 p-5 bg-surface-container-lowest rounded-xl border-l-4 border-primary">
+<span class="text-xs font-bold text-primary uppercase tracking-widest mb-2 block">Tiếp theo</span>
+<h3 class="headline font-bold text-xl leading-tight">12:30 PM</h3>
+<p class="text-sm font-medium text-on-surface mt-1">Dầu cá Omega-3</p>
+<div class="mt-4 flex items-center gap-4">
+<button class="bg-primary px-3 py-2 text-xs text-white font-bold rounded-lg hover:opacity-90">Ghi nhận</button>
+<span class="text-[10px] text-on-surface-variant italic">Nhắc trước 15'</span>
+</div>
+</div>
+<div class="flex-none w-40 p-4 bg-surface-container-low rounded-xl opacity-60">
+<h3 class="font-bold text-on-surface opacity-80">06:00 PM</h3>
+<p class="text-xs text-on-surface-variant">Atorvastatin</p>
+</div>
+<div class="flex-none w-40 p-4 bg-surface-container-low rounded-xl opacity-60">
+<h3 class="font-bold text-on-surface opacity-80">09:00 PM</h3>
+<p class="text-xs text-on-surface-variant">Magnesium</p>
+</div>
+</div>
+</section>
+<!-- Prescription Categories: Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Category: Chronic Illness -->
+<div class="lg:col-span-2 space-y-6">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-primary rounded-full"></div>
+<h2 class="headline text-xl font-bold">Thuốc bệnh nền</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Med Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary-fixed text-primary rounded-xl">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+</div>
+<span class="text-[10px] px-2 py-1 bg-surface-container-high text-on-secondary-container font-bold rounded">Hàng ngày</span>
+</div>
+<h3 class="title-lg font-bold text-on-surface mb-1">Metformin HCl</h3>
+<p class="text-sm text-on-surface-variant mb-4">Liều lượng: 500mg • Sau khi ăn sáng</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-surface-container-low text-[10px] font-semibold text-on-surface-variant rounded-full">Nhắc 15 phút</span>
+<span class="px-3 py-1 bg-surface-container-low text-[10px] font-semibold text-on-surface-variant rounded-full">Chu kỳ 1 tháng</span>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl group-hover:bg-primary group-hover:text-white transition-all">Ghi nhận đã uống</button>
+</div>
+<!-- Med Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group border-l-4 border-error/20">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-error-container text-error rounded-xl">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+</div>
+<span class="text-[10px] px-2 py-1 bg-surface-container-high text-on-secondary-container font-bold rounded">Cách ngày</span>
+</div>
+<h3 class="title-lg font-bold text-on-surface mb-1">Amlodipine</h3>
+<p class="text-sm text-on-surface-variant mb-4">Liều lượng: 5mg • Buổi tối</p>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-surface-container-low text-[10px] font-semibold text-on-surface-variant rounded-full">Không nhắc</span>
+<span class="px-3 py-1 bg-surface-container-low text-[10px] font-semibold text-on-surface-variant rounded-full">Tái khám: 15/11</span>
+</div>
+<button class="w-full py-3 bg-surface-container-low text-primary font-bold rounded-xl group-hover:bg-primary group-hover:text-white transition-all">Ghi nhận đã uống</button>
+</div>
+</div>
+<!-- Category: Supplements -->
+<div class="mt-12 space-y-6">
+<div class="flex items-center gap-3">
+<div class="w-2 h-8 bg-tertiary-container rounded-full"></div>
+<h2 class="headline text-xl font-bold">Thuốc bổ / Thực phẩm chức năng</h2>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl flex items-center justify-between gap-6 border-l-4 border-tertiary/20">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-tertiary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="eco">eco</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">Multivitamin Premium</h3>
+<p class="text-sm text-on-surface-variant">1 viên mỗi sáng • Sau ăn 30 phút</p>
+</div>
+</div>
+<button class="px-6 py-3 border border-outline-variant/30 text-on-surface-variant font-bold rounded-xl hover:bg-surface-container-low transition-colors">Sửa lịch</button>
+</div>
+</div>
+</div>
+<!-- Side Panel: Settings & Summary -->
+<div class="space-y-8">
+<!-- Detailed Schedule Settings Card -->
+<div class="bg-surface-container-high p-6 rounded-3xl">
+<h3 class="headline font-bold text-lg mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                        Cài đặt nhắc nhở
+                    </h3>
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Thông báo</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-xl">
+<span class="text-sm font-medium">Bật nhắc nhở</span>
+<div class="w-10 h-6 bg-primary rounded-full relative">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Thời gian nhắc trước</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-primary">
+<option>Tại thời điểm uống</option>
+<option selected="">Trước 15 phút</option>
+<option>Trước 30 phút</option>
+<option>Trước 1 giờ</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase mb-2">Âm thanh</label>
+<div class="flex items-center gap-3 p-3 bg-surface-container-lowest rounded-xl cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="volume_up">volume_up</span>
+<span class="text-sm font-medium">Bản nhạc "Chữa lành"</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-4 bg-white text-primary font-bold rounded-xl shadow-sm hover:shadow-md transition-all">Lưu thay đổi</button>
+</div>
+<!-- Acute Treatment Banner -->
+<div class="relative overflow-hidden rounded-3xl p-6 h-64 flex flex-col justify-end text-white">
+<img alt="Clinic" class="absolute inset-0 w-full h-full object-cover" data-alt="Abstract soft-focus medical laboratory with cool blue tones and clean surfaces, professional and calming" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtrTGgNNymoIDoDS_0fOQw3yH1mNBL2Er2e-NTm4lvXuxNSJFnWHIeYVhlKfE7Fp3h_0_BFyMYobUuf261nGkL5pEqG9WaYQTA0VaNBJYmC0Aiekbb7z_RC3DmCQ4_r5uh0APPJIH-sy29KUqoVAS51fmN9XJAHYxeesTNc3p62FXZL7OAmXHpvnqOZfAwDUD_JxY2LIsOLcjguH2L1nLAtLdsMbrhBpNW2XhgBkacXKBpS0LqhlfDK4jCMFqMTnN92cEtbGF8iX4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+<div class="relative z-10">
+<h3 class="headline font-bold text-lg mb-2">Điều trị cấp tính</h3>
+<p class="text-xs opacity-90 mb-4">Bạn chưa có đơn thuốc điều trị ngắn hạn nào hiện tại.</p>
+<button class="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 rounded-lg text-xs font-bold hover:bg-white/30 transition-colors">Thêm thuốc điều trị</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-8 py-6 w-[calc(100%-18rem)] ml-72 border-t border-opacity-5 border-[#001c3b] bg-surface-bright">
+<span class="text-[10px] font-bold text-primary uppercase tracking-widest">© 2024 The Clinical Sanctuary</span>
+<div class="flex gap-6">
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors" href="#">ĐIỀU KHOẢN</a>
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors" href="#">BẢO MẬT</a>
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors" href="#">LIÊN HỆ</a>
+</div>
+<p class="text-[10px] text-slate-400">Bảo mật thông tin y tế theo tiêu chuẩn quốc tế.</p>
+</footer>
+</body></html>

@@ -7,7 +7,7 @@ const uiStore = useUiStore()
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F9FAFB]">
+  <div class="min-h-screen bg-surface">
     <AppSidebar />
     <AppNavbar />
 

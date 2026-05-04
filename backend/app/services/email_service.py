@@ -106,6 +106,28 @@ class EmailService:
         )
         background_tasks.add_task(self._send, message)
 
+    async def send_otp_email(
+        self,
+        background_tasks: BackgroundTasks,
+        email: str,
+        full_name: str,
+        otp: str,
+    ) -> None:
+        """Gửi email chứa mã OTP 6 chữ số để đặt lại mật khẩu (background task)."""
+        html = self._get_template(
+            "otp_reset.html",
+            full_name=full_name,
+            otp=otp,
+            expire_minutes=10,
+        )
+        message = MessageSchema(
+            subject="[Medis] Mã xác nhận đặt lại mật khẩu",
+            recipients=[email],
+            body=html,
+            subtype=MessageType.html,
+        )
+        background_tasks.add_task(self._send, message)
+
     # ------------------------------------------------------------------ #
     #  Helpers                                                             #
     # ------------------------------------------------------------------ #

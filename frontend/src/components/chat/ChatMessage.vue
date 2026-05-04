@@ -19,7 +19,7 @@ const isUser = computed(() => props.role === 'user')
     <div
       :class="[
         'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold',
-        isUser ? 'bg-[#10B981] text-white' : 'bg-[#F3F4F6] text-[#374151]',
+        isUser ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant',
       ]"
     >
       {{ isUser ? 'B' : 'AI' }}
@@ -31,14 +31,14 @@ const isUser = computed(() => props.role === 'user')
         :class="[
           'px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap',
           isUser
-            ? 'bg-[#10B981] text-white rounded-tr-sm'
-            : 'bg-white border border-[#E5E7EB] text-[#111827] rounded-tl-sm',
+            ? 'bg-primary text-white rounded-tr-sm'
+            : 'bg-card border border-outline-variant text-on-surface rounded-tl-sm',
           optimistic ? 'opacity-70' : '',
         ]"
       >
         {{ content }}
       </div>
-      <span v-if="createdAt" class="text-[10px] text-[#9CA3AF] px-1">
+      <span v-if="createdAt" class="text-[10px] text-outline px-1">
         {{ formatDateTime(createdAt) }}
       </span>
     </div>

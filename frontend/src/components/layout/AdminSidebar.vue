@@ -20,13 +20,13 @@ function isActive(to: string) {
 <template>
   <aside
     :class="[
-      'fixed inset-y-0 left-0 z-40 bg-[#111827] flex flex-col transition-all duration-200',
+      'fixed inset-y-0 left-0 z-40 bg-on-surface flex flex-col transition-all duration-200',
       uiStore.sidebarOpen ? 'w-60' : 'w-16',
     ]"
   >
     <!-- Logo -->
     <div class="flex items-center gap-3 px-4 py-5 border-b border-white/10">
-      <div class="w-8 h-8 flex-shrink-0 bg-[#10B981] rounded-lg flex items-center justify-center">
+      <div class="w-8 h-8 flex-shrink-0 bg-primary rounded-lg flex items-center justify-center">
         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -34,7 +34,7 @@ function isActive(to: string) {
       </div>
       <div v-if="uiStore.sidebarOpen">
         <span class="text-lg font-bold text-white">Medis</span>
-        <span class="text-xs text-[#6B7280] ml-1">Admin</span>
+        <span class="text-xs text-white/50 ml-1">Admin</span>
       </div>
     </div>
 
@@ -42,9 +42,7 @@ function isActive(to: string) {
     <div class="px-2 pt-3">
       <RouterLink
         to="/dashboard"
-        :class="[
-          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#9CA3AF] hover:text-white hover:bg-white/10 transition-colors',
-        ]"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/10 transition-colors"
       >
         <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
@@ -62,8 +60,8 @@ function isActive(to: string) {
         :class="[
           'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
           isActive(item.to)
-            ? 'bg-[#10B981] text-white'
-            : 'text-[#9CA3AF] hover:bg-white/10 hover:text-white',
+            ? 'bg-primary text-white'
+            : 'text-white/60 hover:bg-white/10 hover:text-white',
         ]"
       >
         <svg v-if="item.icon === 'users'" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis - Tra cứu thuốc &amp; Tương tác thuốc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#001c3b",
+                    "error": "#ba1a1a",
+                    "surface": "#f9f9ff",
+                    "inverse-surface": "#183152",
+                    "surface-dim": "#c7dbff",
+                    "on-tertiary-container": "#f6fff5",
+                    "surface-variant": "#d5e3ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#e7eeff",
+                    "secondary-fixed": "#d5e3ff",
+                    "on-primary-container": "#fdfcff",
+                    "primary-fixed-dim": "#92ccff",
+                    "inverse-primary": "#92ccff",
+                    "on-error": "#ffffff",
+                    "tertiary": "#006a3d",
+                    "primary-fixed": "#cce5ff",
+                    "outline": "#6f7881",
+                    "on-tertiary-fixed-variant": "#00522e",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "surface-container-highest": "#d5e3ff",
+                    "secondary-fixed-dim": "#a8c8ff",
+                    "tertiary-fixed-dim": "#47e08f",
+                    "on-primary-fixed-variant": "#004b73",
+                    "tertiary-fixed": "#68fda9",
+                    "primary": "#006193",
+                    "on-secondary-fixed": "#001b3c",
+                    "primary-container": "#007bb9",
+                    "on-secondary-fixed-variant": "#034688",
+                    "on-primary-fixed": "#001d31",
+                    "background": "#f9f9ff",
+                    "tertiary-container": "#00864e",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#001c3b",
+                    "surface-container-low": "#f0f3ff",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-secondary-container": "#004587",
+                    "secondary-container": "#87b5fe",
+                    "surface-tint": "#006497",
+                    "on-tertiary-fixed": "#00210f",
+                    "outline-variant": "#bfc7d2",
+                    "on-surface-variant": "#3f4850",
+                    "surface-container-high": "#dee8ff",
+                    "surface-bright": "#f9f9ff",
+                    "secondary": "#2c5fa2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clinical-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body">
+<!-- Top Navigation -->
+<header class="fixed top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none h-16 flex justify-between items-center px-8 border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tight text-[#006193] dark:text-[#007bb9] font-headline">Medis</span>
+<nav class="hidden md:flex items-center space-x-6">
+<a class="text-[#006193] font-semibold border-b-2 border-[#006193] py-1" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-[#006193] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-2 py-1 rounded" href="#">Drug Lookup</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-[#006193] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-2 py-1 rounded" href="#">Interaction Checker</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-label-md w-48 text-sm" placeholder="Tìm kiếm thuốc..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-slate-500 hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-slate-500 hover:text-primary transition-colors">help</button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-outline-variant/20" data-alt="professional medical professional headshot with a friendly expression wearing clinical attire in a bright office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPAiq0RxM-k8OrSRNQjnFhyxhVIMHjZB5g1vBMcHyvlvqo-8JBLg8verJQWEIljQAZJJaaofemYvb1BhL1hBYQFSMA6jMpcDp4AexUDt3EUnjHvzKW1aZf2cP_c5eyP8XKFBSJv6Ek05K5G6NeIFRjSu0NGM63ilbkmvmJDe_O_owOpM_G4JZeT2o_l9NUVeyVGZr4zjVkl6MWqqQVLWwF_6dj3WDBfNgwcBRl22iPPR_uLTz7Z1Vtw9WWXSkMvpd73KxK0qLCe04"/>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 px-8 bg-gradient-to-br from-[#001c3b] to-[#006193] overflow-hidden min-h-[870px] flex items-center">
+<div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+<div class="max-w-2xl">
+<h1 class="font-headline text-5xl md:text-6xl font-extrabold text-white leading-tight mb-6">
+                    Tra cứu thuốc &amp; <br/>
+<span class="text-primary-fixed-dim">tương tác thuốc</span> <br/>
+                    an toàn, chính xác
+                </h1>
+<p class="text-lg text-slate-200 mb-10 leading-relaxed max-w-lg">
+                    Hệ thống hỗ trợ lâm sàng thông minh dành cho y bác sĩ và bệnh nhân, giúp tối ưu hóa quá trình điều trị và phòng tránh rủi ro tương tác thuốc nghiêm trọng.
+                </p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-4 bg-gradient-to-r from-primary to-primary-container text-white font-bold rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.2)] hover:scale-105 active:duration-150 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">health_metrics</span>
+                        Bắt đầu tra cứu
+                    </button>
+<button class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl backdrop-blur-md border border-white/20 transition-all">
+                        Xem hướng dẫn
+                    </button>
+</div>
+</div>
+<div class="relative flex justify-center lg:justify-end">
+<div class="bg-white/95 backdrop-blur-xl p-8 rounded-xl shadow-2xl w-full max-w-md border border-white/20 relative">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-12 h-12 bg-error-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Cảnh báo tương tác</h3>
+<p class="text-xs text-outline">Phát hiện bởi Medis AI</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">pill</span>
+<span class="font-medium">Paracetamol</span>
+</div>
+<span class="text-xs font-bold text-primary">500mg</span>
+</div>
+<div class="flex justify-center">
+<span class="material-symbols-outlined text-error rotate-90">swap_horiz</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">pill</span>
+<span class="font-medium">Warfarin</span>
+</div>
+<span class="text-xs font-bold text-primary">5mg</span>
+</div>
+</div>
+<div class="mt-6 p-4 bg-error-container/30 rounded-lg border-l-4 border-error">
+<p class="text-sm text-on-error-container font-medium">
+                            Nguy cơ tăng hiệu quả chống đông máu, dẫn đến xuất huyết nghiêm trọng. Cần điều chỉnh liều lượng.
+                        </p>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -top-12 -right-12 w-64 h-64 bg-primary-fixed-dim/20 rounded-full blur-3xl -z-10"></div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-24 px-8 container mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-headline text-3xl font-bold mb-4">Công cụ lâm sàng chuyên nghiệp</h2>
+<div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">medication</span>
+</div>
+<h3 class="title-lg font-bold mb-3">Drug Lookup</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Cơ sở dữ liệu hơn 50,000 loại thuốc lưu hành tại Việt Nam và quốc tế, cập nhật liên tục từ FDA &amp; Bộ Y Tế.
+                </p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">swap_horiz</span>
+</div>
+<h3 class="title-lg font-bold mb-3">Interaction Check</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Kiểm tra tương tác đa tầng giữa thuốc-thuốc, thuốc-thực phẩm và thuốc-bệnh lý với độ chính xác cao.
+                </p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">smart_toy</span>
+</div>
+<h3 class="title-lg font-bold mb-3">AI Chatbot</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Trợ lý ảo hỗ trợ giải đáp thắc mắc về dược lý 24/7 dựa trên các tài liệu y khoa được kiểm chứng.
+                </p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">description</span>
+</div>
+<h3 class="title-lg font-bold mb-3">Health Records</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Quản lý lịch sử dùng thuốc và hồ sơ bệnh án điện tử cá nhân hóa cho từng bệnh nhân một cách bảo mật.
+                </p>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">clinical_notes</span>
+</div>
+<h3 class="title-lg font-bold mb-3">Drug Recommendation AI</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Gợi ý phác đồ thuốc thay thế khi phát hiện tương tác hoặc dị ứng dựa trên hồ sơ lâm sàng.
+                </p>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface-container-lowest p-8 rounded-xl hover:shadow-[0px_20px_40px_rgba(0,28,59,0.08)] transition-all group">
+<div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">photo_camera</span>
+</div>
+<h3 class="title-lg font-bold mb-3">OCR Smart Import</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                    Tự động nhận diện tên thuốc từ đơn thuốc tay hoặc vỏ hộp qua camera điện thoại một cách nhanh chóng.
+                </p>
+</div>
+</div>
+</section>
+<!-- Tech Stack Section -->
+<section class="py-24 bg-surface-container-low px-8">
+<div class="container mx-auto">
+<div class="mb-16">
+<h2 class="font-headline text-3xl font-bold mb-4">Hệ sinh thái công nghệ</h2>
+<p class="text-on-surface-variant">Ứng dụng những công nghệ tiên tiến nhất để đảm bảo tính an toàn dữ liệu.</p>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-white p-6 rounded-xl flex flex-col items-center text-center">
+<div class="w-12 h-12 mb-4 bg-blue-50 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">memory</span>
+</div>
+<span class="font-bold text-sm">Deep Learning</span>
+</div>
+<div class="bg-white p-6 rounded-xl flex flex-col items-center text-center">
+<div class="w-12 h-12 mb-4 bg-blue-50 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">database</span>
+</div>
+<span class="font-bold text-sm">Real-time DB</span>
+</div>
+<div class="bg-white p-6 rounded-xl flex flex-col items-center text-center">
+<div class="w-12 h-12 mb-4 bg-blue-50 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">security</span>
+</div>
+<span class="font-bold text-sm">End-to-End Encryption</span>
+</div>
+<div class="bg-white p-6 rounded-xl flex flex-col items-center text-center">
+<div class="w-12 h-12 mb-4 bg-blue-50 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">cloud</span>
+</div>
+<span class="font-bold text-sm">Edge Computing</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Team Section -->
+<section class="py-24 px-8 container mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-headline text-3xl font-bold mb-4">Đội ngũ chuyên gia</h2>
+<p class="text-on-surface-variant">Sự kết hợp giữa chuyên môn y tế và công nghệ phần mềm.</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<div class="text-center">
+<div class="relative inline-block mb-4">
+<img alt="Expert 1" class="w-32 h-32 rounded-full mx-auto" data-alt="portrait of a senior medical researcher with graying hair and glasses in a professional studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMGodMLMRxQLklLA19Jt6jG-seth0zj5kzpQZWNRbfUaz-LKBdK_yUAx7jpmAUYOhfRzOho06jaOQn1PRsiU_GICW0wd0Iioe2GhnnjGoD9WN763tI6Frx4sXhrb7TEv2bB1wms6zSThxmmWmoHPvfLrq2ufpkBxQiebRwlHk_j2alL-CK0J_x1x3m9CkuzpNIUYUnUJsMgL01XmuD6I6iI3fA7tmkRcaT8bq8-lbdsma7B_p0ehloOZ3Z71ZQ9awC13PjaEKqn0o"/>
+<div class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-xs">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-lg">Dr. Nguyễn An</h4>
+<p class="text-primary text-sm font-semibold mb-2">Cố vấn chuyên môn</p>
+<p class="text-xs text-outline px-4">15 năm kinh nghiệm trong lĩnh vực dược lý lâm sàng.</p>
+</div>
+<div class="text-center">
+<div class="relative inline-block mb-4">
+<img alt="Expert 2" class="w-32 h-32 rounded-full mx-auto" data-alt="portrait of a young female tech lead with a confident smile in a bright modern office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxhvrY26F_RZH3TX0J9N9nlfuSQ54SHfrF9KHPsOxKHiOJNjRk5WOTwm7T7g4MNaQG_55hUviC_OAs7sWjsf_IEygi5zVIrKrU1zqdkF4uKmCRPGKDUR5XZQgOdCq5foDofpsiGBJIU3iEOB6ZQuw9TOg2LaI1X-bEDbgf94mUOUSE_I0ybBF-Vs9mdEySbQSZbnCBEohJYJIUmszZPu6oeDPVIoh-3zxaDE44BAJTSaNh2BGYPVnidElxoKA50XClvX6GVmEpN9Y"/>
+<div class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-xs">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-lg">Trần Minh</h4>
+<p class="text-primary text-sm font-semibold mb-2">CTO &amp; AI Architect</p>
+<p class="text-xs text-outline px-4">Chuyên gia về Machine Learning và xử lý ngôn ngữ tự nhiên.</p>
+</div>
+<div class="text-center">
+<div class="relative inline-block mb-4">
+<img alt="Expert 3" class="w-32 h-32 rounded-full mx-auto" data-alt="portrait of a middle-aged male pharmacist wearing a white coat with a friendly expression in a pharmacy background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsBYmawfTQMciG9Hlbw9nbIGjfCSGtkfngC1-Ot-1YgO_GvpkdVt4-Z-12N3pfyd7ks1SleXk6W5Ie88TxM7BC-KAtkWMTb7Y_Ve_zyONA1fltemPafat0Zy3C-RS5Hvzf2R1vcSU7xqjWnUyotFf_m-bnGcp9NZ5kzVE27R8iNfECWjSmaZcUuGfCH02CP2lDEOAneJZiyUpjevTT8NUXWiWbY2u59oaRlgY-sdJdQM66xAa2Ymg6nOL1wC_kf47X7q0ARGOEYPU"/>
+<div class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-xs">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-lg">DS. Lê Mai</h4>
+<p class="text-primary text-sm font-semibold mb-2">Trưởng phòng dữ liệu</p>
+<p class="text-xs text-outline px-4">Quản lý hệ thống cơ sở dữ liệu thuốc quốc gia.</p>
+</div>
+<div class="text-center">
+<div class="relative inline-block mb-4">
+<img alt="Expert 4" class="w-32 h-32 rounded-full mx-auto" data-alt="portrait of a male UX designer with a creative look in a minimalist workspace with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6Klx6l91sya3i-a6P-tiv24aZeMg_CUM6807Yb4IHTuXJ7px3Iu5yVskREtqPeuZJuSYH6V2DM98sVCq74DlDynAIBSF3ixQQ8MDl5A-b995Cpw-5gfoLh_VeBHwPeAathOiZt_YjMcV45DYMY0jOPCABUpPQLoF6YtPOlEvzTvemafmctaubKRcSox_AgNBp8ESHjquhLL9nESkXAXF89VzWpd84UrxSTv-45B21gZrnK451UJyx2a6l7kuPdUzFnO6-Iq_Enx8"/>
+<div class="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white border-2 border-white">
+<span class="material-symbols-outlined text-xs">verified</span>
+</div>
+</div>
+<h4 class="font-bold text-lg">Phạm Hùng</h4>
+<p class="text-primary text-sm font-semibold mb-2">Product Designer</p>
+<p class="text-xs text-outline px-4">Tập trung vào trải nghiệm người dùng trong y tế số.</p>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-[#001c3b] text-white pt-20 pb-10 px-8">
+<div class="container mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+<div>
+<span class="text-3xl font-black text-[#007bb9] font-headline mb-6 block">Medis</span>
+<p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Clinical Sanctuary - Nơi sự chính xác y khoa gặp gỡ công nghệ vị nhân sinh. Cam kết mang lại giá trị bền vững cho sức khỏe cộng đồng.
+                    </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">social_leaderboard</span>
+</a>
+<a class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">linked_camera</span>
+</a>
+<a class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">share</span>
+</a>
+</div>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-lg">Giải pháp</h5>
+<ul class="space-y-4 text-slate-400 text-sm">
+<li><a class="hover:text-white transition-colors" href="#">Cho Bệnh viện</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Cho Nhà thuốc</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Cho Bác sĩ</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Dành cho cá nhân</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-lg">Hỗ trợ</h5>
+<ul class="space-y-4 text-slate-400 text-sm">
+<li><a class="hover:text-white transition-colors" href="#">Trung tâm trợ giúp</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Tài liệu API</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Chính sách bảo mật</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Điều khoản dịch vụ</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-lg">Bản tin</h5>
+<p class="text-slate-400 text-sm mb-4">Cập nhật tin tức y khoa và sản phẩm mới nhất.</p>
+<div class="flex gap-2">
+<input class="bg-white/5 border-none focus:ring-1 focus:ring-primary rounded-lg px-4 py-2 text-sm w-full" placeholder="Email của bạn" type="email"/>
+<button class="bg-primary px-4 py-2 rounded-lg material-symbols-outlined">send</button>
+</div>
+</div>
+</div>
+<div class="border-t border-white/10 pt-8 text-center text-slate-500 text-xs">
+<p>© 2024 Medis Clinical. All rights reserved. Vietnam Healthcare Innovation.</p>
+</div>
+</div>
+</footer>
+</body></html>

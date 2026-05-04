@@ -84,6 +84,14 @@ class ResetPasswordRequest(BaseModel):
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
 
+# OTP-based forgot password schemas
+class OtpForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class VerifyResetOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str  # 6-digit string
+
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str

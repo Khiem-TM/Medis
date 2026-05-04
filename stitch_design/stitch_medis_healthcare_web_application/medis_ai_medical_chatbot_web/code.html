@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis | AI Bot Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#001c3b",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "inverse-surface": "#183152",
+                        "surface-dim": "#c7dbff",
+                        "on-tertiary-container": "#f6fff5",
+                        "surface-variant": "#d5e3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "secondary-fixed": "#d5e3ff",
+                        "on-primary-container": "#fdfcff",
+                        "primary-fixed-dim": "#92ccff",
+                        "inverse-primary": "#92ccff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#006a3d",
+                        "primary-fixed": "#cce5ff",
+                        "outline": "#6f7881",
+                        "on-tertiary-fixed-variant": "#00522e",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d5e3ff",
+                        "secondary-fixed-dim": "#a8c8ff",
+                        "tertiary-fixed-dim": "#47e08f",
+                        "on-primary-fixed-variant": "#004b73",
+                        "tertiary-fixed": "#68fda9",
+                        "primary": "#006193",
+                        "on-secondary-fixed": "#001b3c",
+                        "primary-container": "#007bb9",
+                        "on-secondary-fixed-variant": "#034688",
+                        "on-primary-fixed": "#001d31",
+                        "background": "#f9f9ff",
+                        "tertiary-container": "#00864e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#001c3b",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-secondary-container": "#004587",
+                        "secondary-container": "#87b5fe",
+                        "surface-tint": "#006497",
+                        "on-tertiary-fixed": "#00210f",
+                        "outline-variant": "#bfc7d2",
+                        "on-surface-variant": "#3f4850",
+                        "surface-container-high": "#dee8ff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#2c5fa2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .clinical-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#f9f9ff] flex flex-col py-6 px-4 space-y-2 border-r border-slate-100">
+<div class="flex items-center gap-3 px-4 mb-8">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<h1 class="text-xl font-black text-[#006193] leading-none">Medis</h1>
+<p class="text-[10px] font-medium text-slate-500 uppercase tracking-widest mt-1">Clinical Sanctuary</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Nav Item (Dashboard) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 hover:text-[#006193] transition-all duration-200 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<!-- Nav Item (Drug Lookup) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 hover:text-[#006193] transition-all duration-200 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">medication</span>
+<span class="text-sm">Drug Lookup</span>
+</a>
+<!-- Nav Item (Interaction) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 hover:text-[#006193] transition-all duration-200 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">swap_horiz</span>
+<span class="text-sm">Interaction Checker</span>
+</a>
+<!-- ACTIVE Nav Item (AI Bot) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white text-[#006193] shadow-sm rounded-xl font-bold translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span class="text-sm">AI Bot</span>
+</a>
+<!-- Nav Item (Records) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 hover:text-[#006193] transition-all duration-200 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span class="text-sm">Records</span>
+</a>
+<!-- Nav Item (History) -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 hover:text-[#006193] transition-all duration-200 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm">History</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-slate-100 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-white/50 rounded-xl font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<div class="mt-4 px-4">
+<button class="w-full h-12 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+                    Book Appointment
+                </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area: Two Column Layout -->
+<main class="ml-64 flex h-screen bg-surface-container-low overflow-hidden">
+<!-- Left Column: Chat History List -->
+<section class="w-80 bg-white/40 border-r border-slate-100 flex flex-col h-full">
+<div class="p-6">
+<h2 class="text-lg font-bold text-on-surface mb-4">Conversations</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface rounded-xl border-none text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search sessions..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-3 space-y-2 pb-6">
+<!-- Chat History Items -->
+<div class="p-4 rounded-xl bg-white shadow-sm border border-primary/5 cursor-pointer hover:shadow-md transition-all group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">Ongoing</span>
+<span class="text-[10px] text-slate-400 font-medium">2m ago</span>
+</div>
+<h3 class="text-sm font-bold text-on-surface line-clamp-1 mb-1">Drug interaction inquiry</h3>
+<p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">Analyzing potential conflicts between Metformin and Lisinopril...</p>
+</div>
+<div class="p-4 rounded-xl hover:bg-white/60 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">12 Feb</span>
+<span class="text-[10px] text-slate-400 font-medium">4:30 PM</span>
+</div>
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1 mb-1">Morning fatigue symptoms</h3>
+<p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">Discussed sleep hygiene and potential iron deficiency factors.</p>
+</div>
+<div class="p-4 rounded-xl hover:bg-white/60 transition-all cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">10 Feb</span>
+<span class="text-[10px] text-slate-400 font-medium">09:15 AM</span>
+</div>
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1 mb-1">Lab result analysis</h3>
+<p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">Interpretation of CBC panel and cholesterol levels.</p>
+</div>
+</div>
+<div class="p-4 bg-surface-container-high/30">
+<div class="flex items-center gap-3 p-3 rounded-xl bg-primary-fixed/50">
+<img alt="Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="professional male doctor portrait with short dark hair in clinical white coat soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOE2KXBuaAbEmY3YWJ3gN7PyUqzwiEyCv3LazT58cP-JTEJJNs-D6Eoqfky-OPRAaMhCHc54_JTZlyzQX5c7XSNvPyH_vdsMXNVMyvT6ekPYB5s6CL7zR2SPfS4cgO3kNjOByL_-u0wDA_IVQ3unncpjVE6WLCD6eobOBTyEqbEFpHsBjxPHQiK_a1VDKOec2LM3Pg3v0mC6f2Zih8fO7_4L1FRFPFitfpBnjRs9SAHEAl_eUsHgODx-7rspbX1Y3r9rQVL6StHoo"/>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-bold text-on-surface truncate">Dr. Nguyen Pham</p>
+<p class="text-[10px] font-medium text-primary uppercase">Chief Physician</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
+</div>
+</div>
+</section>
+<!-- Right Column: Main Chat Interface -->
+<section class="flex-1 flex flex-col h-full bg-white relative">
+<!-- Chat Header -->
+<header class="h-20 px-8 flex items-center justify-between border-b border-slate-50 sticky top-0 bg-white/80 backdrop-blur-xl z-20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-xl font-bold text-on-surface">MediBot Clinical AI</h2>
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-black rounded-full uppercase">Verified Agent</span>
+</div>
+<p class="text-xs text-slate-500 font-medium flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            Operational: Ready to analyze symptoms and clinical data
+                        </p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">print</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="h-10 px-4 rounded-xl bg-surface-container-highest text-primary font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">export_notes</span>
+                        Save Record
+                    </button>
+</div>
+</header>
+<!-- Message Area -->
+<div class="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth bg-[#fdfcff]">
+<!-- Bot Message (Asymmetric Layout) -->
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 shrink-0 rounded-full bg-primary flex items-center justify-center text-white mt-1">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="space-y-4">
+<div class="bg-surface-container-low p-6 rounded-2xl rounded-tl-none shadow-sm text-on-surface leading-relaxed">
+<p class="font-medium text-sm mb-3">Good afternoon. I'm MediBot. How can I assist with your clinical inquiries today?</p>
+<p class="text-sm">I can help you check for drug interactions, interpret lab results, or provide general medical information based on current clinical guidelines.</p>
+</div>
+<div class="flex gap-2 flex-wrap">
+<button class="px-4 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                                Check drug conflict
+                            </button>
+<button class="px-4 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                                Interpret CBC panel
+                            </button>
+<button class="px-4 py-2 bg-white border border-slate-100 rounded-full text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                                Symptom analyzer
+                            </button>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-4 max-w-2xl ml-auto flex-row-reverse">
+<div class="w-10 h-10 shrink-0 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container mt-1 overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="close up of mid adult woman with natural expression in soft indoor lighting professional headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiLy_ngLKrd9_pW0K4ugSDvOHAgXavDO0jL34TX6LqOLtkY1lcL37y9JAVaKEAzixLZfqMgUabpScU_qM1EJh8ziI6WLgWYttEZqiGltvMt-DIOaUEYQFxd8c-7trstveG5LZNC0oJ3iXMkrY0ru5ubg_83OVv3_tk9HDEmFq-zZ2U5IPW9ThDZ0OUs_QQtUG0c9aGE8WYJk4JrTAs6WTgZaP6RSbGRLJiyXFTRNnBJ-Y5aVC0k9jwCnsealv3oohi0d6-rkI9-60"/>
+</div>
+<div class="bg-primary text-white p-6 rounded-2xl rounded-tr-none shadow-md">
+<p class="text-sm font-medium">I'm currently taking 500mg of Metformin twice a day. Is it safe to take Lisinopril for my blood pressure as well?</p>
+<span class="text-[10px] text-white/60 block mt-2 font-medium">Read 14:22</span>
+</div>
+</div>
+<!-- Bot Response with Data Grid -->
+<div class="flex gap-4 max-w-3xl">
+<div class="w-10 h-10 shrink-0 rounded-full bg-primary flex items-center justify-center text-white mt-1">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="space-y-4 flex-1">
+<div class="bg-surface-container-low p-6 rounded-2xl rounded-tl-none shadow-sm text-on-surface">
+<h4 class="font-bold text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+                                Clinical Interaction Analysis
+                            </h4>
+<p class="text-sm leading-relaxed mb-4">Generally, Metformin and Lisinopril can be taken together and are often prescribed for patients with both diabetes and hypertension. However, there are some considerations:</p>
+<!-- Bento Style Data Grid -->
+<div class="grid grid-cols-2 gap-3 mb-4">
+<div class="bg-white p-4 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2 text-tertiary mb-1">
+<span class="material-symbols-outlined text-[16px]">monitor_heart</span>
+<span class="text-[10px] font-black uppercase tracking-widest">Benefit</span>
+</div>
+<p class="text-xs font-bold">Kidney Protection</p>
+<p class="text-[11px] text-slate-500 mt-1">Lisinopril helps protect kidneys in diabetic patients.</p>
+</div>
+<div class="bg-white p-4 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2 text-error mb-1">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+<span class="text-[10px] font-black uppercase tracking-widest">Caution</span>
+</div>
+<p class="text-xs font-bold">Lactic Acidosis</p>
+<p class="text-[11px] text-slate-500 mt-1">Rare risk if renal function is significantly impaired.</p>
+</div>
+</div>
+<p class="text-sm font-bold text-on-surface py-2 px-3 bg-white/60 rounded-lg inline-block">
+                                Recommendation: Proceed with physician's guidance. Monitor kidney function (eGFR/Creatinine).
+                            </p>
+</div>
+</div>
+</div>
+<!-- Typing indicator -->
+<div class="flex gap-4 items-center animate-pulse">
+<div class="w-10 h-10 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-300">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div class="flex gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+</div>
+</div>
+</div>
+<!-- Input Area (Floating) -->
+<footer class="p-8 pt-0">
+<div class="max-w-4xl mx-auto relative group">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-primary-container/10 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative bg-white rounded-2xl shadow-xl border border-slate-100 p-3 flex items-end gap-3 ring-1 ring-slate-50">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<div class="flex-1 min-h-[48px] py-3 px-1">
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-on-surface resize-none max-h-32 placeholder:text-slate-400" placeholder="Type your medical query or upload a report..." rows="1"></textarea>
+</div>
+<div class="flex items-center gap-2 pb-0.5">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="h-10 w-10 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<div class="mt-3 flex justify-center gap-6">
+<p class="text-[10px] text-slate-400 font-medium uppercase tracking-widest flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+                            End-to-End Encrypted
+                        </p>
+<p class="text-[10px] text-slate-400 font-medium uppercase tracking-widest flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[12px]">info</span>
+                            Not for Emergencies
+                        </p>
+</div>
+</div>
+</footer>
+</section>
+</main>
+<!-- FAB (Suppressed per rules as we are on a functional sub-page) -->
+</body></html>

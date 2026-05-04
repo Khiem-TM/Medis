@@ -8,7 +8,8 @@ source venv/bin/activate
 
 # Chạy server (development)
 
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+source venv/bin/activate
+uvicorn app.main:app --reload
 Lưu ý: Dùng --reload khi dev để server tự restart khi thay đổi code. Khi Postgres.app hiện dialog xin quyền kết nối → click Allow.
 
 Các lệnh hữu ích khác:

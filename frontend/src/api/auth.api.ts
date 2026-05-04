@@ -13,6 +13,8 @@ export const authApi = {
   verifyEmail: (token: string) => api.get(`/auth/verify-email?token=${token}`).then((r) => r.data),
   resendVerification: (email: string) => api.post('/auth/resend-verification', { email }).then((r) => r.data),
   me: () => api.get<UserResponse>('/auth/me').then((r) => r.data),
+  forgotPasswordOtp: (data: { email: string }) => api.post('/auth/forgot-password/otp', data).then((r) => r.data),
+  verifyResetOtp: (data: { email: string; otp: string }) => api.post<{ reset_token: string }>('/auth/verify-reset-otp', data).then((r) => r.data),
 }
 
 // Vue Query mutations
@@ -38,4 +40,12 @@ export function useResetPasswordMutation() {
 
 export function useResendVerificationMutation() {
   return useMutation({ mutationFn: authApi.resendVerification })
+}
+
+export function useForgotPasswordOtpMutation() {
+  return useMutation({ mutationFn: authApi.forgotPasswordOtp })
+}
+
+export function useVerifyResetOtpMutation() {
+  return useMutation({ mutationFn: authApi.verifyResetOtp })
 }

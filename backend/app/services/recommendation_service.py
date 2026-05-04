@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import settings
-from app.models.drug import Drug, DrugInteraction, InteractionSeverity
+from app.models.drug import Drug, DrugInteraction
 from app.models.health_profile import HealthProfile
 from app.models.prescription import Prescription, PrescriptionStatus
 from app.models.user import User
@@ -193,8 +193,8 @@ class RecommendationService:
                         a, b = sorted([cur_id, sug_id])
                         conditions.append(
                             and_(
-                                DrugInteraction.drug_id_1 == a,
-                                DrugInteraction.drug_id_2 == b,
+                                DrugInteraction.drug_id == a,
+                                DrugInteraction.interacts_with_id == b,
                             )
                         )
                 if conditions:
@@ -204,12 +204,8 @@ class RecommendationService:
                         )
                     ).scalars().all()
 
-                    dangerous = {
-                        i.drug_id_1 for i in interactions
-                        if i.severity in (InteractionSeverity.major, InteractionSeverity.moderate)
-                    } | {
-                        i.drug_id_2 for i in interactions
-                        if i.severity in (InteractionSeverity.major, InteractionSeverity.moderate)
+                    dangerous = {i.drug_id for i in interactions} | {
+                        i.interacts_with_id for i in interactions
                     }
                     for s in suggestions:
                         if s.drug_id and s.drug_id in dangerous:

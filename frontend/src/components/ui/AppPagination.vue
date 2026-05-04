@@ -32,7 +32,7 @@ const sizeOptions = [10, 20, 50, 100]
 
 <template>
   <div class="flex items-center justify-between gap-4 py-3">
-    <p class="text-sm text-[#6B7280]">
+    <p class="text-sm text-outline">
       Hiển thị {{ (meta.page - 1) * meta.size + 1 }}–{{ Math.min(meta.page * meta.size, meta.total) }}
       trong {{ meta.total }} kết quả
     </p>
@@ -41,7 +41,7 @@ const sizeOptions = [10, 20, 50, 100]
       <!-- Prev -->
       <button
         :disabled="meta.page <= 1"
-        class="p-1.5 rounded-lg hover:bg-[#F3F4F6] disabled:opacity-40 disabled:cursor-not-allowed text-[#6B7280]"
+        class="p-1.5 rounded-lg hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed text-outline"
         @click="emit('update:modelValue', meta.page - 1)"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,14 +51,14 @@ const sizeOptions = [10, 20, 50, 100]
 
       <!-- Pages -->
       <template v-for="(p, i) in pages" :key="i">
-        <span v-if="p === '...'" class="px-1 text-[#9CA3AF] text-sm">…</span>
+        <span v-if="p === '...'" class="px-1 text-outline text-sm">…</span>
         <button
           v-else
           :class="[
             'min-w-[32px] h-8 px-2 rounded-lg text-sm font-medium transition-colors',
             p === meta.page
-              ? 'bg-[#10B981] text-white'
-              : 'text-[#374151] hover:bg-[#F3F4F6]',
+              ? 'bg-primary text-white'
+              : 'text-on-surface-variant hover:bg-surface-container-low',
           ]"
           @click="emit('update:modelValue', p as number)"
         >
@@ -69,7 +69,7 @@ const sizeOptions = [10, 20, 50, 100]
       <!-- Next -->
       <button
         :disabled="meta.page >= meta.total_pages"
-        class="p-1.5 rounded-lg hover:bg-[#F3F4F6] disabled:opacity-40 disabled:cursor-not-allowed text-[#6B7280]"
+        class="p-1.5 rounded-lg hover:bg-surface-container-low disabled:opacity-40 disabled:cursor-not-allowed text-outline"
         @click="emit('update:modelValue', meta.page + 1)"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@ const sizeOptions = [10, 20, 50, 100]
     <select
       v-if="showSizeSelector"
       :value="size ?? meta.size"
-      class="text-sm border border-[#E5E7EB] rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30"
+      class="text-sm border border-outline-variant rounded-lg px-2 py-1 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
       @change="emit('update:size', +($event.target as HTMLSelectElement).value)"
     >
       <option v-for="s in sizeOptions" :key="s" :value="s">{{ s }} / trang</option>

@@ -10,8 +10,8 @@ defineProps<{
     <div
       v-for="i in lines"
       :key="i"
-      :class="['h-4 bg-[#E5E7EB] rounded animate-pulse', i === lines ? 'w-3/4' : 'w-full']"
+      :class="['h-4 bg-surface-container-high rounded animate-pulse', i === lines ? 'w-3/4' : 'w-full']"
     />
   </div>
-  <div v-else :class="['bg-[#E5E7EB] rounded animate-pulse', $props.class ?? 'h-4 w-full']" />
+  <div v-else :class="['bg-surface-container-high rounded animate-pulse', $props.class ?? 'h-4 w-full']" />
 </template>

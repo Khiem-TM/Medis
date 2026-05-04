@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis - Clinical Sanctuary Authentication</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#001c3b",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "inverse-surface": "#183152",
+                        "surface-dim": "#c7dbff",
+                        "on-tertiary-container": "#f6fff5",
+                        "surface-variant": "#d5e3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "secondary-fixed": "#d5e3ff",
+                        "on-primary-container": "#fdfcff",
+                        "primary-fixed-dim": "#92ccff",
+                        "inverse-primary": "#92ccff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#006a3d",
+                        "primary-fixed": "#cce5ff",
+                        "outline": "#6f7881",
+                        "on-tertiary-fixed-variant": "#00522e",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d5e3ff",
+                        "secondary-fixed-dim": "#a8c8ff",
+                        "tertiary-fixed-dim": "#47e08f",
+                        "on-primary-fixed-variant": "#004b73",
+                        "tertiary-fixed": "#68fda9",
+                        "primary": "#006193",
+                        "on-secondary-fixed": "#001b3c",
+                        "primary-container": "#007bb9",
+                        "on-secondary-fixed-variant": "#034688",
+                        "on-primary-fixed": "#001d31",
+                        "background": "#f9f9ff",
+                        "tertiary-container": "#00864e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#001c3b",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-secondary-container": "#004587",
+                        "secondary-container": "#87b5fe",
+                        "surface-tint": "#006497",
+                        "on-tertiary-fixed": "#00210f",
+                        "outline-variant": "#bfc7d2",
+                        "on-surface-variant": "#3f4850",
+                        "surface-container-high": "#dee8ff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#2c5fa2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .clinical-gradient {
+            background: linear-gradient(135deg, #006193 0%, #007bb9 100%);
+        }
+        .glass-overlay {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .asymmetric-shape {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex items-center justify-center p-4 md:p-8">
+<main class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_20px_40px_rgba(0,28,59,0.08)]">
+<!-- Left Panel: Feature Highlights -->
+<section class="clinical-gradient hidden md:flex flex-col justify-between p-12 text-on-primary relative overflow-hidden">
+<!-- Decorative Elements -->
+<div class="absolute top-[-10%] right-[-10%] w-64 h-64 asymmetric-shape bg-primary-fixed/10 blur-3xl"></div>
+<div class="absolute bottom-[-5%] left-[-5%] w-80 h-80 asymmetric-shape bg-secondary-fixed/10 blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-12">
+<div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="medical_services">medical_services</span>
+</div>
+<span class="font-headline font-extrabold text-2xl tracking-tight text-white">Medis</span>
+</div>
+<div class="space-y-6">
+<h1 class="font-headline font-bold text-4xl leading-tight">
+                        Kiến tạo tương lai <br/>y tế số hiện đại.
+                    </h1>
+<p class="text-white/80 text-lg max-w-md font-body leading-relaxed">
+                        Hệ thống quản trị lâm sàng thông minh, mang đến trải nghiệm tinh tế và chuẩn xác cho đội ngũ y bác sĩ.
+                    </p>
+</div>
+</div>
+<!-- Feature Cards (Editorial Layout) -->
+<div class="relative z-10 grid grid-cols-1 gap-4">
+<div class="glass-overlay p-6 rounded-xl flex items-start gap-4 transform transition-transform hover:translate-x-2">
+<div class="p-3 bg-white/10 rounded-full">
+<span class="material-symbols-outlined text-white" data-icon="smart_toy">smart_toy</span>
+</div>
+<div>
+<h3 class="font-headline font-semibold text-white mb-1">Trợ lý AI lâm sàng</h3>
+<p class="text-white/70 text-sm">Hỗ trợ tra cứu tương tác thuốc và chẩn đoán sơ bộ tức thì.</p>
+</div>
+</div>
+<div class="glass-overlay p-6 rounded-xl flex items-start gap-4 transform transition-transform hover:translate-x-2">
+<div class="p-3 bg-white/10 rounded-full">
+<span class="material-symbols-outlined text-white" data-icon="security">security</span>
+</div>
+<div>
+<h3 class="font-headline font-semibold text-white mb-1">Bảo mật đa lớp</h3>
+<p class="text-white/70 text-sm">Dữ liệu bệnh nhân được mã hóa theo tiêu chuẩn y tế quốc tế.</p>
+</div>
+</div>
+</div>
+<div class="relative z-10 pt-8 border-t border-white/10">
+<p class="text-label-md text-white/50">© 2024 Medis Clinical Sanctuary. All rights reserved.</p>
+</div>
+</section>
+<!-- Right Panel: Authentication Form -->
+<section class="flex flex-col justify-center items-center p-8 md:p-16 bg-white">
+<div class="w-full max-w-md">
+<!-- Mobile Logo -->
+<div class="flex md:hidden items-center gap-2 mb-8 justify-center">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="medical_services">medical_services</span>
+<span class="font-headline font-extrabold text-2xl tracking-tight text-primary">Medis</span>
+</div>
+<header class="text-center mb-10">
+<h2 class="font-headline font-bold text-3xl text-on-surface mb-3">Chào mừng trở lại</h2>
+<p class="text-on-surface-variant font-body">Vui lòng nhập thông tin để truy cập hệ thống.</p>
+</header>
+<!-- Toggle Tabs -->
+<nav class="flex bg-surface-container-low p-1.5 rounded-full mb-10">
+<button class="flex-1 py-2.5 px-6 rounded-full font-headline font-semibold text-sm transition-all bg-white text-primary shadow-sm">
+                        Đăng nhập
+                    </button>
+<button class="flex-1 py-2.5 px-6 rounded-full font-headline font-semibold text-sm transition-all text-on-surface-variant hover:text-primary">
+                        Đăng ký
+                    </button>
+</nav>
+<!-- Login Form -->
+<form class="space-y-6" onsubmit="return false;">
+<div class="space-y-1.5">
+<label class="text-label-md font-semibold text-on-surface-variant ml-1" for="username">Tên đăng nhập</label>
+<div class="relative group">
+<input class="w-full h-12 bg-surface-container-low border-none rounded-xl px-4 focus:ring-0 focus:border-b-2 focus:border-primary transition-all text-on-surface placeholder:text-outline-variant" id="username" placeholder="nguyen.van.a" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-3 text-outline-variant group-focus-within:text-primary" data-icon="person">person</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center px-1">
+<label class="text-label-md font-semibold text-on-surface-variant" for="password">Mật khẩu</label>
+<a class="text-label-md font-semibold text-primary hover:underline" href="#">Quên mật khẩu?</a>
+</div>
+<div class="relative group">
+<input class="w-full h-12 bg-surface-container-low border-none rounded-xl px-4 focus:ring-0 focus:border-b-2 focus:border-primary transition-all text-on-surface placeholder:text-outline-variant" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-3 text-outline-variant hover:text-primary" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<button class="w-full h-14 clinical-gradient text-white font-headline font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-95 transition-all" type="submit">
+                        Đăng nhập ngay
+                    </button>
+</form>
+<div class="relative my-8 text-center">
+<span class="relative z-10 bg-white px-4 text-label-md text-outline-variant font-medium">Hoặc đăng nhập bằng</span>
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-surface-container-high"></div>
+</div>
+<!-- Social Login -->
+<button class="w-full h-12 flex items-center justify-center gap-3 border border-outline-variant/30 rounded-xl hover:bg-surface-container-low transition-colors group">
+<img alt="Google Logo" class="w-5 h-5 group-hover:grayscale-0" data-alt="Official Google G logo in bright colors on a white background with a clean vector style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCicp6VDYB7puUR9uyvgYK7lh7FhhpKd8vYKSSEM4Cm6K3Sl-RaQjYB5EvnAqfPOSOgOWcskg2oIJigzNkSDnKjzvKszqGQFtnRM10UKqAtHt9kXHuVr3Ftmv3Te9PfZCIzf93_A91s2N3AU-SMy4tMvL1IHCFZFNDvG1qnz8-yiyHHXFY0Qsh_4YycCS4ror5knML3Ul8C4gxN4idnEtObO3AijAroYSHo9mhjZrJ9XoxWFS5HSUmsw1-tv-5XORZUUPFqnQ73eU4"/>
+<span class="font-headline font-semibold text-sm text-on-surface">Tiếp tục với Google</span>
+</button>
+<footer class="mt-10 text-center">
+<p class="text-sm text-on-surface-variant">
+                        Bằng việc đăng nhập, bạn đồng ý với <a class="text-primary font-medium hover:underline" href="#">Điều khoản dịch vụ</a> và <a class="text-primary font-medium hover:underline" href="#">Chính sách bảo mật</a> của chúng tôi.
+                    </p>
+</footer>
+</div>
+</section>
+</main>
+<!-- Background Decoration for Desktop -->
+<div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary-fixed/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-secondary-fixed/20 blur-[120px] rounded-full"></div>
+</div>
+</body></html>

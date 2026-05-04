@@ -49,6 +49,12 @@ const router = createRouter({
       meta: { layout: 'auth', requiresGuest: true, title: 'Quên mật khẩu' },
     },
     {
+      path: '/verify-otp',
+      name: 'verify-otp',
+      component: () => import('@/views/auth/OtpVerifyView.vue'),
+      meta: { layout: 'auth', requiresGuest: true, title: 'Xác nhận OTP' },
+    },
+    {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/auth/ResetPasswordView.vue'),
@@ -133,6 +139,22 @@ const router = createRouter({
       name: 'chatbot',
       component: () => import('@/views/chatbot/ChatbotView.vue'),
       meta: { layout: 'app', requiresAuth: true, title: 'Chatbot AI Sức khỏe' },
+    },
+
+    // Recommendations (requires auth)
+    {
+      path: '/recommendations',
+      name: 'recommendations',
+      component: () => import('@/views/recommendations/RecommendationView.vue'),
+      meta: { layout: 'app', requiresAuth: true, title: 'Gợi ý thuốc AI' },
+    },
+
+    // Medication schedule (requires auth)
+    {
+      path: '/schedule',
+      name: 'schedule',
+      component: () => import('@/views/profile/ScheduleView.vue'),
+      meta: { layout: 'app', requiresAuth: true, title: 'Lịch uống thuốc' },
     },
 
     // Admin routes

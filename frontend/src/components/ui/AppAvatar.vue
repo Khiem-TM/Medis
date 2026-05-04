@@ -22,8 +22,8 @@ const abbr = computed(() => initials(props.name))
 </script>
 
 <template>
-  <div :class="['rounded-full overflow-hidden flex-shrink-0 bg-[#D1FAE5] flex items-center justify-center', sizeClasses]">
+  <div :class="['rounded-full overflow-hidden flex-shrink-0 bg-primary-fixed flex items-center justify-center', sizeClasses]">
     <img v-if="src" :src="src" :alt="name ?? ''" class="w-full h-full object-cover" />
-    <span v-else class="font-semibold text-[#065F46]">{{ abbr }}</span>
+    <span v-else class="font-semibold text-primary">{{ abbr }}</span>
   </div>
 </template>

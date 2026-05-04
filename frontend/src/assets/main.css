@@ -1,16 +1,48 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-primary: #10B981;
-  --color-primary-dk: #059669;
-  --color-primary-lt: #D1FAE5;
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
-  --color-info: #3B82F6;
-  --color-page-bg: #F9FAFB;
-  --color-card: #FFFFFF;
-  --color-border: #E5E7EB;
-  --color-text: #111827;
-  --color-muted: #6B7280;
+  /* Primary - Clinical Blue */
+  --color-primary: #006193;
+  --color-primary-dk: #004d73;
+  --color-primary-container: #007bb9;
+  --color-primary-fixed: #cce5ff;
+  --color-primary-fixed-dim: #92ccff;
+
+  /* Secondary */
+  --color-secondary: #2c5fa2;
+  --color-secondary-container: #87b5fe;
+
+  /* Tertiary - Clinical Green (success/safe) */
+  --color-tertiary: #006a3d;
+  --color-tertiary-fixed: #68fda9;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+
+  /* Surface system */
+  --color-surface: #f9f9ff;
+  --color-surface-container-low: #f0f3ff;
+  --color-surface-container: #e7eeff;
+  --color-surface-container-high: #dee8ff;
+
+  /* On-surface text */
+  --color-on-surface: #001c3b;
+  --color-on-surface-variant: #3f4850;
+
+  /* Structural */
+  --color-outline: #6f7881;
+  --color-outline-variant: #bfc7d2;
+
+  /* Semantic aliases (backward compat) */
+  --color-danger: #ba1a1a;
+  --color-warning: #f59e0b;
+  --color-info: #2c5fa2;
+  --color-page-bg: #f9f9ff;
+  --color-card: #ffffff;
+  --color-border: #bfc7d2;
+  --color-text: #001c3b;
+  --color-muted: #6f7881;
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }

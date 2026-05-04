@@ -40,6 +40,7 @@ class User(Base):
     health_profiles = relationship("HealthProfile", back_populates="user", lazy="select")
     activity_logs = relationship("ActivityLog", back_populates="user", lazy="select")
     chat_messages = relationship("ChatMessage", back_populates="user", lazy="select")
+    reminders = relationship("MedicationReminder", back_populates="user", lazy="select", cascade="all, delete-orphan")
 
 
     def to_dict(self) -> dict:

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification - Medis Ether</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-background": "#001c3b",
+                        "surface-container": "#e7eeff",
+                        "surface": "#f9f9ff",
+                        "on-tertiary-container": "#f6fff5",
+                        "surface-container-low": "#f0f3ff",
+                        "surface-container-high": "#dee8ff",
+                        "on-tertiary-fixed": "#00210f",
+                        "inverse-surface": "#183152",
+                        "secondary-fixed-dim": "#a8c8ff",
+                        "secondary-fixed": "#d5e3ff",
+                        "outline-variant": "#bfc7d2",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "primary": "#006193",
+                        "on-error": "#ffffff",
+                        "outline": "#6f7881",
+                        "on-secondary-fixed": "#001b3c",
+                        "on-secondary-container": "#004587",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#92ccff",
+                        "on-tertiary-fixed-variant": "#00522e",
+                        "tertiary-container": "#00864e",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#001c3b",
+                        "on-primary-container": "#fdfcff",
+                        "on-primary-fixed": "#001d31",
+                        "tertiary-fixed-dim": "#47e08f",
+                        "surface-dim": "#c7dbff",
+                        "surface-tint": "#006497",
+                        "surface-container-highest": "#d5e3ff",
+                        "primary-container": "#007bb9",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#cce5ff",
+                        "tertiary-fixed": "#68fda9",
+                        "surface-bright": "#f9f9ff",
+                        "inverse-primary": "#92ccff",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#87b5fe",
+                        "tertiary": "#006a3d",
+                        "surface-variant": "#d5e3ff",
+                        "on-surface-variant": "#3f4850",
+                        "secondary": "#2c5fa2",
+                        "on-primary-fixed-variant": "#004b73",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#034688"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem", // Overridden by design system mandate
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9ff;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+        .clinical-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[#f9f9ff] dark:bg-slate-950">
+<div class="text-xl font-bold tracking-tight text-[#006193] dark:text-sky-300">Medis Ether</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-[#f0f3ff] transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center px-6 py-24 relative overflow-hidden">
+<!-- Abstract Aesthetic Background Elements -->
+<div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-tertiary/5 rounded-full blur-3xl"></div>
+<section class="max-w-xl w-full">
+<div class="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-[0px_20px_40px_rgba(0,28,59,0.04)] relative z-10">
+<!-- Header Section -->
+<div class="mb-10 text-center">
+<div class="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
+<span class="material-symbols-outlined text-4xl" data-icon="verified_user">verified_user</span>
+</div>
+<h1 class="text-3xl font-extrabold text-on-surface tracking-tight mb-3">Verification</h1>
+<p class="text-on-surface-variant text-body-lg">Enter the 6-digit code sent to your email.</p>
+</div>
+<!-- OTP Input Grid -->
+<form class="space-y-10">
+<div class="grid grid-cols-6 gap-3 md:gap-4 justify-center">
+<input autocomplete="one-time-code" class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+<input class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+<input class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+<input class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+<input class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+<input class="w-full aspect-square text-center text-2xl font-bold bg-surface-container-low border-b-2 border-transparent focus:border-surface-tint focus:ring-0 transition-all rounded-lg text-primary outline-none" maxlength="1" pattern="\d*" type="text"/>
+</div>
+<!-- Actions -->
+<div class="space-y-6">
+<button class="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-semibold text-lg rounded-xl shadow-[0px_20px_40px_rgba(0,97,147,0.15)] hover:scale-[1.02] active:scale-95 transition-all duration-200" type="submit">
+                            Verify Code
+                        </button>
+<div class="text-center">
+<p class="text-on-surface-variant mb-2">Didn't receive the code?</p>
+<button class="text-primary font-semibold hover:text-primary-container transition-colors focus:outline-none focus:underline underline-offset-4" type="button">
+                                Resend code
+                            </button>
+</div>
+</div>
+</form>
+<!-- Helpful Tip (Clinical Sanctuary Detail) -->
+<div class="mt-12 pt-8 border-t border-outline-variant/10">
+<div class="flex items-start gap-4 p-4 bg-surface-container rounded-xl">
+<span class="material-symbols-outlined text-primary-container" data-icon="info">info</span>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                            Check your spam or junk folder if you don't see the email in your inbox within a few minutes.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Navigation suppressed for transactional screen -->
+<!-- BottomNavBar (Only for Privacy/Terms access in footer context) -->
+<footer class="w-full py-8 text-center text-slate-400 dark:text-slate-500 text-xs font-medium uppercase tracking-widest bg-transparent">
+<div class="flex justify-center gap-6 mb-4">
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms</a>
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+</div>
+<div>© 2024 Medis Ether Healthcare. All rights reserved.</div>
+</footer>
+</body></html>

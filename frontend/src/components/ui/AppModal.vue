@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import AppButton from './AppButton.vue'
 
 const props = defineProps<{
   open: boolean
@@ -28,16 +27,16 @@ onUnmounted(() => document.removeEventListener('keydown', handleKey))
         <!-- Dialog -->
         <div
           :class="[
-            'relative bg-white rounded-2xl shadow-xl flex flex-col max-h-[90vh] w-full',
+            'relative bg-card rounded-2xl shadow-xl flex flex-col max-h-[90vh] w-full',
             size === 'sm' ? 'max-w-sm' : size === 'lg' ? 'max-w-2xl' : size === 'xl' ? 'max-w-4xl' : 'max-w-lg',
           ]"
         >
           <!-- Header -->
-          <div v-if="title || $slots.header" class="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
-            <h2 class="text-lg font-semibold text-[#111827]">
+          <div v-if="title || $slots.header" class="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
+            <h2 class="text-lg font-semibold text-on-surface">
               <slot name="header">{{ title }}</slot>
             </h2>
-            <button @click="emit('close')" class="text-[#9CA3AF] hover:text-[#374151] p-1 rounded-lg hover:bg-[#F3F4F6]">
+            <button @click="emit('close')" class="text-outline hover:text-on-surface p-1 rounded-lg hover:bg-surface-container-low">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -50,7 +49,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKey))
           </div>
 
           <!-- Footer -->
-          <div v-if="$slots.footer" class="px-6 py-4 border-t border-[#E5E7EB] flex justify-end gap-2">
+          <div v-if="$slots.footer" class="px-6 py-4 border-t border-outline-variant flex justify-end gap-2">
             <slot name="footer" />
           </div>
         </div>

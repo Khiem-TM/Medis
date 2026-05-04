@@ -31,19 +31,19 @@ onMounted(async () => {
   <div class="text-center">
     <!-- Loading -->
     <div v-if="status === 'loading'" class="flex flex-col items-center gap-4 py-8">
-      <AppSpinner size="lg" class="text-[#10B981]" />
-      <p class="text-[#6B7280]">Đang xác nhận email...</p>
+      <AppSpinner size="lg" class="text-primary" />
+      <p class="text-outline">Đang xác nhận email...</p>
     </div>
 
     <!-- Success -->
     <div v-else-if="status === 'success'" class="py-6">
-      <div class="w-16 h-16 bg-[#D1FAE5] rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-[#10B981]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="w-16 h-16 bg-tertiary-fixed rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h2 class="text-xl font-bold text-[#111827] mb-2">Email đã được xác nhận!</h2>
-      <p class="text-sm text-[#6B7280] mb-6">Tài khoản của bạn đã được kích hoạt. Bạn có thể đăng nhập ngay bây giờ.</p>
+      <h2 class="text-xl font-bold text-on-surface mb-2">Email đã được xác nhận!</h2>
+      <p class="text-sm text-outline mb-6">Tài khoản của bạn đã được kích hoạt. Bạn có thể đăng nhập ngay bây giờ.</p>
       <AppButton full>
         <router-link to="/login">Đăng nhập</router-link>
       </AppButton>
@@ -52,7 +52,7 @@ onMounted(async () => {
     <!-- Error -->
     <div v-else class="py-6">
       <AppAlert type="error" title="Xác nhận thất bại" class="mb-6">{{ errorMsg }}</AppAlert>
-      <router-link to="/login" class="text-sm text-[#10B981] hover:text-[#059669]">← Quay lại đăng nhập</router-link>
+      <router-link to="/login" class="text-sm text-primary hover:text-primary-dk">← Quay lại đăng nhập</router-link>
     </div>
   </div>
 </template>

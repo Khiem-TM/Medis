@@ -11,6 +11,7 @@ from app.schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse,
     RefreshTokenRequest, ForgotPasswordRequest,
     ResetPasswordRequest, ResendVerificationRequest,
+    OtpForgotPasswordRequest, VerifyResetOtpRequest,
 )
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
@@ -117,6 +118,29 @@ async def forgot_password(
     service = _auth_service(db, redis)
     await service.forgot_password(req.email, background_tasks)
     return {"message": "Nếu email tồn tại, hướng dẫn đặt lại mật khẩu đã được gửi."}
+
+
+@router.post("/forgot-password/otp", summary="Gửi mã OTP đặt lại mật khẩu")
+async def forgot_password_otp(
+    req: OtpForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    service = _auth_service(db, redis)
+    await service.forgot_password_otp(req.email, background_tasks)
+    return {"message": "Nếu email tồn tại, mã OTP đã được gửi đến email của bạn."}
+
+
+@router.post("/verify-reset-otp", summary="Xác thực OTP và nhận reset token")
+async def verify_reset_otp(
+    req: VerifyResetOtpRequest,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    service = _auth_service(db, redis)
+    reset_token = await service.verify_reset_otp(req.email, req.otp)
+    return {"reset_token": reset_token}
 
 
 @router.post("/reset-password", summary="Đặt lại mật khẩu bằng token")

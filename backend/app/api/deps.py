@@ -56,7 +56,6 @@ async def get_optional_user(
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
 ) -> User | None:
-    """Return the authenticated user if a valid Bearer token is provided, else None."""
     if not credentials:
         return None
     payload = decode_token(credentials.credentials)

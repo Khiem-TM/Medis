@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mã xác nhận đặt lại mật khẩu</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f9f9ff; font-family: 'Inter', Arial, sans-serif; }
+    .container { max-width: 520px; margin: 40px auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #bfc7d2; }
+    .header { background: linear-gradient(135deg, #006193 0%, #007bb9 100%); padding: 32px 40px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; }
+    .header p { margin: 6px 0 0; color: #cce5ff; font-size: 14px; }
+    .body { padding: 36px 40px; }
+    .greeting { font-size: 16px; color: #001c3b; margin-bottom: 16px; }
+    .desc { font-size: 14px; color: #3f4850; line-height: 1.6; margin-bottom: 28px; }
+    .otp-box { background: #f0f3ff; border: 2px solid #cce5ff; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 28px; }
+    .otp-label { font-size: 12px; color: #6f7881; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+    .otp-code { font-size: 42px; font-weight: 800; letter-spacing: 12px; color: #006193; font-family: 'Courier New', monospace; }
+    .otp-expire { font-size: 13px; color: #6f7881; margin-top: 10px; }
+    .warning { background: #ffdad6; border-left: 4px solid #ba1a1a; border-radius: 8px; padding: 14px 18px; font-size: 13px; color: #93000a; margin-bottom: 24px; }
+    .footer { padding: 24px 40px; border-top: 1px solid #bfc7d2; text-align: center; font-size: 12px; color: #6f7881; }
+    .footer a { color: #006193; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 Đặt lại mật khẩu</h1>
+      <p>Medis — Quản lý thuốc & sức khỏe</p>
+    </div>
+    <div class="body">
+      <p class="greeting">Xin chào, <strong>{{ full_name }}</strong>!</p>
+      <p class="desc">
+        Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
+        Hãy nhập mã OTP dưới đây vào ứng dụng để tiếp tục:
+      </p>
+      <div class="otp-box">
+        <p class="otp-label">Mã xác nhận của bạn</p>
+        <div class="otp-code">{{ otp }}</div>
+        <p class="otp-expire">Mã có hiệu lực trong <strong>{{ expire_minutes }} phút</strong></p>
+      </div>
+      <div class="warning">
+        ⚠️ <strong>Không chia sẻ mã này với bất kỳ ai.</strong> Nhân viên Medis sẽ không bao giờ yêu cầu mã OTP của bạn.
+        Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+      </div>
+    </div>
+    <div class="footer">
+      <p>© 2026 Medis. Mọi quyền được bảo lưu.</p>
+      <p><a href="#">Chính sách bảo mật</a> &middot; <a href="#">Liên hệ hỗ trợ</a></p>
+    </div>
+  </div>
+</body>
+</html>

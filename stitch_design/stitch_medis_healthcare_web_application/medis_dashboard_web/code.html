@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis - Clinical Sanctuary Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#001c3b",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "inverse-surface": "#183152",
+                        "surface-dim": "#c7dbff",
+                        "on-tertiary-container": "#f6fff5",
+                        "surface-variant": "#d5e3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "secondary-fixed": "#d5e3ff",
+                        "on-primary-container": "#fdfcff",
+                        "primary-fixed-dim": "#92ccff",
+                        "inverse-primary": "#92ffcc",
+                        "on-error": "#ffffff",
+                        "tertiary": "#006a3d",
+                        "primary-fixed": "#cce5ff",
+                        "outline": "#6f7881",
+                        "on-tertiary-fixed-variant": "#00522e",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d5e3ff",
+                        "secondary-fixed-dim": "#a8c8ff",
+                        "tertiary-fixed-dim": "#47e08f",
+                        "on-primary-fixed-variant": "#004b73",
+                        "tertiary-fixed": "#68fda9",
+                        "primary": "#006193",
+                        "on-secondary-fixed": "#001b3c",
+                        "primary-container": "#007bb9",
+                        "on-secondary-fixed-variant": "#034688",
+                        "on-primary-fixed": "#001d31",
+                        "background": "#f9f9ff",
+                        "tertiary-container": "#00864e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#001c3b",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-secondary-container": "#004587",
+                        "secondary-container": "#87b5fe",
+                        "surface-tint": "#006497",
+                        "on-tertiary-fixed": "#00210f",
+                        "outline-variant": "#bfc7d2",
+                        "on-surface-variant": "#3f4850",
+                        "surface-container-high": "#dee8ff",
+                        "surface-bright": "#f9f9ff",
+                        "secondary": "#2c5fa2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-slate-100 dark:border-slate-800 bg-[#f9f9ff] dark:bg-slate-950 flex flex-col h-full py-6 px-4 space-y-2 z-50">
+<div class="flex items-center px-4 mb-8 space-x-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<div class="text-xl font-black text-[#006193] dark:text-[#007bb9]">Medis</div>
+<div class="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Clinical Sanctuary</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-3 bg-white dark:bg-slate-800 text-[#006193] dark:text-white shadow-sm rounded-xl font-bold translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="text-sm">Drug Lookup</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">swap_horiz</span>
+<span class="text-sm">Interaction Checker</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="text-sm">AI Bot</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm">Records</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm">History</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-[#006193] hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-error">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<main class="ml-64 flex-1 flex flex-col h-screen overflow-y-auto">
+<!-- TopNavBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-40 w-full flex justify-between items-center px-8 h-16 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-6">
+<h1 class="text-xl font-bold tracking-tight text-[#006193] dark:text-[#007bb9]">Clinical Dashboard</h1>
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+<span class="material-symbols-outlined text-sm">search</span>
+</span>
+<input class="pl-10 pr-4 py-2 rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary w-64 text-sm transition-all" placeholder="Search patient or drug..." type="text"/>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-600">help</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">Dr. Nguyen</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-tighter">Chief Pharmacist</p>
+</div>
+<img alt="User Profile Avatar" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/10" data-alt="Close up portrait of a professional medical doctor in white coat with friendly confident expression in clinical office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMWhqZgHCLncZBrIM5hYFUqhd82n7dWqWylR0ynahTgs7aktZZTLfYAyT3_JbRFYJ6O6-BEf5Cp-uum2GGx7MOv0d9M4sd_hLNNazogdn_GexM76r-JxlSggrwDGtEeac2qPuYQ5HeVBPsBh8lCleGsBXBxf9RE589z9vzDpM7EGQd-3IpodkAGIgbh53HXHGZtrhHHn8fAImDDkQAGOZSnM7yoDHgcWlqSp4sh0fGLvSoJeDfeAkZoHRkftvD1zWyYzM1Ko-Ynu8"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+<!-- Stats Row -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.02)] flex items-center justify-between">
+<div>
+<p class="text-label-md text-slate-500 mb-1">Total Prescriptions</p>
+<h3 class="text-2xl font-bold text-on-surface">1,284</h3>
+<p class="text-[10px] text-tertiary flex items-center mt-2">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span> +12% this month
+                        </p>
+</div>
+<div class="w-12 h-12 bg-primary-fixed flex items-center justify-center rounded-xl text-primary">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.02)] flex items-center justify-between">
+<div>
+<p class="text-label-md text-slate-500 mb-1">Active Prescriptions</p>
+<h3 class="text-2xl font-bold text-on-surface">432</h3>
+<p class="text-[10px] text-primary flex items-center mt-2">
+<span class="material-symbols-outlined text-xs mr-1">hourglass_empty</span> 28 pending refill
+                        </p>
+</div>
+<div class="w-12 h-12 bg-secondary-fixed flex items-center justify-center rounded-xl text-secondary">
+<span class="material-symbols-outlined">timer</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.02)] flex items-center justify-between">
+<div>
+<p class="text-label-md text-slate-500 mb-1">Drug Interactions</p>
+<h3 class="text-2xl font-bold text-error">12</h3>
+<p class="text-[10px] text-error flex items-center mt-2">
+<span class="material-symbols-outlined text-xs mr-1">warning</span> Urgent review required
+                        </p>
+</div>
+<div class="w-12 h-12 bg-error-container flex items-center justify-center rounded-xl text-error">
+<span class="material-symbols-outlined">report</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.02)] flex items-center justify-between">
+<div>
+<p class="text-label-md text-slate-500 mb-1">AI Bot Sessions</p>
+<h3 class="text-2xl font-bold text-on-surface">89</h3>
+<p class="text-[10px] text-slate-500 flex items-center mt-2">
+<span class="material-symbols-outlined text-xs mr-1">history</span> Average 4m per chat
+                        </p>
+</div>
+<div class="w-12 h-12 bg-surface-container-highest flex items-center justify-center rounded-xl text-[#006193]">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+</div>
+</section>
+<!-- Main Content Area: Asymmetric Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left: Recent Activity Log -->
+<section class="col-span-12 lg:col-span-7 bg-surface-container-low rounded-xl p-8">
+<div class="flex justify-between items-center mb-8">
+<h2 class="text-xl font-bold text-on-surface">Clinical Activity</h2>
+<button class="text-sm font-semibold text-primary hover:underline">View All</button>
+</div>
+<div class="space-y-4">
+<!-- Activity Item 1 -->
+<div class="bg-white p-5 rounded-xl flex items-start space-x-4 shadow-sm border border-transparent hover:border-primary/10 transition-all">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">pill</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="text-sm font-bold text-on-surface">New Prescription: Metformin</h4>
+<span class="text-[10px] text-slate-400 font-medium">12 MIN AGO</span>
+</div>
+<p class="text-xs text-slate-500 mt-1">Patient: <strong>Trần Văn An</strong> • 500mg daily</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="bg-white p-5 rounded-xl flex items-start space-x-4 shadow-sm border border-transparent hover:border-primary/10 transition-all">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="text-sm font-bold text-on-surface">Interaction Warning</h4>
+<span class="text-[10px] text-slate-400 font-medium">1 HR AGO</span>
+</div>
+<p class="text-xs text-slate-500 mt-1">Conflict found between <strong>Aspirin</strong> and <strong>Warfarin</strong> for Patient ID #8841.</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="bg-white p-5 rounded-xl flex items-start space-x-4 shadow-sm border border-transparent hover:border-primary/10 transition-all">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">smart_toy</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="text-sm font-bold text-on-surface">AI Summary Generated</h4>
+<span class="text-[10px] text-slate-400 font-medium">3 HR AGO</span>
+</div>
+<p class="text-xs text-slate-500 mt-1">Clinical notes summarized for <strong>Phạm Kim Chi</strong>.</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="bg-white p-5 rounded-xl flex items-start space-x-4 shadow-sm border border-transparent hover:border-primary/10 transition-all">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">person_add</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="text-sm font-bold text-on-surface">New Patient Records</h4>
+<span class="text-[10px] text-slate-400 font-medium">5 HR AGO</span>
+</div>
+<p class="text-xs text-slate-500 mt-1">Imported 5 new clinical profiles from Central Hospital.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right: Quick Actions -->
+<section class="col-span-12 lg:col-span-5 flex flex-col gap-6">
+<h2 class="text-xl font-bold text-on-surface px-2">Clinical Toolkit</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-white hover:bg-primary hover:text-white p-6 rounded-xl flex flex-col items-center justify-center text-center group transition-all duration-300 shadow-sm">
+<span class="material-symbols-outlined text-3xl mb-3 text-primary group-hover:text-white">swap_horiz</span>
+<span class="text-sm font-bold">Check Interaction</span>
+</button>
+<button class="bg-white hover:bg-primary hover:text-white p-6 rounded-xl flex flex-col items-center justify-center text-center group transition-all duration-300 shadow-sm">
+<span class="material-symbols-outlined text-3xl mb-3 text-primary group-hover:text-white">search</span>
+<span class="text-sm font-bold">Drug Lookup</span>
+</button>
+<button class="bg-white hover:bg-primary hover:text-white p-6 rounded-xl flex flex-col items-center justify-center text-center group transition-all duration-300 shadow-sm">
+<span class="material-symbols-outlined text-3xl mb-3 text-primary group-hover:text-white">add_notes</span>
+<span class="text-sm font-bold">New Prescription</span>
+</button>
+<button class="bg-white hover:bg-primary hover:text-white p-6 rounded-xl flex flex-col items-center justify-center text-center group transition-all duration-300 shadow-sm">
+<span class="material-symbols-outlined text-3xl mb-3 text-primary group-hover:text-white">psychology</span>
+<span class="text-sm font-bold">AI Consult</span>
+</button>
+</div>
+<!-- AI Highlight Card -->
+<div class="relative overflow-hidden bg-primary rounded-xl p-8 text-white mt-auto flex-1">
+<div class="relative z-10 h-full flex flex-col">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined fill-1 text-tertiary-fixed">auto_awesome</span>
+<span class="text-[10px] font-bold tracking-widest uppercase">Smart Insight</span>
+</div>
+<h3 class="text-2xl font-bold mb-4 leading-tight">Trending Pharmaceutical Trends in Vietnam</h3>
+<p class="text-sm text-primary-fixed-dim mb-6 leading-relaxed">
+                                Analysis shows a 24% increase in respiratory-related prescriptions this quarter. Review your supply of Salbutamol.
+                            </p>
+<button class="mt-auto w-full py-4 bg-white text-primary rounded-xl font-bold text-sm hover:bg-surface-container-low transition-colors">
+                                View Full Report
+                            </button>
+</div>
+<div class="absolute -right-12 -bottom-12 opacity-10">
+<span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'wght' 200">medical_information</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom: Drug Recommendation Highlight Card -->
+<section class="bg-white rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.05)] overflow-hidden">
+<div class="flex flex-col md:flex-row">
+<div class="w-full md:w-1/3 bg-slate-900 overflow-hidden relative min-h-[240px]">
+<img alt="Pharmaceutical Highlight" class="absolute inset-0 w-full h-full object-cover opacity-80" data-alt="Detailed close up of premium medicine packaging and pills on a clean laboratory surface with soft blue aesthetic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4z41jT7oDwInp6qdAQFFc4PZYBkYHog9zXux_ENvu5LdUkyH69PIq5FCg2rU-wFcO3BGS0KAj5hp3r-LuBNZsHQssDKPCT8-tPr2RmifPAuiJmD4xY5OzbmT0pyd1lHft_CPO3g6OKemNHc3mmvC_PNR8gRUy6xcWAysOzxQ9vMSBU7HhzJkDhyf1ColzS5PKNp3DhvPvlPVLTXpuGK9B5lzZEa4dgy_axlHEBurdyc0WKdil7uQqUn-DhZFMFEt2Fglvo-xP3IM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+<div class="absolute bottom-6 left-6">
+<span class="bg-tertiary-fixed text-tertiary text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">Clinical Pick</span>
+<h4 class="text-white text-xl font-bold mt-2">Dapagliflozin (Farxiga)</h4>
+</div>
+</div>
+<div class="flex-1 p-8">
+<div class="flex items-center justify-between mb-4">
+<span class="text-label-md text-slate-500 font-medium">Drug of the Month Recommendation</span>
+<div class="flex gap-2">
+<span class="text-xs bg-surface-container-high px-3 py-1 rounded-full text-primary font-bold">Type 2 Diabetes</span>
+<span class="text-xs bg-surface-container-high px-3 py-1 rounded-full text-primary font-bold">Cardiovascular</span>
+</div>
+</div>
+<p class="text-body-lg text-on-surface/80 leading-relaxed mb-6">
+                            Recent clinical trials indicate significant efficacy in patients with heart failure regardless of diabetic status. Consider for multi-disciplinary management strategies.
+                        </p>
+<div class="flex items-center gap-6">
+<div class="flex -space-x-2">
+<img alt="Expert 1" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Portrait of a female medical researcher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDf2aLSNytBTu9mrWxnNmiJFuTIlTySNN2zcC-KjIwx-sXQGjQOkgWF-S2fC6tQ46ivAJQmw4qe4hEbsYGaaPM1tCbHdmHXSQ8gjlKktTAIrReB0FkGfHbVACliFwJZor8W1v19jwSXzuV9haVjJ16XUjym86aTPcvbPrMS2zJ5imMCX4xSFfcgfr1NmOiOt6TsmD_bJNs8Os38cZnJJ02BGzS76WDzBAN3afglfbVp4Of5BTqyysMZIwdoxk55O0NKAEEp-DQ7u4"/>
+<img alt="Expert 2" class="w-8 h-8 rounded-full border-2 border-white" data-alt="Portrait of a male clinical doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACJEcm8NBuvXctufrJgyq8mZ9zlbIopViK8LDhaojqJfxZ_Dm-6_oIWgUNR2h1Qa1XW7NEW4cl7usxK0CzM1sWwWGT-7waVNrN2n-jD2HDHK99RTyfuccXZflFGUYLh4jgPFnFpSapQar8H6g96asUCDRdkMjBFFh6i3TRsVDAZKSURWh68hNS5m6CEsega3OdkvXLaoz44WO6AUK0vDMHeGD3c3fMGiYsNPpW5KcLzVxz45LRvKoYyABkb2UqQqcHnCRMOWTsy7g"/>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">+4</div>
+</div>
+<span class="text-xs text-slate-400">Validated by Clinical Board</span>
+<button class="ml-auto flex items-center gap-2 text-primary font-bold text-sm group">
+                                Read Clinical Study 
+                                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Spacer -->
+<footer class="h-16 shrink-0"></footer>
+</main>
+<!-- FAB (Suppressed on Dashboard per instructions - not rendered) -->
+</body></html>

@@ -13,12 +13,12 @@ const emit = defineEmits<{ dismiss: [] }>()
     :class="[
       'rounded-lg border p-4 flex gap-3',
       type === 'success'
-        ? 'bg-[#D1FAE5] border-[#6EE7B7] text-[#065F46]'
+        ? 'bg-tertiary-fixed border-tertiary/30 text-tertiary'
         : type === 'error'
-          ? 'bg-red-50 border-red-200 text-red-800'
+          ? 'bg-error-container border-error/30 text-error'
           : type === 'warning'
             ? 'bg-yellow-50 border-yellow-200 text-yellow-800'
-            : 'bg-blue-50 border-blue-200 text-blue-800',
+            : 'bg-primary-fixed border-primary/20 text-primary',
     ]"
   >
     <!-- Icon -->

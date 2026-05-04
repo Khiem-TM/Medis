@@ -20,7 +20,7 @@ const emit = defineEmits<{
 
 <template>
   <AppModal :open="open" :title="title ?? 'Xác nhận'" size="sm" @close="emit('cancel')">
-    <p class="text-sm text-[#374151]">{{ message ?? 'Bạn có chắc muốn thực hiện thao tác này?' }}</p>
+    <p class="text-sm text-on-surface-variant">{{ message ?? 'Bạn có chắc muốn thực hiện thao tác này?' }}</p>
 
     <template #footer>
       <AppButton variant="ghost" @click="emit('cancel')">{{ cancelLabel ?? 'Hủy' }}</AppButton>

@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 _VERIFY_EMAIL_TTL = 24 * 3600   # 24 giờ
 _RESET_PASSWORD_TTL = 3600       # 1 giờ
 _RATE_LIMIT_TTL = 300            # 5 phút
+_OTP_RESET_TTL = 600             # 10 phút cho OTP
+_OTP_RESET_TOKEN_TTL = 900       # 15 phút cho short-lived reset token sau OTP
 
 
 class AuthService:
@@ -216,6 +218,57 @@ class AuthService:
             )
         logger.info(f"Password reset successfully for user {user_id}")
 
+
+    async def forgot_password_otp(self, email: str, background_tasks: BackgroundTasks) -> None:
+        """Gửi mã OTP 6 chữ số để đặt lại mật khẩu."""
+        import random
+        result = await self.db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+
+        if not user or user.auth_provider == AuthProvider.google:
+            return  # Silent - không tiết lộ email
+
+        # Rate limit: 1 OTP / 5 phút
+        if await self.redis.exists(f"otp:reset:limit:{user.id}"):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Vui lòng chờ 5 phút trước khi gửi lại mã OTP",
+            )
+
+        otp = str(random.randint(100000, 999999))
+        await self.redis.setex(f"otp:reset:{email}", _OTP_RESET_TTL, otp)
+        await self.redis.setex(f"otp:reset:limit:{user.id}", _RATE_LIMIT_TTL, "1")
+
+        if self.email_service:
+            await self.email_service.send_otp_email(
+                background_tasks, email, user.full_name or "", otp
+            )
+        logger.info(f"OTP reset sent to {email}")
+
+    async def verify_reset_otp(self, email: str, otp: str) -> str:
+        """Xác thực OTP và trả về reset token ngắn hạn."""
+        stored_otp = await self.redis.get(f"otp:reset:{email}")
+        if not stored_otp or stored_otp != otp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mã OTP không đúng hoặc đã hết hạn",
+            )
+
+        await self.redis.delete(f"otp:reset:{email}")
+
+        result = await self.db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tài khoản không tồn tại",
+            )
+
+        # Issue short-lived reset token (reuse existing reset:password: key pattern)
+        reset_token = str(uuid.uuid4())
+        await self.redis.setex(f"reset:password:{reset_token}", _OTP_RESET_TOKEN_TTL, str(user.id))
+        logger.info(f"OTP verified, reset token issued for user {user.id}")
+        return reset_token
 
     async def logout(self, access_token: str, user_id: int) -> None:
         payload = decode_token(access_token)

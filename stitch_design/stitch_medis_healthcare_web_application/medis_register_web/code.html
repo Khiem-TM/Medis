@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Register | Medis Ether</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#ebf1ff",
+                      "on-background": "#001c3b",
+                      "surface-container": "#e7eeff",
+                      "surface": "#f9f9ff",
+                      "on-tertiary-container": "#f6fff5",
+                      "surface-container-low": "#f0f3ff",
+                      "surface-container-high": "#dee8ff",
+                      "on-tertiary-fixed": "#00210f",
+                      "inverse-surface": "#183152",
+                      "secondary-fixed-dim": "#a8c8ff",
+                      "secondary-fixed": "#d5e3ff",
+                      "outline-variant": "#bfc7d2",
+                      "on-tertiary": "#ffffff",
+                      "background": "#f9f9ff",
+                      "primary": "#006193",
+                      "on-error": "#ffffff",
+                      "outline": "#6f7881",
+                      "on-secondary-fixed": "#001b3c",
+                      "on-secondary-container": "#004587",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed-dim": "#92ccff",
+                      "on-tertiary-fixed-variant": "#00522e",
+                      "tertiary-container": "#00864e",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "on-surface": "#001c3b",
+                      "on-primary-container": "#fdfcff",
+                      "on-primary-fixed": "#001d31",
+                      "tertiary-fixed-dim": "#47e08f",
+                      "surface-dim": "#c7dbff",
+                      "surface-tint": "#006497",
+                      "surface-container-highest": "#d5e3ff",
+                      "primary-container": "#007bb9",
+                      "on-error-container": "#93000a",
+                      "primary-fixed": "#cce5ff",
+                      "tertiary-fixed": "#68fda9",
+                      "surface-bright": "#f9f9ff",
+                      "inverse-primary": "#92ccff",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#87b5fe",
+                      "tertiary": "#006a3d",
+                      "surface-variant": "#d5e3ff",
+                      "on-surface-variant": "#3f4850",
+                      "secondary": "#2c5fa2",
+                      "on-primary-fixed-variant": "#004b73",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed-variant": "#034688"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .clinical-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[#f9f9ff] dark:bg-slate-950">
+<div class="text-xl font-bold tracking-tight text-[#006193] dark:text-sky-300">
+            Medis Ether
+        </div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#f0f3ff] transition-colors text-slate-500">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex flex-col md:flex-row pt-20">
+<!-- Visual Section (Hidden on mobile) -->
+<div class="hidden md:flex md:w-5/12 lg:w-1/2 relative bg-surface-container-low overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="Modern minimalist clinical interior with soft blue light, clean lines, and a sense of serenity and high-end healthcare" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAniW7A4lEOceENXQnvo8mlh8lab2mihDE1lebyz7rTBQyZuEZmBpbtf5JNlQWjv_P8D1aY2pjozfAFHGVI9yX-6LJjpqeSg08GMyENMvPClifII0fgsYQX3L0o6Zxg2eJtmRyQ21n3gqVHUQ8zsD76BqNAUkVOJxejzE71Wzhdko6XlMz72HCq2N-DIVYdeJRWBABeMNkJEaFrH1YD3exiA_yo5h480EwDY9cF8c-QtfK9ZSbW9pg0SgqhyZIPwZE5NDEv-V9dyJE"/>
+<div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent"></div>
+</div>
+<div class="relative z-10 p-12 flex flex-col justify-end">
+<h1 class="text-4xl font-extrabold text-on-background mb-4 leading-tight">
+                    Your Clinical <br/>Sanctuary Awaits.
+                </h1>
+<p class="text-body-lg text-on-surface-variant max-w-md">
+                    Join Vietnam's leading digital health ecosystem. Experience precision care wrapped in editorial calm.
+                </p>
+</div>
+</div>
+<!-- Registration Form Section -->
+<div class="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 bg-surface">
+<div class="w-full max-w-md">
+<div class="mb-10">
+<h2 class="text-3xl font-extrabold text-on-surface mb-2">Create Account</h2>
+<p class="text-body-md text-on-surface-variant">Enter your details to start your health journey.</p>
+</div>
+<form class="space-y-6">
+<!-- Full Name -->
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Full name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all placeholder:text-outline/50" placeholder="Nguyen Van A" type="text"/>
+</div>
+</div>
+<!-- Contact Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Phone</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all placeholder:text-outline/50" placeholder="+84 900 000 000" type="tel"/>
+</div>
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Email</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all placeholder:text-outline/50" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<!-- Username -->
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Username</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all placeholder:text-outline/50" placeholder="clinical_user_01" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span class="text-[11px] font-medium">Available</span>
+</div>
+</div>
+</div>
+<!-- Password Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Password</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all" placeholder="••••••••" type="password"/>
+</div>
+<div class="group">
+<label class="block text-xs font-semibold text-on-surface-variant mb-2 uppercase tracking-wider">Confirm Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-0 focus:border-b-2 focus:border-surface-tint transition-all" placeholder="••••••••" type="password"/>
+<!-- Validation Marker Example -->
+<div class="absolute -bottom-5 right-0 text-[10px] text-error flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                                    Passwords must match
+                                </div>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full h-[52px] bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold rounded-xl shadow-[0px_20px_40px_rgba(0,28,59,0.08)] hover:scale-[1.02] active:scale-95 transition-all" type="submit">
+                            Complete Registration
+                        </button>
+</div>
+</form>
+<div class="mt-8 flex flex-col items-center gap-4">
+<a class="text-body-md text-primary font-semibold hover:underline flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                        Back to Login
+                    </a>
+<p class="text-label-md text-on-surface-variant text-center px-4">
+                        By registering, you agree to our <span class="text-primary font-medium cursor-pointer">Terms of Service</span> and <span class="text-primary font-medium cursor-pointer">Privacy Policy</span>.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Only visibility logic applied for context) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-t-[24px] shadow-[0px_-10px_30px_rgba(0,28,59,0.04)] md:hidden">
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+<span class="text-[11px] font-medium">Support</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="shied">shield</span>
+<span class="text-[11px] font-medium">Privacy</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[11px] font-medium">Terms</span>
+</a>
+</nav>
+</body></html>

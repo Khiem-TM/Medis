@@ -15,7 +15,7 @@ from app.schemas.log import ActivityLogResponse, DeleteManyRequest
 from app.schemas.user import PaginatedResponse
 from app.services.log_service import ActivityLogService
 
-router = APIRouter(prefix="/activity", tags=["📋 Lịch sử hoạt động"])
+router = APIRouter(prefix="/activity", tags=[" Lịch sử hoạt động"])
 
 
 def _svc(db: AsyncSession) -> ActivityLogService:

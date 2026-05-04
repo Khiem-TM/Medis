@@ -19,16 +19,16 @@ defineProps<{
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto rounded-xl border border-[#E5E7EB]">
+  <div class="w-full overflow-x-auto">
     <table class="w-full text-sm">
       <thead>
-        <tr class="bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <tr class="bg-surface-container-low border-b border-outline-variant">
           <th
             v-for="col in columns"
             :key="col.key"
             :style="col.width ? `width: ${col.width}` : ''"
             :class="[
-              'px-4 py-3 font-medium text-[#6B7280] whitespace-nowrap',
+              'px-4 py-3 font-medium text-outline whitespace-nowrap',
               col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left',
             ]"
           >
@@ -37,7 +37,7 @@ defineProps<{
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-[#E5E7EB] bg-white">
+      <tbody class="divide-y divide-outline-variant bg-card">
         <!-- Loading skeleton -->
         <template v-if="loading">
           <tr v-for="i in skeletonRows ?? 5" :key="i">
@@ -59,13 +59,13 @@ defineProps<{
           <tr
             v-for="(row, idx) in data"
             :key="idx"
-            class="hover:bg-[#F9FAFB] transition-colors"
+            class="hover:bg-surface-container-low transition-colors"
           >
             <td
               v-for="col in columns"
               :key="col.key"
               :class="[
-                'px-4 py-3 text-[#374151]',
+                'px-4 py-3 text-on-surface-variant',
                 col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left',
               ]"
             >

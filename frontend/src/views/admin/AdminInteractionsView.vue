@@ -3,11 +3,9 @@ import { ref, computed } from 'vue'
 import { useAdminInteractions, useCreateInteractionMutation, useUpdateInteractionMutation, useDeleteInteractionMutation } from '@/api/interactions.api'
 import { usePagination } from '@/composables/usePagination'
 import { useToast } from '@/composables/useToast'
-import { getSeverityClasses, getSeverityLabel } from '@/utils/severity'
 import type { AdminInteractionSearchParams, CreateInteractionRequest, Severity } from '@/types/interaction.types'
-import AppTable from '@/components/ui/AppTable.vue'
 import AppPagination from '@/components/ui/AppPagination.vue'
-import AppSelect from '@/components/ui/AppSelect.vue'
+import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
@@ -54,14 +52,23 @@ const severityFormOptions = [
   { label: 'Nặng', value: 'major' },
 ]
 
-const columns = [
-  { key: 'drug_id_1', label: 'Thuốc 1' },
-  { key: 'drug_id_2', label: 'Thuốc 2' },
-  { key: 'severity', label: 'Mức độ', align: 'center' as const },
-  { key: 'interaction_type', label: 'Loại' },
-  { key: 'description', label: 'Mô tả' },
-  { key: 'actions', label: '', align: 'right' as const },
-]
+function getSeverityClasses(severity: string) {
+  switch (severity) {
+    case 'major':    return 'bg-error-container text-error'
+    case 'moderate': return 'bg-yellow-100 text-yellow-700'
+    case 'minor':    return 'bg-tertiary-fixed text-tertiary'
+    default:         return 'bg-surface-container text-outline'
+  }
+}
+
+function getSeverityLabel(severity: string) {
+  switch (severity) {
+    case 'major':    return 'Nặng'
+    case 'moderate': return 'Trung bình'
+    case 'minor':    return 'Nhẹ'
+    default:         return severity
+  }
+}
 
 function openCreate() {
   form.value = defaultForm()
@@ -108,135 +115,183 @@ function doDelete() {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-[#111827]">Quản lý tương tác thuốc</h1>
-        <p class="text-sm text-[#6B7280] mt-1">Thêm, sửa, xóa các cặp tương tác thuốc đã biết</p>
+        <h1 class="text-2xl font-bold text-on-surface">Quản lý tương tác thuốc</h1>
+        <p class="text-sm text-outline mt-0.5">Thêm, sửa, xóa các cặp tương tác thuốc đã biết</p>
       </div>
-      <AppButton @click="openCreate">
+      <button
+        @click="openCreate"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary to-primary-container text-white rounded-xl hover:opacity-90 transition-opacity"
+      >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         Thêm tương tác
-      </AppButton>
+      </button>
     </div>
 
-    <!-- Filter -->
-    <div class="bg-white p-3 rounded-xl border border-[#E5E7EB] flex gap-3">
-      <AppSelect v-model="severityFilter" :options="severityOptions" class="w-48" />
-    </div>
-
-    <!-- Table -->
-    <div class="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
-      <div class="px-4 py-3 border-b border-[#E5E7EB]">
-        <p class="text-sm text-[#6B7280]">
+    <!-- Table card -->
+    <div class="bg-card rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
+      <!-- Filter bar -->
+      <div class="px-5 py-4 border-b border-outline-variant flex flex-wrap gap-3 bg-card">
+        <select
+          v-model="severityFilter"
+          class="px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option v-for="opt in severityOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <div class="ml-auto flex items-center text-sm text-outline">
           <template v-if="!isLoading && data">{{ data.meta.total.toLocaleString() }} cặp tương tác</template>
-          <template v-else>Đang tải...</template>
-        </p>
+        </div>
       </div>
 
-      <AppTable :columns="columns" :data="(data?.items ?? []) as any[]" :loading="isLoading" empty-message="Không có tương tác nào">
-        <template #drug_id_1="{ row }">
-          <span class="text-sm font-mono">{{ row.drug_name_1 || row.drug_id_1 }}</span>
-        </template>
-        <template #drug_id_2="{ row }">
-          <span class="text-sm font-mono">{{ row.drug_name_2 || row.drug_id_2 }}</span>
-        </template>
-        <template #severity="{ row }">
-          <span :class="['text-xs font-medium px-2 py-0.5 rounded-full', getSeverityClasses(row.severity)]">
-            {{ getSeverityLabel(row.severity) }}
-          </span>
-        </template>
-        <template #interaction_type="{ row }">{{ row.interaction_type ?? '—' }}</template>
-        <template #description="{ row }">
-          <span class="text-sm text-[#374151] line-clamp-2">{{ row.description ?? '—' }}</span>
-        </template>
-        <template #actions="{ row }">
-          <div class="flex items-center gap-2 justify-end">
-            <AppButton variant="ghost" size="sm" @click="openEdit(row)">Sửa</AppButton>
-            <AppButton variant="ghost" size="sm" class="text-red-500 hover:text-red-600" @click="openDelete(row)">Xóa</AppButton>
-          </div>
-        </template>
-      </AppTable>
+      <!-- Table -->
+      <div v-if="isLoading" class="p-5 space-y-3">
+        <AppSkeleton v-for="i in 5" :key="i" class="h-12 rounded-xl" />
+      </div>
+      <div v-else-if="!data?.items.length" class="text-center py-16">
+        <p class="text-sm text-outline">Không có tương tác nào</p>
+      </div>
+      <div v-else class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant">
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Thuốc 1</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Thuốc 2</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Mức độ</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Loại</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Mô tả</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/50">
+            <tr
+              v-for="row in data.items"
+              :key="row.id"
+              class="hover:bg-surface-container-low/50 transition-colors"
+            >
+              <td class="px-5 py-4">
+                <span class="text-sm font-mono font-medium text-on-surface">{{ (row as any).drug_name_1 || row.drug_id_1 }}</span>
+              </td>
+              <td class="px-5 py-4">
+                <span class="text-sm font-mono font-medium text-on-surface">{{ (row as any).drug_name_2 || row.drug_id_2 }}</span>
+              </td>
+              <td class="px-5 py-4 text-center">
+                <span :class="['px-2.5 py-0.5 rounded-full text-xs font-bold', getSeverityClasses(row.severity)]">
+                  {{ getSeverityLabel(row.severity) }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ row.interaction_type ?? '—' }}</td>
+              <td class="px-5 py-4">
+                <p class="text-sm text-on-surface-variant line-clamp-2 max-w-xs">{{ row.description ?? '—' }}</p>
+              </td>
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-2 justify-end">
+                  <button
+                    @click="openEdit(row)"
+                    class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    @click="openDelete(row)"
+                    class="px-3 py-1.5 text-xs font-medium text-error border border-error/30 rounded-lg hover:bg-error hover:text-white transition-colors"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div v-if="data?.meta" class="px-4 border-t border-[#E5E7EB]">
+      <!-- Pagination -->
+      <div v-if="data?.meta" class="px-5 border-t border-outline-variant">
         <AppPagination :meta="data.meta" :model-value="page" show-size-selector :size="size" @update:model-value="setPage" @update:size="setSize" />
       </div>
     </div>
 
-    <!-- Create/Edit modal (shared form) -->
+    <!-- Create modal -->
     <AppModal :open="showCreate" title="Thêm tương tác thuốc" size="lg" @close="showCreate = false">
       <div class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mã thuốc 1 *</label>
-            <input v-model="form.drug_id_1" placeholder="ID thuốc 1" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 1 <span class="text-error">*</span></label>
+            <input v-model="form.drug_id_1" placeholder="ID thuốc 1" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mã thuốc 2 *</label>
-            <input v-model="form.drug_id_2" placeholder="ID thuốc 2" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 2 <span class="text-error">*</span></label>
+            <input v-model="form.drug_id_2" placeholder="ID thuốc 2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mức độ *</label>
-            <AppSelect v-model="form.severity" :options="severityFormOptions" class="mt-1 w-full" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mức độ <span class="text-error">*</span></label>
+            <select v-model="form.severity" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <option v-for="opt in severityFormOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
           <div>
-            <label class="text-sm font-medium text-[#374151]">Loại tương tác</label>
-            <input v-model="form.interaction_type" placeholder="vd: Dược lý học" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Loại tương tác</label>
+            <input v-model="form.interaction_type" placeholder="vd: Dược lý học" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium text-[#374151]">Mô tả</label>
-          <textarea v-model="form.description" rows="3" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981] resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Mô tả</label>
+          <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
         </div>
         <div>
-          <label class="text-sm font-medium text-[#374151]">Khuyến nghị</label>
-          <textarea v-model="form.recommendation" rows="2" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981] resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Khuyến nghị</label>
+          <textarea v-model="form.recommendation" rows="2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
         </div>
       </div>
       <template #footer>
-        <AppButton variant="outline" @click="showCreate = false">Hủy</AppButton>
-        <AppButton :disabled="!form.drug_id_1 || !form.drug_id_2" :loading="creating" @click="doCreate">Tạo</AppButton>
+        <AppButton variant="ghost" @click="showCreate = false">Hủy</AppButton>
+        <AppButton variant="gradient" :disabled="!form.drug_id_1 || !form.drug_id_2" :loading="creating" @click="doCreate">Tạo</AppButton>
       </template>
     </AppModal>
 
+    <!-- Edit modal -->
     <AppModal :open="showEdit" title="Sửa tương tác thuốc" size="lg" @close="showEdit = false">
       <div class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mã thuốc 1</label>
-            <input v-model="form.drug_id_1" disabled class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm bg-[#F9FAFB] opacity-60" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 1</label>
+            <input v-model="form.drug_id_1" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
           </div>
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mã thuốc 2</label>
-            <input v-model="form.drug_id_2" disabled class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm bg-[#F9FAFB] opacity-60" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 2</label>
+            <input v-model="form.drug_id_2" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-[#374151]">Mức độ</label>
-            <AppSelect v-model="form.severity" :options="severityFormOptions" class="mt-1 w-full" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mức độ</label>
+            <select v-model="form.severity" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <option v-for="opt in severityFormOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+            </select>
           </div>
           <div>
-            <label class="text-sm font-medium text-[#374151]">Loại tương tác</label>
-            <input v-model="form.interaction_type" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Loại tương tác</label>
+            <input v-model="form.interaction_type" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium text-[#374151]">Mô tả</label>
-          <textarea v-model="form.description" rows="3" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981] resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Mô tả</label>
+          <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
         </div>
         <div>
-          <label class="text-sm font-medium text-[#374151]">Khuyến nghị</label>
-          <textarea v-model="form.recommendation" rows="2" class="mt-1 w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981] resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Khuyến nghị</label>
+          <textarea v-model="form.recommendation" rows="2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
         </div>
       </div>
       <template #footer>
-        <AppButton variant="outline" @click="showEdit = false">Hủy</AppButton>
-        <AppButton :loading="updating" @click="doEdit">Lưu thay đổi</AppButton>
+        <AppButton variant="ghost" @click="showEdit = false">Hủy</AppButton>
+        <AppButton variant="gradient" :loading="updating" @click="doEdit">Lưu thay đổi</AppButton>
       </template>
     </AppModal>
 

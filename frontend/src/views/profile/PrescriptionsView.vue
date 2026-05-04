@@ -9,10 +9,9 @@ import { useConfirm } from '@/composables/useConfirm'
 import { prescriptionSchema } from '@/schemas/prescription.schema'
 import { formatDate } from '@/utils/format'
 import type { PrescriptionSearchParams } from '@/types/prescription.types'
-import AppTable from '@/components/ui/AppTable.vue'
 import AppPagination from '@/components/ui/AppPagination.vue'
+import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppButton from '@/components/ui/AppButton.vue'
-import AppBadge from '@/components/ui/AppBadge.vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
@@ -97,14 +96,6 @@ async function deleteItem(id: string) {
   })
 }
 
-const columns = [
-  { key: 'name', label: 'Tên đơn thuốc' },
-  { key: 'items_count', label: 'Số thuốc', align: 'center' as const },
-  { key: 'status', label: 'Trạng thái', align: 'center' as const },
-  { key: 'created_at', label: 'Ngày tạo' },
-  { key: 'actions', label: '', align: 'right' as const, width: '120px' },
-]
-
 const statusOptions = [
   { label: 'Tất cả', value: '' },
   { label: 'Đang dùng', value: 'active' },
@@ -113,41 +104,146 @@ const statusOptions = [
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-[#111827]">Đơn thuốc</h1>
-      <AppButton @click="showModal = true; resetForm()">+ Tạo đơn thuốc</AppButton>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-on-surface">Đơn thuốc</h1>
+        <p class="text-sm text-outline mt-0.5">Quản lý các đơn thuốc của bạn</p>
+      </div>
+      <AppButton variant="gradient" @click="showModal = true; resetForm()">
+        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Tạo đơn thuốc
+      </AppButton>
     </div>
 
-    <!-- Filters -->
-    <div class="flex items-center gap-3 bg-white p-3 rounded-xl border border-[#E5E7EB]">
-      <AppInput v-model="search" placeholder="Tìm kiếm đơn thuốc..." class="flex-1" />
-      <AppSelect v-model="statusFilter" :options="statusOptions" placeholder="Trạng thái" class="w-40" />
+    <!-- Schedule quick-link banner -->
+    <div
+      class="bg-gradient-to-r from-primary-fixed to-surface-container-high rounded-2xl border border-primary/20 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
+      @click="router.push('/schedule')"
+    >
+      <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-on-surface">Lịch uống thuốc</p>
+        <p class="text-xs text-outline mt-0.5">Đặt nhắc nhở uống thuốc theo đơn của bạn</p>
+      </div>
+      <svg class="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
-      <AppTable :columns="columns" :data="(data?.items ?? []) as any[]" :loading="isLoading" empty-message="Chưa có đơn thuốc nào">
-        <template #status="{ row }">
-          <AppBadge :variant="row.status === 'active' ? 'success' : 'default'">
-            {{ row.status === 'active' ? 'Đang dùng' : 'Hoàn thành' }}
-          </AppBadge>
-        </template>
-        <template #items_count="{ row }">
-          {{ row.items?.length ?? 0 }}
-        </template>
-        <template #created_at="{ row }">
-          {{ formatDate(row.created_at as string) }}
-        </template>
-        <template #actions="{ row }">
-          <div class="flex items-center gap-1 justify-end">
-            <AppButton variant="ghost" size="sm" @click="router.push(`/profile/prescriptions/${row.id}`)">Xem</AppButton>
-            <AppButton variant="ghost" size="sm" class="text-red-500 hover:text-red-700" :loading="deleting && deletingId === row.id" @click="deleteItem(row.id as string)">Xóa</AppButton>
-          </div>
-        </template>
-      </AppTable>
+    <!-- Table card -->
+    <div class="bg-card rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
+      <!-- Filter bar -->
+      <div class="px-5 py-4 border-b border-outline-variant flex flex-wrap gap-3 bg-card">
+        <div class="relative flex-1 min-w-48">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-outline pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Tìm kiếm đơn thuốc..."
+            class="w-full pl-9 pr-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          />
+        </div>
+        <select
+          v-model="statusFilter"
+          class="px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <div class="ml-auto flex items-center text-sm text-outline">
+          <template v-if="!isLoading && data">{{ data.meta.total.toLocaleString() }} đơn thuốc</template>
+        </div>
+      </div>
 
-      <div v-if="data?.meta" class="px-4 border-t border-[#E5E7EB]">
+      <!-- Loading -->
+      <div v-if="isLoading" class="p-5 space-y-3">
+        <AppSkeleton v-for="i in 4" :key="i" class="h-14 rounded-xl" />
+      </div>
+
+      <!-- Empty -->
+      <div v-else-if="!data?.items.length" class="text-center py-16">
+        <svg class="w-10 h-10 text-outline/40 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-sm text-outline">Chưa có đơn thuốc nào</p>
+        <button class="mt-2 text-sm text-primary hover:underline" @click="showModal = true; resetForm()">Tạo đơn thuốc đầu tiên</button>
+      </div>
+
+      <!-- Table -->
+      <div v-else class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant">
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tên đơn thuốc</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Số thuốc</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Trạng thái</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ngày tạo</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/50">
+            <tr
+              v-for="row in data.items"
+              :key="(row as any).id"
+              class="hover:bg-surface-container-low/50 transition-colors"
+            >
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-on-surface">{{ (row as any).name }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-4 text-center">
+                <span class="text-sm font-bold text-on-surface-variant">{{ (row as any).items?.length ?? 0 }}</span>
+              </td>
+              <td class="px-5 py-4 text-center">
+                <span :class="[
+                  'px-2.5 py-0.5 rounded-full text-xs font-bold',
+                  (row as any).status === 'active'
+                    ? 'bg-tertiary-fixed text-tertiary'
+                    : 'bg-surface-container text-outline',
+                ]">
+                  {{ (row as any).status === 'active' ? 'Đang dùng' : 'Hoàn thành' }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ formatDate((row as any).created_at) }}</td>
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-2 justify-end">
+                  <button
+                    @click="router.push(`/profile/prescriptions/${(row as any).id}`)"
+                    class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
+                  >
+                    Xem
+                  </button>
+                  <button
+                    @click="deleteItem((row as any).id)"
+                    :disabled="deleting && deletingId === (row as any).id"
+                    class="px-3 py-1.5 text-xs font-medium text-error border border-error/30 rounded-lg hover:bg-error hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="data?.meta" class="px-5 border-t border-outline-variant">
         <AppPagination :meta="data.meta" :model-value="page" show-size-selector :size="size" @update:model-value="setPage" @update:size="setSize" />
       </div>
     </div>
@@ -164,19 +260,19 @@ const statusOptions = [
         <!-- Drug items -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-medium text-[#374151]">Danh sách thuốc <span class="text-red-500">*</span></label>
-            <AppButton variant="ghost" size="sm" type="button" @click="addItem">+ Thêm thuốc</AppButton>
+            <label class="text-sm font-medium text-on-surface">Danh sách thuốc <span class="text-error">*</span></label>
+            <button type="button" @click="addItem" class="text-sm text-primary hover:underline font-medium">+ Thêm thuốc</button>
           </div>
-          <p v-if="formErrors.items" class="text-xs text-red-500 mb-2">{{ formErrors.items }}</p>
+          <p v-if="formErrors.items" class="text-xs text-error mb-2">{{ formErrors.items }}</p>
 
-          <div v-for="(item, i) in form.items" :key="i" class="flex gap-2 items-start border border-[#E5E7EB] rounded-xl p-3 mb-2">
+          <div v-for="(item, i) in form.items" :key="i" class="flex gap-2 items-start border border-outline-variant rounded-xl p-3 mb-2 bg-surface-container-low">
             <div class="flex-1 grid grid-cols-2 gap-2">
               <AppInput v-model="item.drug_name" placeholder="Tên thuốc *" :error="formErrors[`items.${i}.drug_name`]" />
               <AppInput v-model="item.dosage" placeholder="Liều dùng *" :error="formErrors[`items.${i}.dosage`]" />
               <AppInput v-model="item.frequency" placeholder="Tần suất (VD: 2 lần/ngày)" />
               <AppInput v-model="item.duration" placeholder="Thời gian (VD: 7 ngày)" />
             </div>
-            <button type="button" @click="removeItem(i)" class="mt-1 text-[#9CA3AF] hover:text-red-500 p-1 flex-shrink-0">
+            <button type="button" @click="removeItem(i)" class="mt-1 text-outline hover:text-error p-1 flex-shrink-0 transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -187,7 +283,7 @@ const statusOptions = [
 
       <template #footer>
         <AppButton variant="ghost" @click="showModal = false">Hủy</AppButton>
-        <AppButton :loading="creating" @click="submitForm">Tạo đơn thuốc</AppButton>
+        <AppButton variant="gradient" :loading="creating" @click="submitForm">Tạo đơn thuốc</AppButton>
       </template>
     </AppModal>
 
