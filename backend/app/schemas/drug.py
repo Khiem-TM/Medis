@@ -31,6 +31,29 @@ class DrugWarningResponse(BaseModel):
     warning_text: str
 
 
+# ── Drug Event Type ─────────────────────────────────────────────────────────
+
+class DrugEventTypeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    event_name: str
+    description: Optional[str] = None
+    source_event_id: Optional[int] = None
+
+
+# ── Drug Feature ─────────────────────────────────────────────────────────────
+
+class DrugFeatureResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    drug_id: str
+    targets: Optional[str] = None
+    enzymes: Optional[str] = None
+    pathways: Optional[str] = None
+    smiles: Optional[str] = None
+
+
 # ── Drug Interaction ────────────────────────────────────────────────────────
 
 class DrugInteractionResponse(BaseModel):
@@ -41,6 +64,11 @@ class DrugInteractionResponse(BaseModel):
     interacts_with_name: Optional[str] = None
     # Populated by service layer
     drug_name: Optional[str] = None
+    event_type_id: Optional[int] = None
+    interaction_label: Optional[str] = None
+    source: Optional[str] = None
+    confidence_score: Optional[float] = None
+    event_type: Optional[DrugEventTypeResponse] = None
 
 
 # ── Drug List / Detail ──────────────────────────────────────────────────────
@@ -114,3 +142,4 @@ class InteractionCheckResult(BaseModel):
     has_interaction: bool
     interactions: List[DrugInteractionResponse]
     safe_pairs: List[SafePairInfo]
+    prediction_count: int = 0

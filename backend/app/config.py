@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
 
+    # ML Microservice
+    ML_SERVICE_URL: str = "http://localhost:9000"
+    ML_SERVICE_TIMEOUT: float = 10.0
+    ML_CACHE_PREDICTIONS: bool = True
+
+    # Celery
+    CELERY_BROKER_URL: str = ""
+    FCM_SERVICE_ACCOUNT_KEY: str = ""
+
     # Frontend
     FRONTEND_URL: str = "http://localhost:5173"
     

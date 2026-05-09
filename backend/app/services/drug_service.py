@@ -18,6 +18,7 @@ from app.models.drug import Drug, DrugInteraction
 from app.schemas.drug import (
     DrugDetailResponse,
     DrugInteractionResponse,
+    DrugEventTypeResponse,
     DrugListItem,
     InteractionCheckResult,
     SafePairInfo,
@@ -164,7 +165,12 @@ class InteractionService:
         self.redis = redis
 
     async def check_interactions(self, drug_ids: List[str]) -> InteractionCheckResult:
-        # 1. Validate all drug_ids exist
+        from app.models.drug_event_type import DrugEventType
+        from app.models.drug_feature import DrugFeature
+        from app.models.drug import InteractionSource
+        from app.services.ml_client import predict_interaction
+
+        # ── Step 1: Validate all drug IDs exist ─────────────────────────────
         drugs_result = await self.db.execute(select(Drug).where(Drug.id.in_(drug_ids)))
         found_drugs = {d.id: d.generic_name for d in drugs_result.scalars().all()}
         missing = [d for d in drug_ids if d not in found_drugs]
@@ -174,19 +180,18 @@ class InteractionService:
                 detail=f"Thuốc không tìm thấy trong hệ thống: {', '.join(missing)}",
             )
 
-        # 2. Generate all ordered pairs (drug_id → interacts_with_id)
-        # Mỗi cặp (A,B) kiểm tra cả A→B và B→A vì drug_interactions không đảm bảo 2 chiều
-        pair_set: set[tuple] = set()
-        for a, b in combinations(drug_ids, 2):
-            pair_set.add((a, b))
-            pair_set.add((b, a))
-        pairs = list(pair_set)
+        # ── Step 2: Build pairs ──────────────────────────────────────────────
+        original_pairs = list(combinations(drug_ids, 2))
+        all_directed: list[tuple] = []
+        for a, b in original_pairs:
+            all_directed.append((a, b))
+            all_directed.append((b, a))
 
-        # 3. Check cache per pair, collect uncached
+        # ── Step 3: Redis cache check ────────────────────────────────────────
         pair_results: dict[tuple, Optional[dict]] = {}
         uncached_pairs: list[tuple] = []
 
-        for pair in pairs:
+        for pair in all_directed:
             cache_key = f"cache:interaction:{pair[0]}:{pair[1]}"
             cached = await self.redis.get(cache_key)
             if cached is not None:
@@ -194,7 +199,7 @@ class InteractionService:
             else:
                 uncached_pairs.append(pair)
 
-        # 4. Batch query DB for uncached pairs
+        # ── Step 4: Batch DB lookup ──────────────────────────────────────────
         if uncached_pairs:
             conditions = [
                 and_(
@@ -204,7 +209,9 @@ class InteractionService:
                 for a, b in uncached_pairs
             ]
             result = await self.db.execute(
-                select(DrugInteraction).where(or_(*conditions))
+                select(DrugInteraction)
+                .options(selectinload(DrugInteraction.event_type))
+                .where(or_(*conditions))
             )
             db_map = {
                 (i.drug_id, i.interacts_with_id): i
@@ -219,6 +226,16 @@ class InteractionService:
                         "drug_id": interaction.drug_id,
                         "interacts_with_id": interaction.interacts_with_id,
                         "interacts_with_name": interaction.interacts_with_name,
+                        "event_type_id": interaction.event_type_id,
+                        "interaction_label": interaction.interaction_label,
+                        "source": interaction.source.value if interaction.source else "database",
+                        "confidence_score": interaction.confidence_score,
+                        "event_type": {
+                            "id": interaction.event_type.id,
+                            "event_name": interaction.event_type.event_name,
+                            "description": interaction.event_type.description,
+                            "source_event_id": interaction.event_type.source_event_id,
+                        } if interaction.event_type else None,
                     }
                     await self.redis.setex(cache_key, _PAIR_TTL, json.dumps(data))
                     pair_results[pair] = data
@@ -226,12 +243,106 @@ class InteractionService:
                     await self.redis.setex(cache_key, _PAIR_TTL, "null")
                     pair_results[pair] = None
 
-        # 5. Dedup: nếu A→B tồn tại, không cần thêm B→A vào kết quả
+        # ── Step 5: Find canonical pairs needing ML ──────────────────────────
+        pairs_needing_ml: list[tuple] = []
+        for a, b in original_pairs:
+            if pair_results.get((a, b)) is None and pair_results.get((b, a)) is None:
+                pairs_needing_ml.append((a, b))
+
+        # ── Step 6: ML fallback ──────────────────────────────────────────────
+        from app.config import settings
+        ml_interactions: list[DrugInteractionResponse] = []
+        prediction_count = 0
+
+        if pairs_needing_ml:
+            all_ml_ids = {d for pair in pairs_needing_ml for d in pair}
+            feat_result = await self.db.execute(
+                select(DrugFeature).where(DrugFeature.drug_id.in_(all_ml_ids))
+            )
+            features_map = {f.drug_id: f for f in feat_result.scalars().all()}
+
+            event_type_result = await self.db.execute(select(DrugEventType))
+            event_type_map = {et.event_name: et for et in event_type_result.scalars().all()}
+
+            for a, b in pairs_needing_ml:
+                feat_a = features_map.get(a)
+                feat_b = features_map.get(b)
+                if not feat_a or not feat_b:
+                    continue
+
+                prediction = await predict_interaction(
+                    drug_a_id=a,
+                    drug_b_id=b,
+                    features_a={
+                        "targets": feat_a.targets,
+                        "enzymes": feat_a.enzymes,
+                        "pathways": feat_a.pathways,
+                        "smiles": feat_a.smiles,
+                    },
+                    features_b={
+                        "targets": feat_b.targets,
+                        "enzymes": feat_b.enzymes,
+                        "pathways": feat_b.pathways,
+                        "smiles": feat_b.smiles,
+                    },
+                )
+                if prediction is None:
+                    continue
+
+                predicted_event_name = prediction.get("event_name", "")
+                confidence = prediction.get("confidence")
+                event_type = event_type_map.get(predicted_event_name)
+
+                if settings.ML_CACHE_PREDICTIONS:
+                    new_row = DrugInteraction(
+                        drug_id=a,
+                        interacts_with_id=b,
+                        interacts_with_name=found_drugs.get(b),
+                        event_type_id=event_type.id if event_type else None,
+                        interaction_label=predicted_event_name,
+                        source=InteractionSource.model_predicted,
+                        confidence_score=confidence,
+                    )
+                    self.db.add(new_row)
+                    cache_data = {
+                        "drug_id": a,
+                        "interacts_with_id": b,
+                        "interacts_with_name": found_drugs.get(b),
+                        "event_type_id": event_type.id if event_type else None,
+                        "interaction_label": predicted_event_name,
+                        "source": "model_predicted",
+                        "confidence_score": confidence,
+                        "event_type": {
+                            "id": event_type.id,
+                            "event_name": event_type.event_name,
+                            "description": event_type.description,
+                            "source_event_id": event_type.source_event_id,
+                        } if event_type else None,
+                    }
+                    await self.redis.setex(
+                        f"cache:interaction:{a}:{b}", _PAIR_TTL, json.dumps(cache_data)
+                    )
+                    await self.db.commit()
+
+                prediction_count += 1
+                ml_interactions.append(DrugInteractionResponse(
+                    drug_id=a,
+                    interacts_with_id=b,
+                    interacts_with_name=found_drugs.get(b),
+                    drug_name=found_drugs.get(a),
+                    event_type_id=event_type.id if event_type else None,
+                    interaction_label=predicted_event_name,
+                    source="model_predicted",
+                    confidence_score=confidence,
+                    event_type=DrugEventTypeResponse.model_validate(event_type) if event_type else None,
+                ))
+
+        # ── Step 7: Consolidate DB interactions ──────────────────────────────
         seen_pairs: set[frozenset] = set()
-        interactions: list[DrugInteractionResponse] = []
+        db_interactions: list[DrugInteractionResponse] = []
         interacting_drug_sets: set[frozenset] = set()
 
-        for pair in pairs:
+        for pair in all_directed:
             data = pair_results.get(pair)
             if not data:
                 continue
@@ -240,16 +351,26 @@ class InteractionService:
                 continue
             seen_pairs.add(key)
             interacting_drug_sets.add(key)
-            interactions.append(DrugInteractionResponse(
+            db_interactions.append(DrugInteractionResponse(
                 drug_id=data["drug_id"],
                 interacts_with_id=data["interacts_with_id"],
                 interacts_with_name=data.get("interacts_with_name"),
                 drug_name=found_drugs.get(data["drug_id"]),
+                event_type_id=data.get("event_type_id"),
+                interaction_label=data.get("interaction_label"),
+                source=data.get("source"),
+                confidence_score=data.get("confidence_score"),
+                event_type=DrugEventTypeResponse(**data["event_type"])
+                    if data.get("event_type") else None,
             ))
 
-        # 6. Safe pairs — original combinations, not in interacting sets
-        original_pairs = list(combinations(drug_ids, 2))
-        safe_pairs: list[SafePairInfo] = [
+        for ml_ix in ml_interactions:
+            interacting_drug_sets.add(frozenset([ml_ix.drug_id, ml_ix.interacts_with_id]))
+
+        all_interactions = db_interactions + ml_interactions
+
+        # ── Step 8: Safe pairs ────────────────────────────────────────────────
+        safe_pairs = [
             SafePairInfo(
                 drug_id_1=a,
                 drug_id_2=b,
@@ -263,9 +384,10 @@ class InteractionService:
         return InteractionCheckResult(
             checked_drugs=drug_ids,
             total_pairs=len(original_pairs),
-            has_interaction=len(interactions) > 0,
-            interactions=interactions,
+            has_interaction=len(all_interactions) > 0,
+            interactions=all_interactions,
             safe_pairs=safe_pairs,
+            prediction_count=prediction_count,
         )
 
     async def export_result(self, drug_ids: List[str]) -> bytes:
@@ -275,7 +397,7 @@ class InteractionService:
         ws = wb.active
         ws.title = "Tương tác thuốc"
 
-        headers = ["STT", "Thuốc A (ID)", "Thuốc B (ID)", "Tên thuốc B"]
+        headers = ["STT", "Thuốc A (ID)", "Thuốc B (ID)", "Tên thuốc B", "Loại tương tác", "Nguồn", "Độ tin cậy"]
         ws.append(headers)
         for col, _ in enumerate(headers, 1):
             ws.cell(row=1, column=col).font = openpyxl.styles.Font(bold=True)
@@ -286,6 +408,9 @@ class InteractionService:
                 interaction.drug_id,
                 interaction.interacts_with_id,
                 interaction.interacts_with_name or "",
+                interaction.interaction_label or "",
+                interaction.source or "database",
+                f"{interaction.confidence_score:.2%}" if interaction.confidence_score is not None else "",
             ])
 
         for col in ws.columns:

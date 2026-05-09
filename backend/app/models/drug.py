@@ -1,10 +1,18 @@
+import enum
+
 from sqlalchemy import (
     Column, String, Text, DateTime,
-    Integer, ForeignKey, UniqueConstraint, PrimaryKeyConstraint
+    Integer, ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+    Float, Enum as SAEnum,
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+
+class InteractionSource(str, enum.Enum):
+    database = "database"
+    model_predicted = "model_predicted"
 
 
 class Drug(Base):
@@ -48,6 +56,12 @@ class Drug(Base):
         "DrugInteraction",
         back_populates="drug",
         cascade="all, delete-orphan"
+    )
+    features = relationship(
+        "DrugFeature",
+        back_populates="drug",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self):
@@ -135,12 +149,26 @@ class DrugInteraction(Base):
     drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
     interacts_with_id = Column(String(50), nullable=False, index=True)
     interacts_with_name = Column(String(255), nullable=True)
+    event_type_id = Column(
+        Integer,
+        ForeignKey("drug_event_types.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    interaction_label = Column(String(255), nullable=True, index=True)
+    source = Column(
+        SAEnum(InteractionSource, name="interactionsource"),
+        nullable=True,
+        index=True,
+    )
+    confidence_score = Column(Float, nullable=True)
 
     __table_args__ = (
         PrimaryKeyConstraint("drug_id", "interacts_with_id"),
     )
 
     drug = relationship("Drug", back_populates="interactions")
+    event_type = relationship("DrugEventType", back_populates="interactions")
 
     def __repr__(self):
         return f"<DrugInteraction {self.drug_id} ↔ {self.interacts_with_id}>"

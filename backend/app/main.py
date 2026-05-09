@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -43,6 +44,20 @@ async def lifespan(app: FastAPI):
         logger.info("Redis connected")
     except Exception as e:
         logger.error(f"Redis connection failed: {e}")
+
+    # Start lightweight in-process reminder scheduler (fallback when Celery not available)
+    async def _reminder_loop():
+        from app.tasks.reminder_tasks import trigger_due_reminders
+        import asyncio
+        while True:
+            try:
+                await trigger_due_reminders()
+            except Exception as e:
+                logger.error(f"Reminder scheduler error: {e}")
+            await asyncio.sleep(60)  # Run every 60 seconds
+
+    asyncio.create_task(_reminder_loop())
+    logger.info("In-process reminder scheduler started")
 
     yield
 

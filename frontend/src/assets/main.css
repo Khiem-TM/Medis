@@ -1,48 +1,56 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Primary - Clinical Blue */
-  --color-primary: #006193;
-  --color-primary-dk: #004d73;
-  --color-primary-container: #007bb9;
-  --color-primary-fixed: #cce5ff;
-  --color-primary-fixed-dim: #92ccff;
+  /* Navy brand palette */
+  --color-navy-900: #0C1D42;
+  --color-navy-800: #142853;
+  --color-navy-700: #1E3568;
+  --color-navy-600: #2C447F;
+  --color-navy-500: #3D5793;
+
+  /* Primary (interactive accent blue) */
+  --color-primary: #2563EB;
+  --color-primary-dk: #1D4FD8;
+  --color-primary-container: #3B82F6;
+  --color-primary-fixed: #DCEDFF;
+  --color-primary-fixed-dim: #BFDBFE;
 
   /* Secondary */
-  --color-secondary: #2c5fa2;
-  --color-secondary-container: #87b5fe;
+  --color-secondary: #1E3568;
+  --color-secondary-container: #BFDBFE;
 
-  /* Tertiary - Clinical Green (success/safe) */
-  --color-tertiary: #006a3d;
-  --color-tertiary-fixed: #68fda9;
+  /* Tertiary - green */
+  --color-tertiary: #10B981;
+  --color-tertiary-fixed: #D1FAE5;
 
   /* Error */
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
+  --color-error: #EF4444;
+  --color-error-container: #FEE2E2;
 
   /* Surface system */
-  --color-surface: #f9f9ff;
-  --color-surface-container-low: #f0f3ff;
-  --color-surface-container: #e7eeff;
-  --color-surface-container-high: #dee8ff;
+  --color-surface: #F3F5F7;
+  --color-surface-container-low: #F8FAFB;
+  --color-surface-container: #EFF3F8;
+  --color-surface-container-high: #E4EBF5;
 
   /* On-surface text */
-  --color-on-surface: #001c3b;
-  --color-on-surface-variant: #3f4850;
+  --color-on-surface: #0C1D42;
+  --color-on-surface-variant: #2A3A5E;
 
   /* Structural */
-  --color-outline: #6f7881;
-  --color-outline-variant: #bfc7d2;
+  --color-outline: #5A6985;
+  --color-outline-variant: rgba(12, 29, 66, 0.12);
 
-  /* Semantic aliases (backward compat) */
-  --color-danger: #ba1a1a;
-  --color-warning: #f59e0b;
-  --color-info: #2c5fa2;
-  --color-page-bg: #f9f9ff;
-  --color-card: #ffffff;
-  --color-border: #bfc7d2;
-  --color-text: #001c3b;
-  --color-muted: #6f7881;
+  /* Semantic aliases */
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-info: #2563EB;
+  --color-page-bg: #F3F5F7;
+  --color-card: #FFFFFF;
+  --color-border: rgba(12, 29, 66, 0.08);
+  --color-text: #0C1D42;
+  --color-muted: #5A6985;
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* Font */
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 }

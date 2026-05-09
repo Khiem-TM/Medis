@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface">
+  <div class="min-h-screen" style="background: #F3F5F7;">
     <slot />
   </div>
 </template>
