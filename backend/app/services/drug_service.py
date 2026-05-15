@@ -274,12 +274,14 @@ class InteractionService:
                     drug_a_id=a,
                     drug_b_id=b,
                     features_a={
+                        "generic_name": found_drugs.get(a),
                         "targets": feat_a.targets,
                         "enzymes": feat_a.enzymes,
                         "pathways": feat_a.pathways,
                         "smiles": feat_a.smiles,
                     },
                     features_b={
+                        "generic_name": found_drugs.get(b),
                         "targets": feat_b.targets,
                         "enzymes": feat_b.enzymes,
                         "pathways": feat_b.pathways,

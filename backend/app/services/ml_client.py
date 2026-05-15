@@ -15,11 +15,13 @@ async def predict_interaction(
     features_b: dict,
 ) -> Optional[dict]:
     """
-    Call ML microservice to predict drug interaction event type.
+    Call DDI-MVP microservice to predict drug interaction event type.
 
     Request:  POST {ML_SERVICE_URL}/predict
-              {"drug_a": {"id": ..., "targets": ..., "enzymes": ..., "pathways": ..., "smiles": ...},
-               "drug_b": {...}}
+              {
+                "drug_a": {"id": "DB00945", "generic_name": "Aspirin", ...},
+                "drug_b": {"id": "DB00316", "generic_name": "Warfarin", ...}
+              }
 
     Response: {"event_name": str, "confidence": float}
 
@@ -36,10 +38,10 @@ async def predict_interaction(
             return resp.json()
     except httpx.HTTPStatusError as exc:
         logger.warning(
-            "ML service HTTP %s for pair (%s, %s): %s",
+            "DDI-MVP service HTTP %s for pair (%s, %s): %s",
             exc.response.status_code, drug_a_id, drug_b_id, exc,
         )
         return None
     except httpx.RequestError as exc:
-        logger.warning("ML service unreachable for pair (%s, %s): %s", drug_a_id, drug_b_id, exc)
+        logger.warning("DDI-MVP service unreachable for pair (%s, %s): %s", drug_a_id, drug_b_id, exc)
         return None

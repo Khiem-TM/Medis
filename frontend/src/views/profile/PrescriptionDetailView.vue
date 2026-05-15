@@ -20,23 +20,7 @@ function checkInteractions() {
   fetchInteractions()
 }
 
-function getSeverityClasses(severity: string) {
-  switch (severity) {
-    case 'major':    return 'bg-error-container text-error'
-    case 'moderate': return 'bg-yellow-100 text-yellow-700'
-    case 'minor':    return 'bg-tertiary-fixed text-tertiary'
-    default:         return 'bg-surface-container text-outline'
-  }
-}
-
-function getSeverityLabel(severity: string) {
-  switch (severity) {
-    case 'major':    return 'Nặng'
-    case 'moderate': return 'Trung bình'
-    case 'minor':    return 'Nhẹ'
-    default:         return severity
-  }
-}
+const interactionCount = computed(() => interactions.value?.interactions.length ?? 0)
 </script>
 
 <template>
@@ -123,7 +107,7 @@ function getSeverityLabel(severity: string) {
               : 'bg-tertiary-fixed/40 border-tertiary/20',
           ]">
             <div :class="['text-2xl font-bold', interactions.has_interaction ? 'text-error' : 'text-tertiary']">
-              {{ interactions.interaction_count }}
+              {{ interactionCount }}
             </div>
             <div>
               <p :class="['font-semibold text-sm', interactions.has_interaction ? 'text-error' : 'text-tertiary']">
@@ -136,21 +120,22 @@ function getSeverityLabel(severity: string) {
           <!-- Interaction pairs with issues -->
           <div v-if="interactions.has_interaction" class="space-y-3">
             <div
-              v-for="pair in interactions.pairs.filter((p) => p.has_interaction)"
-              :key="`${pair.drug_1_id}-${pair.drug_2_id}`"
-              :class="[
-                'border-l-4 rounded-xl p-4 bg-surface-container-low',
-                pair.interaction?.severity === 'major' ? 'border-error' : pair.interaction?.severity === 'moderate' ? 'border-yellow-400' : 'border-tertiary',
-              ]"
+              v-for="interaction in interactions.interactions"
+              :key="`${interaction.drug_id}-${interaction.interacts_with_id}`"
+              class="border-l-4 border-error rounded-xl p-4 bg-surface-container-low"
             >
               <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <p class="font-semibold text-on-surface text-sm">{{ pair.drug_1_name }} ↔ {{ pair.drug_2_name }}</p>
-                <span v-if="pair.interaction" :class="['text-xs font-bold px-2.5 py-0.5 rounded-full', getSeverityClasses(pair.interaction.severity)]">
-                  {{ getSeverityLabel(pair.interaction.severity) }}
+                <p class="font-semibold text-on-surface text-sm">
+                  {{ interaction.drug_name || interaction.drug_id }} ↔ {{ interaction.interacts_with_name || interaction.interacts_with_id }}
+                </p>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-surface-container text-outline">
+                  {{ interaction.source ?? 'database' }}
                 </span>
               </div>
-              <p v-if="pair.interaction?.description" class="text-sm text-on-surface-variant">{{ pair.interaction.description }}</p>
-              <p v-if="pair.interaction?.recommendation" class="text-sm text-tertiary font-medium mt-1">💡 {{ pair.interaction.recommendation }}</p>
+              <p v-if="interaction.interaction_label" class="text-sm text-on-surface-variant">{{ interaction.interaction_label }}</p>
+              <p v-if="interaction.confidence_score != null" class="text-sm text-tertiary font-medium mt-1">
+                Độ tin cậy: {{ (interaction.confidence_score * 100).toFixed(1) }}%
+              </p>
             </div>
           </div>
         </template>

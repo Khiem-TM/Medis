@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import type { Ref } from 'vue'
 import { api } from './axios'
-import type { InteractionCheckResult, CreateInteractionRequest, DrugInteraction, AdminInteractionSearchParams } from '@/types/interaction.types'
+import type { InteractionCheckResult, CreateInteractionRequest, DrugInteraction, AdminInteractionSearchParams, UpdateInteractionRequest } from '@/types/interaction.types'
 import type { PaginatedResponse } from '@/types/api.types'
 
 export const interactionKeys = {
@@ -21,9 +21,10 @@ export const interactionsApi = {
     api.get<PaginatedResponse<DrugInteraction>>('/admin/interactions', { params }).then((r) => r.data),
   adminCreate: (data: CreateInteractionRequest) =>
     api.post<DrugInteraction>('/admin/interactions', data).then((r) => r.data),
-  adminUpdate: ({ id, data }: { id: string; data: Partial<CreateInteractionRequest> }) =>
-    api.put<DrugInteraction>(`/admin/interactions/${id}`, data).then((r) => r.data),
-  adminDelete: (id: string) => api.delete(`/admin/interactions/${id}`).then((r) => r.data),
+  adminUpdate: ({ drug_id, interacts_with_id, data }: { drug_id: string; interacts_with_id: string; data: UpdateInteractionRequest }) =>
+    api.put<DrugInteraction>(`/admin/interactions/${drug_id}/${interacts_with_id}`, data).then((r) => r.data),
+  adminDelete: ({ drug_id, interacts_with_id }: { drug_id: string; interacts_with_id: string }) =>
+    api.delete(`/admin/interactions/${drug_id}/${interacts_with_id}`).then((r) => r.data),
 }
 
 export function useInteractionCheckMutation() {

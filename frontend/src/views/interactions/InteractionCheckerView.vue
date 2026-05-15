@@ -50,40 +50,17 @@ const errorMessage = computed(() => {
   return e?.message || null
 })
 
-const dangerCount = computed(() => result.value?.pairs.filter((p) => p.has_interaction && p.interaction?.severity === 'major').length ?? 0)
-const warningCount = computed(() => result.value?.pairs.filter((p) => p.has_interaction && p.interaction?.severity !== 'major').length ?? 0)
+const interactionCount = computed(() => result.value?.interactions.length ?? 0)
+const safeCount = computed(() => result.value?.safe_pairs.length ?? 0)
+const mlCount = computed(() => result.value?.prediction_count ?? 0)
 
-function severityToBorder(severity: string | undefined) {
-  if (severity === 'major') return 'bg-error'
-  if (severity === 'moderate') return 'bg-warning'
-  return 'bg-yellow-400'
+function formatConfidence(score: number | undefined) {
+  if (!score) return ''
+  return `${(score * 100).toFixed(1)}%`
 }
 
-function severityToIconBg(severity: string | undefined) {
-  if (severity === 'major') return 'bg-error-container text-error'
-  if (severity === 'moderate') return 'bg-yellow-50 text-yellow-600'
-  return 'bg-yellow-50 text-yellow-600'
-}
-
-function severityToTitleColor(severity: string | undefined) {
-  if (severity === 'major') return 'text-error'
-  return 'text-yellow-700'
-}
-
-function severityToBadge(severity: string | undefined) {
-  if (severity === 'major') return 'bg-error/10 text-error border border-error/20'
-  return 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-}
-
-function severityLabel(severity: string | undefined) {
-  if (severity === 'major') return 'MỨC ĐỘ: CAO'
-  if (severity === 'moderate') return 'MỨC ĐỘ: TRUNG BÌNH'
-  return 'MỨC ĐỘ: NHẸ'
-}
-
-function severityInteractionTypeColor(severity: string | undefined) {
-  if (severity === 'major') return 'text-error'
-  return 'text-yellow-600'
+function printResult() {
+  window.print()
 }
 </script>
 
@@ -92,7 +69,7 @@ function severityInteractionTypeColor(severity: string | undefined) {
     <!-- Page header -->
     <div>
       <h1 class="text-2xl font-bold text-on-surface">Kiểm tra tương tác thuốc</h1>
-      <p class="text-sm text-outline mt-0.5">Chọn từ 2 đến 20 thuốc để kiểm tra tương tác tự động</p>
+      <p class="text-sm text-outline mt-0.5">Chọn từ 2 đến 20 thuốc để kiểm tra tương tác tự động. Hệ thống có tích hợp AI dự đoán tương tác.</p>
     </div>
 
     <!-- Input section -->
@@ -142,7 +119,7 @@ function severityInteractionTypeColor(severity: string | undefined) {
     <!-- Loading state -->
     <div v-if="checking" class="bg-card rounded-2xl border border-outline-variant p-12 flex flex-col items-center gap-4">
       <AppSpinner size="lg" class="text-primary" />
-      <p class="text-sm text-outline">Đang phân tích tương tác thuốc...</p>
+      <p class="text-sm text-outline">Đang phân tích tương tác thuốc. Vui lòng đợi...</p>
     </div>
 
     <!-- Empty state -->
@@ -162,17 +139,19 @@ function severityInteractionTypeColor(severity: string | undefined) {
       <div class="flex flex-wrap items-center justify-between gap-4">
         <h3 class="text-lg font-bold text-on-surface">Kết quả phân tích</h3>
         <div class="flex flex-wrap gap-3">
-          <div v-if="dangerCount > 0" class="flex items-center gap-2 px-3 py-1 bg-error-container text-error rounded-full text-xs font-bold uppercase tracking-wider">
+          <div v-if="interactionCount > 0" class="flex items-center gap-2 px-3 py-1 bg-error-container text-error rounded-full text-xs font-bold uppercase tracking-wider">
             <span class="w-2 h-2 rounded-full bg-error" />
-            {{ dangerCount }} Nguy hiểm
+            {{ interactionCount }} Tương tác
           </div>
-          <div v-if="warningCount > 0" class="flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span class="w-2 h-2 rounded-full bg-yellow-500" />
-            {{ warningCount }} Cảnh báo
-          </div>
-          <div v-if="!result.has_interaction" class="flex items-center gap-2 px-3 py-1 bg-tertiary-fixed text-tertiary rounded-full text-xs font-bold uppercase tracking-wider">
+          <div v-if="safeCount > 0" class="flex items-center gap-2 px-3 py-1 bg-tertiary-fixed text-tertiary rounded-full text-xs font-bold uppercase tracking-wider">
             <span class="w-2 h-2 rounded-full bg-tertiary" />
-            An toàn
+            {{ safeCount }} An toàn
+          </div>
+          <div v-if="mlCount > 0" class="flex items-center gap-2 px-3 py-1 bg-primary-container text-primary rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {{ mlCount }} AI Dự đoán
           </div>
         </div>
       </div>
@@ -186,60 +165,72 @@ function severityInteractionTypeColor(severity: string | undefined) {
           'w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0',
           result.has_interaction ? 'bg-error-container text-error' : 'bg-tertiary-fixed text-tertiary'
         ]">
-          {{ result.interaction_count }}
+          {{ interactionCount }}
         </div>
         <div>
           <p class="font-semibold text-on-surface">
             {{ result.has_interaction ? 'Phát hiện tương tác thuốc!' : 'Không có tương tác đáng lo ngại' }}
           </p>
           <p class="text-sm text-outline mt-0.5">
-            {{ result.interaction_count }} / {{ result.total_pairs }} cặp có tương tác
+            {{ interactionCount }} / {{ result.total_pairs }} cặp có tương tác
           </p>
         </div>
       </div>
 
-      <!-- Interaction pair cards (with left border accent) -->
+      <!-- Interaction pair cards -->
       <div class="space-y-4">
         <div
-          v-for="pair in result.pairs.filter((p) => p.has_interaction)"
-          :key="`${pair.drug_1_id}-${pair.drug_2_id}`"
+          v-for="interaction in result.interactions"
+          :key="`${interaction.drug_id}-${interaction.interacts_with_id}`"
           class="bg-card rounded-2xl overflow-hidden border border-outline-variant shadow-sm flex"
         >
           <!-- Left severity bar -->
-          <div :class="['w-1.5 flex-shrink-0', severityToBorder(pair.interaction?.severity)]" />
+          <div class="w-1.5 flex-shrink-0 bg-error" />
+          
           <div class="p-5 flex-1">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div class="flex items-center gap-3">
-                <div :class="['w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0', severityToIconBg(pair.interaction?.severity)]">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-error-container text-error">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 :class="['text-base font-extrabold', severityToTitleColor(pair.interaction?.severity)]">
-                    {{ pair.drug_1_name }} × {{ pair.drug_2_name }}
+                  <h4 class="text-base font-extrabold text-error">
+                    {{ interaction.drug_name || interaction.drug_id }} × {{ interaction.interacts_with_name || interaction.interacts_with_id }}
                   </h4>
-                  <p :class="['text-xs font-bold uppercase tracking-wider', severityInteractionTypeColor(pair.interaction?.severity)]">
-                    {{ pair.interaction?.interaction_type || 'Tương tác thuốc' }}
-                  </p>
+                  <div class="flex items-center gap-2 mt-1">
+                    <p class="text-xs font-bold uppercase tracking-wider text-error">
+                      Cảnh báo tương tác
+                    </p>
+                    <span v-if="interaction.source === 'model_predicted'" class="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-semibold">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      AI Dự đoán (Độ tin cậy: {{ formatConfidence(interaction.confidence_score) }})
+                    </span>
+                    <span v-else class="inline-flex items-center gap-1 text-[10px] bg-outline-variant/30 text-outline px-2 py-0.5 rounded font-semibold">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                      </svg>
+                      Cơ sở dữ liệu
+                    </span>
+                  </div>
                 </div>
               </div>
-              <span :class="['px-3 py-1 rounded-lg text-xs font-black whitespace-nowrap flex-shrink-0', severityToBadge(pair.interaction?.severity)]">
-                {{ severityLabel(pair.interaction?.severity) }}
-              </span>
             </div>
 
-            <p v-if="pair.interaction?.description" class="text-sm text-on-surface-variant mb-4 leading-relaxed">
-              {{ pair.interaction.description }}
+            <p class="text-sm text-on-surface-variant mb-4 leading-relaxed font-medium">
+              {{ interaction.interaction_label }}
             </p>
 
-            <div v-if="pair.interaction?.recommendation" class="bg-surface-container-low rounded-xl p-4 flex items-start gap-3 border-l-4 border-outline-variant">
+            <div v-if="interaction.event_type?.description" class="bg-surface-container-low rounded-xl p-4 flex items-start gap-3 border-l-4 border-outline-variant">
               <svg class="w-4 h-4 text-outline mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <span class="text-xs font-bold text-on-surface block mb-1">Khuyến nghị:</span>
-                <span class="text-sm text-on-surface-variant">{{ pair.interaction.recommendation }}</span>
+                <span class="text-xs font-bold text-on-surface block mb-1">Mô tả loại tương tác:</span>
+                <span class="text-sm text-on-surface-variant">{{ interaction.event_type.description }}</span>
               </div>
             </div>
           </div>
@@ -247,13 +238,13 @@ function severityInteractionTypeColor(severity: string | undefined) {
       </div>
 
       <!-- Safe pairs collapsible -->
-      <details v-if="result.pairs.some((p) => !p.has_interaction)" class="bg-card rounded-2xl border border-outline-variant overflow-hidden">
+      <details v-if="safeCount > 0" class="bg-card rounded-2xl border border-outline-variant overflow-hidden">
         <summary class="px-5 py-4 cursor-pointer text-sm font-semibold text-on-surface select-none list-none flex items-center justify-between hover:bg-surface-container-low transition-colors">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Cặp thuốc an toàn ({{ result.pairs.filter((p) => !p.has_interaction).length }})
+            Cặp thuốc an toàn ({{ safeCount }})
           </div>
           <svg class="w-4 h-4 text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -261,14 +252,14 @@ function severityInteractionTypeColor(severity: string | undefined) {
         </summary>
         <div class="px-5 pb-4 space-y-1 border-t border-outline-variant">
           <div
-            v-for="pair in result.pairs.filter((p) => !p.has_interaction)"
-            :key="`${pair.drug_1_id}-${pair.drug_2_id}`"
+            v-for="pair in result.safe_pairs"
+            :key="`${pair.drug_id_1}-${pair.drug_id_2}`"
             class="flex items-center gap-2 py-2 text-sm text-on-surface-variant"
           >
             <svg class="w-4 h-4 text-tertiary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            {{ pair.drug_1_name }} ↔ {{ pair.drug_2_name }}
+            {{ pair.drug_1_name || pair.drug_id_1 }} ↔ {{ pair.drug_2_name || pair.drug_id_2 }}
           </div>
         </div>
       </details>
@@ -278,7 +269,7 @@ function severityInteractionTypeColor(severity: string | undefined) {
     <Teleport to="body">
       <button
         v-if="result"
-        @click="window.print()"
+        @click="printResult"
         class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50"
         title="In kết quả"
       >

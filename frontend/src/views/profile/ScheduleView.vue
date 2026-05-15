@@ -163,7 +163,7 @@ const todayLabel = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'nume
     </div>
 
     <!-- Add/Edit modal -->
-    <AppModal v-model="showModal" :title="editingReminder ? 'Sửa nhắc nhở' : 'Thêm nhắc nhở mới'">
+    <AppModal :open="showModal" :title="editingReminder ? 'Sửa nhắc nhở' : 'Thêm nhắc nhở mới'" @close="showModal = false">
       <form @submit.prevent="doSubmit" class="space-y-4">
         <AppInput
           v-model="form.drug_name"

@@ -26,6 +26,13 @@ STATE_TTL = 600  # 10 phút
 
 def _build_flow() -> Flow:
     """Tạo Flow instance từ config (stateless, gọi mỗi request)."""
+    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+        logger.error("Google OAuth is not configured: missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth chưa được cấu hình GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET.",
+        )
+
     client_config = {
         "web": {
             "client_id": settings.GOOGLE_CLIENT_ID,

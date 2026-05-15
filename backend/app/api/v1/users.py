@@ -42,8 +42,8 @@ router = APIRouter(prefix="/users", tags=["👤 User Profile"])
 def _user_svc(db: AsyncSession, redis: Redis) -> UserService:
     return UserService(db, redis, EmailService())
 
-def _prescription_svc(db: AsyncSession) -> PrescriptionService:
-    return PrescriptionService(db)
+def _prescription_svc(db: AsyncSession, redis: Redis) -> PrescriptionService:
+    return PrescriptionService(db, redis)
 
 def _health_svc(db: AsyncSession) -> HealthProfileService:
     return HealthProfileService(db)
@@ -131,8 +131,9 @@ async def list_prescriptions(
     status: Optional[str] = Query(None, description="Lọc: active | completed"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     return await svc.get_list(current_user.id, page, size, search, status)
 
 
@@ -146,8 +147,9 @@ async def create_prescription(
     data: PrescriptionCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     result = await svc.create(current_user.id, data)
     await db.commit()
     return result
@@ -162,8 +164,9 @@ async def get_prescription(
     prescription_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     return await svc.get_by_id(current_user.id, prescription_id)
 
 
@@ -177,8 +180,9 @@ async def update_prescription(
     data: PrescriptionUpdate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     result = await svc.update(current_user.id, prescription_id, data)
     await db.commit()
     return result
@@ -194,8 +198,9 @@ async def delete_prescription(
     prescription_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     await svc.delete(current_user.id, prescription_id)
     await db.commit()
     return {"message": "Đơn thuốc đã được xóa"}
@@ -210,8 +215,9 @@ async def delete_many_prescriptions(
     body: BulkDeleteRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     result = await svc.delete_many(current_user.id, body.ids)
     await db.commit()
     return result
@@ -226,8 +232,9 @@ async def check_interactions(
     prescription_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    svc = _prescription_svc(db)
+    svc = _prescription_svc(db, redis)
     return await svc.check_interactions(current_user.id, prescription_id)
 
 

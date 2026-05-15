@@ -12,24 +12,6 @@ const id = computed(() => route.params.id as string)
 
 const { data: drug, isLoading, error } = useDrugDetail(id)
 const { data: interactions } = useDrugInteractions(id)
-
-function getSeverityClasses(severity: string) {
-  switch (severity) {
-    case 'major':    return 'bg-error-container text-error'
-    case 'moderate': return 'bg-yellow-100 text-yellow-700'
-    case 'minor':    return 'bg-tertiary-fixed text-tertiary'
-    default:         return 'bg-surface-container text-outline'
-  }
-}
-
-function getSeverityLabel(severity: string) {
-  switch (severity) {
-    case 'major':    return 'Nặng'
-    case 'moderate': return 'Trung bình'
-    case 'minor':    return 'Nhẹ'
-    default:         return severity
-  }
-}
 </script>
 
 <template>
@@ -127,20 +109,21 @@ function getSeverityLabel(severity: string) {
         <div class="space-y-3">
           <div
             v-for="inter in interactions.items"
-            :key="inter.id"
-            :class="[
-              'border-l-4 rounded-xl p-4 bg-surface-container-low',
-              inter.severity === 'major' ? 'border-error' : inter.severity === 'moderate' ? 'border-yellow-400' : 'border-tertiary',
-            ]"
+            :key="`${inter.drug_id}-${inter.interacts_with_id}`"
+            class="border-l-4 border-error rounded-xl p-4 bg-surface-container-low"
           >
             <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
-              <p class="font-semibold text-on-surface text-sm">{{ inter.drug_id_1 === id ? inter.drug_id_2 : inter.drug_id_1 }}</p>
-              <span :class="['text-xs font-bold px-2.5 py-0.5 rounded-full', getSeverityClasses(inter.severity)]">
-                {{ getSeverityLabel(inter.severity) }}
+              <p class="font-semibold text-on-surface text-sm">
+                {{ inter.drug_id === id ? (inter.interacts_with_name || inter.interacts_with_id) : (inter.drug_name || inter.drug_id) }}
+              </p>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-surface-container text-outline">
+                {{ inter.source ?? 'database' }}
               </span>
             </div>
-            <p v-if="inter.description" class="text-xs text-on-surface-variant">{{ inter.description }}</p>
-            <p v-if="inter.recommendation" class="text-xs text-tertiary mt-1 font-medium">💡 {{ inter.recommendation }}</p>
+            <p v-if="inter.interaction_label" class="text-xs text-on-surface-variant">{{ inter.interaction_label }}</p>
+            <p v-if="inter.confidence_score != null" class="text-xs text-tertiary mt-1 font-medium">
+              Độ tin cậy: {{ (inter.confidence_score * 100).toFixed(1) }}%
+            </p>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useAdminInteractions, useCreateInteractionMutation, useUpdateInteractionMutation, useDeleteInteractionMutation } from '@/api/interactions.api'
 import { usePagination } from '@/composables/usePagination'
 import { useToast } from '@/composables/useToast'
-import type { AdminInteractionSearchParams, CreateInteractionRequest, Severity } from '@/types/interaction.types'
+import type { AdminInteractionSearchParams, CreateInteractionRequest, DrugInteraction } from '@/types/interaction.types'
 import AppPagination from '@/components/ui/AppPagination.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -12,11 +12,11 @@ import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
 
 const toast = useToast()
 const { page, size, params: paginationParams, setPage, setSize } = usePagination(20)
-const severityFilter = ref<Severity | ''>('')
+const drugIdFilter = ref('')
 
 const queryParams = computed<AdminInteractionSearchParams>(() => ({
   ...paginationParams.value,
-  severity: severityFilter.value || undefined,
+  drug_id: drugIdFilter.value || undefined,
 }))
 
 const { data, isLoading } = useAdminInteractions(queryParams)
@@ -25,49 +25,19 @@ const { mutate: updateInteraction, isPending: updating } = useUpdateInteractionM
 const { mutate: deleteInteraction, isPending: deleting } = useDeleteInteractionMutation()
 
 const defaultForm = (): CreateInteractionRequest => ({
-  drug_id_1: '',
-  drug_id_2: '',
-  severity: 'moderate',
-  interaction_type: '',
-  description: '',
-  recommendation: '',
+  drug_id: '',
+  interacts_with_id: '',
+  interacts_with_name: '',
 })
 
 const showCreate = ref(false)
 const showEdit = ref(false)
-const editId = ref('')
+const editingPair = ref({ drug_id: '', interacts_with_id: '' })
 const form = ref(defaultForm())
-const confirmState = ref({ open: false, id: '', label: '' })
+const confirmState = ref({ open: false, drug_id: '', interacts_with_id: '', label: '' })
 
-const severityOptions = [
-  { label: 'Tất cả mức độ', value: '' },
-  { label: 'Nhẹ', value: 'minor' },
-  { label: 'Trung bình', value: 'moderate' },
-  { label: 'Nặng', value: 'major' },
-]
-
-const severityFormOptions = [
-  { label: 'Nhẹ', value: 'minor' },
-  { label: 'Trung bình', value: 'moderate' },
-  { label: 'Nặng', value: 'major' },
-]
-
-function getSeverityClasses(severity: string) {
-  switch (severity) {
-    case 'major':    return 'bg-error-container text-error'
-    case 'moderate': return 'bg-yellow-100 text-yellow-700'
-    case 'minor':    return 'bg-tertiary-fixed text-tertiary'
-    default:         return 'bg-surface-container text-outline'
-  }
-}
-
-function getSeverityLabel(severity: string) {
-  switch (severity) {
-    case 'major':    return 'Nặng'
-    case 'moderate': return 'Trung bình'
-    case 'minor':    return 'Nhẹ'
-    default:         return severity
-  }
+function interactionKey(row: DrugInteraction) {
+  return `${row.drug_id}:${row.interacts_with_id}`
 }
 
 function openCreate() {
@@ -82,32 +52,41 @@ function doCreate() {
   })
 }
 
-function openEdit(row: any) {
-  editId.value = row.id
+function openEdit(row: DrugInteraction) {
+  editingPair.value = { drug_id: row.drug_id, interacts_with_id: row.interacts_with_id }
   form.value = {
-    drug_id_1: row.drug_id_1,
-    drug_id_2: row.drug_id_2,
-    severity: row.severity,
-    interaction_type: row.interaction_type ?? '',
-    description: row.description ?? '',
-    recommendation: row.recommendation ?? '',
+    drug_id: row.drug_id,
+    interacts_with_id: row.interacts_with_id,
+    interacts_with_name: row.interacts_with_name ?? '',
   }
   showEdit.value = true
 }
 
 function doEdit() {
-  updateInteraction({ id: editId.value, data: form.value }, {
+  updateInteraction({
+    drug_id: editingPair.value.drug_id,
+    interacts_with_id: editingPair.value.interacts_with_id,
+    data: { interacts_with_name: form.value.interacts_with_name },
+  }, {
     onSuccess: () => { toast.success('Đã cập nhật'); showEdit.value = false },
     onError: () => toast.error('Cập nhật thất bại'),
   })
 }
 
-function openDelete(row: any) {
-  confirmState.value = { open: true, id: row.id, label: `${row.drug_id_1} ↔ ${row.drug_id_2}` }
+function openDelete(row: DrugInteraction) {
+  confirmState.value = {
+    open: true,
+    drug_id: row.drug_id,
+    interacts_with_id: row.interacts_with_id,
+    label: `${row.drug_id} ↔ ${row.interacts_with_id}`,
+  }
 }
 
 function doDelete() {
-  deleteInteraction(confirmState.value.id, {
+  deleteInteraction({
+    drug_id: confirmState.value.drug_id,
+    interacts_with_id: confirmState.value.interacts_with_id,
+  }, {
     onSuccess: () => { toast.success('Đã xóa'); confirmState.value.open = false },
     onError: () => toast.error('Xóa thất bại'),
   })
@@ -138,11 +117,16 @@ function doDelete() {
       <!-- Filter bar -->
       <div class="px-5 py-4 border-b border-outline-variant flex flex-wrap gap-3 bg-card">
         <select
-          v-model="severityFilter"
+          v-model="drugIdFilter"
           class="px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
-          <option v-for="opt in severityOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          <option value="">Tất cả thuốc</option>
         </select>
+        <input
+          v-model="drugIdFilter"
+          placeholder="Lọc theo DrugBank ID"
+          class="px-3 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
         <div class="ml-auto flex items-center text-sm text-outline">
           <template v-if="!isLoading && data">{{ data.meta.total.toLocaleString() }} cặp tương tác</template>
         </div>
@@ -159,34 +143,38 @@ function doDelete() {
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-surface-container-low border-b border-outline-variant">
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Thuốc 1</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Thuốc 2</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Mức độ</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Loại</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Mô tả</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Thuốc nguồn</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tương tác với</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nhãn tương tác</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nguồn</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Độ tin cậy</th>
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-outline-variant/50">
             <tr
               v-for="row in data.items"
-              :key="row.id"
+              :key="interactionKey(row)"
               class="hover:bg-surface-container-low/50 transition-colors"
             >
               <td class="px-5 py-4">
-                <span class="text-sm font-mono font-medium text-on-surface">{{ (row as any).drug_name_1 || row.drug_id_1 }}</span>
+                <span class="text-sm font-mono font-medium text-on-surface">{{ row.drug_name || row.drug_id }}</span>
               </td>
               <td class="px-5 py-4">
-                <span class="text-sm font-mono font-medium text-on-surface">{{ (row as any).drug_name_2 || row.drug_id_2 }}</span>
+                <span class="text-sm font-mono font-medium text-on-surface">{{ row.interacts_with_name || row.interacts_with_id }}</span>
               </td>
-              <td class="px-5 py-4 text-center">
-                <span :class="['px-2.5 py-0.5 rounded-full text-xs font-bold', getSeverityClasses(row.severity)]">
-                  {{ getSeverityLabel(row.severity) }}
+              <td class="px-5 py-4 text-sm text-on-surface-variant">
+                {{ row.interaction_label ?? '—' }}
+              </td>
+              <td class="px-5 py-4">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface-container text-outline">
+                  {{ row.source ?? 'database' }}
                 </span>
               </td>
-              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ row.interaction_type ?? '—' }}</td>
               <td class="px-5 py-4">
-                <p class="text-sm text-on-surface-variant line-clamp-2 max-w-xs">{{ row.description ?? '—' }}</p>
+                <span class="text-sm text-on-surface-variant">
+                  {{ row.confidence_score != null ? `${(row.confidence_score * 100).toFixed(1)}%` : '—' }}
+                </span>
               </td>
               <td class="px-5 py-4">
                 <div class="flex items-center gap-2 justify-end">
@@ -220,38 +208,22 @@ function doDelete() {
       <div class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 1 <span class="text-error">*</span></label>
-            <input v-model="form.drug_id_1" placeholder="ID thuốc 1" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc nguồn <span class="text-error">*</span></label>
+            <input v-model="form.drug_id" placeholder="ID thuốc nguồn" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
           <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 2 <span class="text-error">*</span></label>
-            <input v-model="form.drug_id_2" placeholder="ID thuốc 2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mức độ <span class="text-error">*</span></label>
-            <select v-model="form.severity" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option v-for="opt in severityFormOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Loại tương tác</label>
-            <input v-model="form.interaction_type" placeholder="vd: Dược lý học" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc tương tác <span class="text-error">*</span></label>
+            <input v-model="form.interacts_with_id" placeholder="ID thuốc tương tác" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium text-on-surface block mb-1.5">Mô tả</label>
-          <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-on-surface block mb-1.5">Khuyến nghị</label>
-          <textarea v-model="form.recommendation" rows="2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Tên thuốc tương tác</label>
+          <input v-model="form.interacts_with_name" placeholder="Tên hiển thị" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
         </div>
       </div>
       <template #footer>
         <AppButton variant="ghost" @click="showCreate = false">Hủy</AppButton>
-        <AppButton variant="gradient" :disabled="!form.drug_id_1 || !form.drug_id_2" :loading="creating" @click="doCreate">Tạo</AppButton>
+        <AppButton variant="gradient" :disabled="!form.drug_id || !form.interacts_with_id" :loading="creating" @click="doCreate">Tạo</AppButton>
       </template>
     </AppModal>
 
@@ -260,33 +232,17 @@ function doDelete() {
       <div class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 1</label>
-            <input v-model="form.drug_id_1" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc nguồn</label>
+            <input v-model="form.drug_id" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
           </div>
           <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc 2</label>
-            <input v-model="form.drug_id_2" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Mức độ</label>
-            <select v-model="form.severity" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option v-for="opt in severityFormOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Loại tương tác</label>
-            <input v-model="form.interaction_type" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            <label class="text-sm font-medium text-on-surface block mb-1.5">Mã thuốc tương tác</label>
+            <input v-model="form.interacts_with_id" disabled class="w-full rounded-xl border border-outline-variant bg-surface-container px-3 py-2.5 text-sm text-outline opacity-70" />
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium text-on-surface block mb-1.5">Mô tả</label>
-          <textarea v-model="form.description" rows="3" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-on-surface block mb-1.5">Khuyến nghị</label>
-          <textarea v-model="form.recommendation" rows="2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none" />
+          <label class="text-sm font-medium text-on-surface block mb-1.5">Tên thuốc tương tác</label>
+          <input v-model="form.interacts_with_name" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
         </div>
       </div>
       <template #footer>

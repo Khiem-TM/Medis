@@ -4,7 +4,6 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
-from itertools import combinations
 from math import ceil
 from pathlib import Path
 from typing import Optional
@@ -12,12 +11,11 @@ from typing import Optional
 import aiofiles
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
 from redis.asyncio import Redis
-from sqlalchemy import func, or_, and_, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.security import hash_password, verify_password
-from app.models.drug import DrugInteraction
 from app.models.health_profile import HealthProfile
 from app.models.prescription import Prescription, PrescriptionItem, PrescriptionStatus
 from app.models.user import User
@@ -148,8 +146,9 @@ class UserService:
 # ══════════════════════════════════════════════════════════════════════════════
 
 class PrescriptionService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, redis: Redis):
         self.db = db
+        self.redis = redis
 
     # ── Helpers ────────────────────────────────────────────────────────── #
 
@@ -303,45 +302,23 @@ class PrescriptionService:
         return {"deleted": deleted, "failed": failed}
 
     async def check_interactions(self, user_id: int, prescription_id: int) -> dict:
+        from app.services.drug_service import InteractionService
+
         prescription = await self._get_and_verify(user_id, prescription_id)
         drug_ids = list({item.drug_id for item in prescription.items if item.drug_id})
 
         if len(drug_ids) < 2:
             return {
+                "checked_drugs": drug_ids,
+                "total_pairs": 0,
+                "has_interaction": False,
                 "interactions": [],
+                "safe_pairs": [],
+                "prediction_count": 0,
                 "message": "Cần ít nhất 2 thuốc có mã drug_id để kiểm tra tương tác",
             }
 
-        pairs = [
-            (min(a, b), max(a, b))
-            for a, b in combinations(drug_ids, 2)
-        ]
-
-        conditions = [
-            and_(DrugInteraction.drug_id_1 == d1, DrugInteraction.drug_id_2 == d2)
-            for d1, d2 in pairs
-        ]
-        result = await self.db.execute(
-            select(DrugInteraction).where(or_(*conditions))
-        )
-        interactions = result.scalars().all()
-
-        return {
-            "prescription_id": prescription_id,
-            "drugs_checked": drug_ids,
-            "interaction_count": len(interactions),
-            "interactions": [
-                {
-                    "drug_1": i.drug_id_1,
-                    "drug_2": i.drug_id_2,
-                    "severity": i.severity,
-                    "type": i.interaction_type,
-                    "description": i.description,
-                    "recommendation": i.recommendation,
-                }
-                for i in interactions
-            ],
-        }
+        return await InteractionService(self.db, self.redis).check_interactions(drug_ids)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

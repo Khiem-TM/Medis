@@ -1,0 +1,7 @@
+# Runtime-only dependencies for the DDI-MVP API.
+# Training still uses requirements.txt.
+tensorflow>=2.13.0
+numpy>=1.24.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.0.0
