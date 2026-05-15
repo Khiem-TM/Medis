@@ -27,11 +27,6 @@ class Drug(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    brand_names = relationship(
-        "DrugBrandName",
-        back_populates="drug",
-        cascade="all, delete-orphan"
-    )
     warnings = relationship(
         "DrugWarning",
         back_populates="drug",
@@ -66,24 +61,6 @@ class Drug(Base):
 
     def __repr__(self):
         return f"<Drug id={self.id} generic_name={self.generic_name}>"
-
-
-# Sản phẩm thương mại của thuốc
-class DrugBrandName(Base):
-    __tablename__ = "drug_brand_names"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    drug_id = Column(String(50), ForeignKey("drugs.id", ondelete="CASCADE"), nullable=False, index=True)
-    name = Column(String(255), nullable=False, index=True)   # Tên thương mại
-    route = Column(String(255), nullable=True)               # Đường dùng
-    strength = Column(String(255), nullable=True)            # Hàm lượng
-    dosage_form = Column(String(255), nullable=True)         # Dạng bào chế
-    country = Column(String(100), nullable=True)             # Xuất xứ
-    image_url = Column(String(500), nullable=True)           # URL ảnh (Cloudinary)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    drug = relationship("Drug", back_populates="brand_names")
 
 
 # Cảnh báo về thuốc

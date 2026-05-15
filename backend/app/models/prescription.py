@@ -12,6 +12,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.drug import Drug
+    from app.models.market_drug import MarketDrugProduct
     from app.models.user import User
 
 
@@ -60,6 +61,11 @@ class PrescriptionItem(Base):
     prescription_id: Mapped[int] = mapped_column(
         ForeignKey("prescriptions.id"), nullable=False, index=True
     )
+    market_product_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("market_drug_products.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     drug_id: Mapped[Optional[str]] = mapped_column(
         String(10),
         ForeignKey("drugs.id"),
@@ -78,6 +84,11 @@ class PrescriptionItem(Base):
     drug: Mapped[Optional["Drug"]] = relationship(
         foreign_keys=[drug_id],
         lazy="selectin",
+    )
+    market_product: Mapped[Optional["MarketDrugProduct"]] = relationship(
+        foreign_keys=[market_product_id],
+        lazy="selectin",
+        back_populates="prescription_items",
     )
 
     def __repr__(self) -> str:

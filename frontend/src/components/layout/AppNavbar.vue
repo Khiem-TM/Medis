@@ -1,12 +1,26 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useUiStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useRouter } from 'vue-router'
 import AppAvatar from '@/components/ui/AppAvatar.vue'
+import MarketDrugSearchModal from '@/components/drug/MarketDrugSearchModal.vue'
 
 const uiStore = useUiStore()
 const authStore = useAuthStore()
 const router = useRouter()
+
+const searchOpen = ref(false)
+
+function handleGlobalKey(e: KeyboardEvent) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    searchOpen.value = true
+  }
+}
+
+onMounted(() => document.addEventListener('keydown', handleGlobalKey))
+onUnmounted(() => document.removeEventListener('keydown', handleGlobalKey))
 
 async function logout() {
   await authStore.logout()
@@ -32,20 +46,23 @@ async function logout() {
         </svg>
       </button>
 
-      <!-- Search bar -->
+      <!-- Search trigger -->
       <div class="flex-1 max-w-xs hidden md:block">
-        <div class="flex items-center gap-2 px-3 py-2 rounded-xl" style="background: #F3F5F7;">
+        <button
+          type="button"
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-colors hover:bg-[#EAECF0]"
+          style="background: #F3F5F7;"
+          @click="searchOpen = true"
+        >
           <svg class="w-4 h-4 flex-shrink-0" style="color: #8A95AC;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input
-            class="flex-1 bg-transparent outline-none text-sm"
-            style="color: #0C1D42;"
-            placeholder="Tìm thuốc, bệnh, bác sĩ..."
-          />
+          <span class="flex-1 text-sm" style="color: #8A95AC;">Tìm thuốc...</span>
           <kbd class="text-xs px-1.5 py-0.5 rounded font-mono hidden lg:block" style="background: rgba(12,29,66,0.07); color: #8A95AC;">⌘K</kbd>
-        </div>
+        </button>
       </div>
+
+      <MarketDrugSearchModal v-model:open="searchOpen" />
 
       <!-- Right tools -->
       <div class="flex items-center gap-1.5 ml-auto">

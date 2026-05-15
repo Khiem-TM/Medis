@@ -17,6 +17,8 @@ import AppInput from '@/components/ui/AppInput.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
+import MarketDrugSearchField from '@/components/drug/MarketDrugSearchField.vue'
+import type { MarketDrugProduct } from '@/types/market-drug.types'
 
 const router = useRouter()
 const toast = useToast()
@@ -43,19 +45,19 @@ const form = reactive({
   name: '',
   notes: '',
   status: 'active' as 'active' | 'completed',
-  items: [{ drug_name: '', dosage: '', frequency: '', duration: '' }],
+  items: [{ market_product_id: undefined as number | undefined, drug_id: undefined as string | undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null as MarketDrugProduct | null }],
 })
 
 function resetForm() {
   form.name = ''
   form.notes = ''
   form.status = 'active'
-  form.items = [{ drug_name: '', dosage: '', frequency: '', duration: '' }]
+  form.items = [{ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null }]
   Object.keys(formErrors).forEach((k) => delete formErrors[k])
 }
 
 function addItem() {
-  form.items.push({ drug_name: '', dosage: '', frequency: '', duration: '' })
+  form.items.push({ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null })
 }
 
 function removeItem(i: number) {
@@ -68,21 +70,53 @@ function validateForm() {
     prescriptionSchema.parse(form)
     return true
   } catch (e) {
-    if (e instanceof z.ZodError) e.issues.forEach((err) => { if (err.path[0]) formErrors[err.path[0] as string] = err.message })
+    if (e instanceof z.ZodError) {
+      e.issues.forEach((err) => {
+        if (err.path.length) formErrors[err.path.join('.')] = err.message
+      })
+    }
     return false
   }
 }
 
 function submitForm() {
   if (!validateForm()) return
-  createPrescription(form, {
-    onSuccess: () => {
-      toast.success('Tạo đơn thuốc thành công')
+  const payload = {
+    name: form.name,
+    notes: form.notes,
+    status: form.status,
+    items: form.items.map((item) => ({
+      market_product_id: item.market_product_id,
+      drug_id: item.drug_id,
+      drug_name: item.drug_name,
+      dosage: item.dosage,
+      frequency: item.frequency,
+      duration: item.duration,
+    })),
+  }
+  createPrescription(payload, {
+    onSuccess: (response) => {
+      if (response.interaction_check?.has_interaction) {
+        toast.warning(`Đơn thuốc đã tạo. Phát hiện ${response.interaction_check.interactions.length} tương tác cần lưu ý.`)
+      } else if (response.interaction_check?.message) {
+        toast.info(response.interaction_check.message)
+      } else {
+        toast.success('Tạo đơn thuốc thành công')
+      }
       showModal.value = false
       resetForm()
     },
     onError: (e) => toast.error((e as { message?: string })?.message || 'Tạo đơn thuốc thất bại'),
   })
+}
+
+function onSelectDrug(index: number, product: MarketDrugProduct | null) {
+  const item = form.items[index]
+  if (!item) return
+  item.selected_product = product
+  item.market_product_id = product?.id
+  item.drug_name = product?.product_name ?? ''
+  item.drug_id = product?.resolved_drug_ids.length === 1 ? product.resolved_drug_ids[0] : undefined
 }
 
 async function deleteItem(id: string) {
@@ -207,7 +241,7 @@ const statusOptions = [
                 </div>
               </td>
               <td class="px-5 py-4 text-center">
-                <span class="text-sm font-bold text-on-surface-variant">{{ (row as any).items?.length ?? 0 }}</span>
+                <span class="text-sm font-bold text-on-surface-variant">{{ (row as any).drug_count ?? 0 }}</span>
               </td>
               <td class="px-5 py-4 text-center">
                 <span :class="[
@@ -267,7 +301,14 @@ const statusOptions = [
 
           <div v-for="(item, i) in form.items" :key="i" class="flex gap-2 items-start border border-outline-variant rounded-xl p-3 mb-2 bg-surface-container-low">
             <div class="flex-1 grid grid-cols-2 gap-2">
-              <AppInput v-model="item.drug_name" placeholder="Tên thuốc *" :error="formErrors[`items.${i}.drug_name`]" />
+              <div class="col-span-2">
+                <MarketDrugSearchField
+                  :model-value="item.selected_product"
+                  placeholder="Chọn thuốc từ danh mục DAV *"
+                  @update:model-value="onSelectDrug(i, $event)"
+                />
+                <p v-if="formErrors[`items.${i}.drug_name`]" class="text-xs text-error mt-1">{{ formErrors[`items.${i}.drug_name`] }}</p>
+              </div>
               <AppInput v-model="item.dosage" placeholder="Liều dùng *" :error="formErrors[`items.${i}.dosage`]" />
               <AppInput v-model="item.frequency" placeholder="Tần suất (VD: 2 lần/ngày)" />
               <AppInput v-model="item.duration" placeholder="Thời gian (VD: 7 ngày)" />

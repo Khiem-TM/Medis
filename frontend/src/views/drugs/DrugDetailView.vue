@@ -45,12 +45,12 @@ const { data: interactions } = useDrugInteractions(id)
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
                 </svg>
               </div>
-              <h1 class="text-2xl font-bold text-on-surface">{{ drug.name }}</h1>
+              <h1 class="text-2xl font-bold text-on-surface">{{ drug.generic_name }}</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <code v-if="drug.atc_code" class="text-xs bg-surface-container px-2.5 py-1 rounded-lg font-mono text-on-surface-variant">{{ drug.atc_code }}</code>
-              <span v-if="drug.dosage_form" class="text-xs bg-primary-fixed text-primary px-2.5 py-0.5 rounded-full font-medium">{{ drug.dosage_form }}</span>
-              <span v-if="drug.classification" class="text-xs bg-secondary-container text-secondary px-2.5 py-0.5 rounded-full font-medium">{{ drug.classification }}</span>
+              <code v-for="atc in drug.atc_codes" :key="atc" class="text-xs bg-surface-container px-2.5 py-1 rounded-lg font-mono text-on-surface-variant">{{ atc }}</code>
+              <span v-for="form in drug.dosage_forms" :key="form" class="text-xs bg-primary-fixed text-primary px-2.5 py-0.5 rounded-full font-medium">{{ form }}</span>
+              <span v-for="category in drug.categories" :key="category" class="text-xs bg-secondary-container text-secondary px-2.5 py-0.5 rounded-full font-medium">{{ category }}</span>
             </div>
           </div>
           <AppButton variant="outline" size="sm" @click="router.push({ path: '/interactions', query: { drug: drug.id } })">
@@ -75,9 +75,9 @@ const { data: interactions } = useDrugInteractions(id)
       </div>
 
       <!-- Products -->
-      <div v-if="drug.products.length > 0" class="bg-card rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
+      <div v-if="drug.brand_names.length > 0" class="bg-card rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
         <div class="px-5 py-4 border-b border-outline-variant">
-          <h2 class="text-base font-semibold text-on-surface">Sản phẩm thương mại ({{ drug.products.length }})</h2>
+          <h2 class="text-base font-semibold text-on-surface">Sản phẩm thương mại ({{ drug.brand_names.length }})</h2>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-left border-collapse">
@@ -85,18 +85,18 @@ const { data: interactions } = useDrugInteractions(id)
               <tr class="bg-surface-container-low border-b border-outline-variant">
                 <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tên thương mại</th>
                 <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Đường dùng</th>
-                <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Liều</th>
+                <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Hàm lượng</th>
                 <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Dạng bào chế</th>
                 <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Xuất xứ</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/50">
-              <tr v-for="p in drug.products" :key="p.id" class="hover:bg-surface-container-low/50 transition-colors">
-                <td class="px-5 py-3 font-medium text-on-surface">{{ p.trade_name }}</td>
+              <tr v-for="p in drug.brand_names" :key="p.id" class="hover:bg-surface-container-low/50 transition-colors">
+                <td class="px-5 py-3 font-medium text-on-surface">{{ p.name }}</td>
                 <td class="px-5 py-3 text-on-surface-variant">{{ p.route ?? '—' }}</td>
-                <td class="px-5 py-3 text-on-surface-variant">{{ p.dosage ?? '—' }}</td>
-                <td class="px-5 py-3 text-on-surface-variant">{{ p.formulation ?? '—' }}</td>
-                <td class="px-5 py-3 text-on-surface-variant">{{ p.origin ?? '—' }}</td>
+                <td class="px-5 py-3 text-on-surface-variant">{{ p.strength ?? '—' }}</td>
+                <td class="px-5 py-3 text-on-surface-variant">{{ p.dosage_form ?? '—' }}</td>
+                <td class="px-5 py-3 text-on-surface-variant">{{ p.country ?? '—' }}</td>
               </tr>
             </tbody>
           </table>

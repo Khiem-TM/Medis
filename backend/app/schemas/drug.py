@@ -6,21 +6,6 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 
 
-# ── Drug Brand Name ────────────────────────────────────────────────────────
-
-class DrugBrandNameResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    drug_id: str
-    name: str
-    route: Optional[str] = None
-    strength: Optional[str] = None
-    dosage_form: Optional[str] = None
-    country: Optional[str] = None
-    image_url: Optional[str] = None
-
-
 # ── Drug Warning ────────────────────────────────────────────────────────────
 
 class DrugWarningResponse(BaseModel):
@@ -88,7 +73,6 @@ class DrugDetailResponse(BaseModel):
     description: Optional[str] = None
     chemical_formula: Optional[str] = None
     molecular_formula: Optional[str] = None
-    brand_names: List[DrugBrandNameResponse] = []
     warnings: List[DrugWarningResponse] = []
     dosage_forms: List[str] = []
     categories: List[str] = []
@@ -103,7 +87,6 @@ class DrugDetailResponse(BaseModel):
             description=drug.description,
             chemical_formula=drug.chemical_formula,
             molecular_formula=drug.molecular_formula,
-            brand_names=[DrugBrandNameResponse.model_validate(p) for p in drug.brand_names],
             warnings=[DrugWarningResponse.model_validate(w) for w in drug.warnings],
             dosage_forms=[df.dosage_form for df in drug.dosage_forms],
             categories=[c.category_name for c in drug.categories],
@@ -143,3 +126,4 @@ class InteractionCheckResult(BaseModel):
     interactions: List[DrugInteractionResponse]
     safe_pairs: List[SafePairInfo]
     prediction_count: int = 0
+    message: Optional[str] = None

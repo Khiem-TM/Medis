@@ -12,7 +12,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.drug import Drug, DrugInteraction, DrugBrandName, DrugWarning
+from app.models.drug import Drug, DrugInteraction, DrugWarning
 from app.models.log import ActivityLog
 from app.models.chat_message import ChatMessage
 from app.models.prescription import Prescription, PrescriptionItem, PrescriptionStatus
@@ -23,8 +23,6 @@ from app.schemas.admin import (
     AdminDrugUpdate,
     AdminInteractionCreate,
     AdminInteractionUpdate,
-    AdminBrandNameCreate,
-    AdminBrandNameUpdate,
     AdminStatsResponse,
     AdminUpdateUser,
     AdminUserDetail,
@@ -287,58 +285,6 @@ class AdminDrugService:
         if not drug:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Thuốc '{drug_id}' không tìm thấy")
         return drug
-
-    async def _get_brand_name_or_404(self, drug_id: str, brand_id: int) -> DrugBrandName:
-        brand = await self.db.scalar(
-            select(DrugBrandName).where(
-                DrugBrandName.id == brand_id, DrugBrandName.drug_id == drug_id
-            )
-        )
-        if not brand:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sản phẩm thương mại không tìm thấy")
-        return brand
-
-    async def add_brand_name(self, drug_id: str, data: AdminBrandNameCreate) -> DrugBrandName:
-        await self._get_drug_or_404(drug_id)
-        brand = DrugBrandName(
-            drug_id=drug_id,
-            name=data.name,
-            route=data.route,
-            strength=data.strength,
-            dosage_form=data.dosage_form,
-            country=data.country,
-            image_url=data.image_url,
-        )
-        self.db.add(brand)
-        await self.db.flush()
-        await self._invalidate_cache(drug_id)
-        return brand
-
-    async def update_brand_name(
-        self, drug_id: str, brand_id: int, data: AdminBrandNameUpdate
-    ) -> DrugBrandName:
-        brand = await self._get_brand_name_or_404(drug_id, brand_id)
-        if data.name is not None:
-            brand.name = data.name
-        if data.route is not None:
-            brand.route = data.route
-        if data.strength is not None:
-            brand.strength = data.strength
-        if data.dosage_form is not None:
-            brand.dosage_form = data.dosage_form
-        if data.country is not None:
-            brand.country = data.country
-        if data.image_url is not None:
-            brand.image_url = data.image_url
-        await self.db.flush()
-        await self._invalidate_cache(drug_id)
-        return brand
-
-    async def delete_brand_name(self, drug_id: str, brand_id: int) -> None:
-        brand = await self._get_brand_name_or_404(drug_id, brand_id)
-        await self.db.delete(brand)
-        await self.db.flush()
-        await self._invalidate_cache(drug_id)
 
     # ── Warnings ──────────────────────────────────────────────────────────
 

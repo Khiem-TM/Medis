@@ -124,6 +124,12 @@ const router = createRouter({
       component: () => import('@/views/drugs/DrugDetailView.vue'),
       meta: { layout: 'app', title: 'Chi tiết thuốc' },
     },
+    {
+      path: '/market-drugs/:id',
+      name: 'market-drug-detail',
+      component: () => import('@/views/drugs/MarketDrugDetailView.vue'),
+      meta: { layout: 'app', title: 'Chi tiết thuốc thị trường' },
+    },
 
     // Interaction checker (requires auth)
     {

@@ -11,6 +11,8 @@ from pydantic import (
 )
 
 from app.models.prescription import PrescriptionStatus
+from app.schemas.market_drug import MarketDrugProductListItem
+from app.schemas.drug import InteractionCheckResult
 from app.models.user import AuthProvider, UserRole
 
 T = TypeVar("T")
@@ -81,11 +83,18 @@ class ChangePasswordRequest(BaseModel):
 # ── Prescription ───────────────────────────────────────────────────────────
 
 class PrescriptionItemCreate(BaseModel):
+    market_product_id: Optional[int] = None
     drug_id: Optional[str] = None
-    drug_name: str
+    drug_name: Optional[str] = None
     dosage: str
     frequency: Optional[str] = None
     duration: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_item(self) -> "PrescriptionItemCreate":
+        if not self.market_product_id and not (self.drug_name and self.drug_name.strip()):
+            raise ValueError("Cần chọn thuốc thị trường hoặc nhập tên thuốc")
+        return self
 
 
 class PrescriptionItemResponse(BaseModel):
@@ -93,11 +102,13 @@ class PrescriptionItemResponse(BaseModel):
 
     id: int
     prescription_id: int
+    market_product_id: Optional[int] = None
     drug_id: Optional[str] = None
     drug_name: str
     dosage: str
     frequency: Optional[str] = None
     duration: Optional[str] = None
+    market_product: Optional[MarketDrugProductListItem] = None
 
 
 class PrescriptionCreate(BaseModel):
@@ -143,6 +154,7 @@ class PrescriptionResponse(BaseModel):
     status: PrescriptionStatus
     notes: Optional[str] = None
     items: List[PrescriptionItemResponse]
+    interaction_check: Optional[InteractionCheckResult] = None
     created_at: datetime
     updated_at: datetime
 

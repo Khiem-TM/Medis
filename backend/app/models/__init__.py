@@ -2,9 +2,13 @@ from app.models.user import User
 from app.models.drug_event_type import DrugEventType
 from app.models.drug_feature import DrugFeature
 from app.models.drug import (
-    Drug, DrugBrandName, DrugWarning, DrugInteraction,
+    Drug, DrugWarning, DrugInteraction,
     DrugDosageForm, DrugCategory, DrugAtcCode,
     InteractionSource,
+)
+from app.models.market_drug import (
+    MarketDrugProduct,
+    MarketDrugProductIngredient,
 )
 from app.models.prescription import Prescription, PrescriptionItem
 from app.models.health_profile import HealthProfile
@@ -17,8 +21,9 @@ from app.models.notification import Notification, NotificationType, Notification
 __all__ = [
     "User",
     "DrugEventType", "DrugFeature",
-    "Drug", "DrugBrandName", "DrugWarning", "DrugInteraction",
+    "Drug", "DrugWarning", "DrugInteraction",
     "DrugDosageForm", "DrugCategory", "DrugAtcCode", "InteractionSource",
+    "MarketDrugProduct", "MarketDrugProductIngredient",
     "Prescription", "PrescriptionItem",
     "HealthProfile",
     "ActivityLog", "SystemLog",

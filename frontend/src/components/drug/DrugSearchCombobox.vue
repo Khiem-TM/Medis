@@ -66,7 +66,7 @@ function onBlur() {
         :key="drug.id"
         class="flex items-center gap-1.5 px-3 py-1 bg-primary-fixed text-primary rounded-full text-sm font-medium"
       >
-        <span>{{ drug.name }}</span>
+        <span>{{ drug.name || drug.generic_name }}</span>
         <button @click="remove(drug.id)" class="hover:text-error transition-colors">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -101,7 +101,7 @@ function onBlur() {
           @mousedown.prevent="select(drug)"
           class="w-full text-left px-4 py-2.5 hover:bg-surface-container-low transition-colors"
         >
-          <p class="text-sm font-medium text-on-surface">{{ drug.name }}</p>
+          <p class="text-sm font-medium text-on-surface">{{ drug.name || drug.generic_name }}</p>
           <p class="text-xs text-outline">
             {{ [drug.atc_code, drug.dosage_form].filter(Boolean).join(' · ') || 'Không có thông tin thêm' }}
           </p>

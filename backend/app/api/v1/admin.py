@@ -17,14 +17,12 @@ from app.schemas.admin import (
     AdminDrugUpdate,
     AdminInteractionCreate,
     AdminInteractionUpdate,
-    AdminBrandNameCreate,
-    AdminBrandNameUpdate,
     AdminUpdateUser,
     AdminUserDetail,
     AdminUserListItem,
     AdminWarningCreate,
 )
-from app.schemas.drug import DrugBrandNameResponse, DrugInteractionResponse, DrugWarningResponse
+from app.schemas.drug import DrugInteractionResponse, DrugWarningResponse
 from app.schemas.user import PaginatedResponse, UserResponse
 from app.services.admin_service import AdminDrugService, AdminInteractionService, AdminUserService
 from app.services.log_service import ActivityLogService, SystemLogService
@@ -184,59 +182,6 @@ async def delete_drug(
     await _sys_log(db, admin.id, "deleted", "drug", drug_id)
     await db.commit()
     return {"success": True, "message": "Đã xóa thuốc", "data": None}
-
-
-@router.post(
-    "/drugs/{drug_id}/brand-names",
-    status_code=status.HTTP_201_CREATED,
-    summary="Thêm sản phẩm thương mại",
-)
-async def add_brand_name(
-    drug_id: str,
-    data: AdminBrandNameCreate,
-    admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db),
-    redis=Depends(get_redis),
-):
-    brand = await AdminDrugService(db, redis).add_brand_name(drug_id, data)
-    await _sys_log(db, admin.id, "created", "brand_name", brand.id)
-    await db.commit()
-    return {"success": True, "data": DrugBrandNameResponse.model_validate(brand).model_dump()}
-
-
-@router.put(
-    "/drugs/{drug_id}/brand-names/{brand_id}",
-    summary="Cập nhật sản phẩm thương mại",
-)
-async def update_brand_name(
-    drug_id: str,
-    brand_id: int,
-    data: AdminBrandNameUpdate,
-    admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db),
-    redis=Depends(get_redis),
-):
-    brand = await AdminDrugService(db, redis).update_brand_name(drug_id, brand_id, data)
-    await _sys_log(db, admin.id, "updated", "brand_name", brand_id)
-    await db.commit()
-    return {"success": True, "data": DrugBrandNameResponse.model_validate(brand).model_dump()}
-
-
-@router.delete(
-    "/drugs/{drug_id}/brand-names/{brand_id}",
-    summary="Xóa sản phẩm thương mại",
-)
-async def delete_brand_name(
-    drug_id: str,
-    brand_id: int,
-    admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db),
-    redis=Depends(get_redis),
-):
-    await AdminDrugService(db, redis).delete_brand_name(drug_id, brand_id)
-    await _sys_log(db, admin.id, "deleted", "brand_name", brand_id)
-    await db.commit()
-    return {"success": True, "message": "Đã xóa sản phẩm thương mại", "data": None}
 
 
 @router.post(

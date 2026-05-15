@@ -1,11 +1,16 @@
+import type { InteractionCheckResult } from './interaction.types'
+import type { MarketDrugProduct } from './market-drug.types'
+
 export interface PrescriptionItem {
   id: string
   prescription_id: string
+  market_product_id: number | null
   drug_id: string | null
   drug_name: string
   dosage: string
   frequency: string | null
   duration: string | null
+  market_product?: MarketDrugProduct | null
 }
 
 export interface Prescription {
@@ -15,13 +20,15 @@ export interface Prescription {
   status: 'active' | 'completed'
   notes: string | null
   items: PrescriptionItem[]
+  interaction_check?: InteractionCheckResult | null
   created_at: string
   updated_at: string
 }
 
 export interface CreatePrescriptionItemRequest {
+  market_product_id?: number
   drug_id?: string
-  drug_name: string
+  drug_name?: string
   dosage: string
   frequency?: string
   duration?: string

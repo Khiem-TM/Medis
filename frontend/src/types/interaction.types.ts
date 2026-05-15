@@ -35,6 +35,7 @@ export interface InteractionCheckResult {
   interactions: DrugInteraction[]
   safe_pairs: SafePair[]
   prediction_count: number
+  message?: string
 }
 
 export interface InteractionCheckRequest {

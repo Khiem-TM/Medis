@@ -2,6 +2,7 @@ import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from sqlalchemy import text
 from redis.asyncio import Redis
@@ -80,6 +81,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.exception_handler(Exception)
@@ -105,4 +107,3 @@ async def root():
 @app.get("/health", tags=["Health Check"])
 async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
-

@@ -17,6 +17,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.security import hash_password, verify_password
 from app.models.health_profile import HealthProfile
+from app.models.market_drug import MarketDrugProduct
 from app.models.prescription import Prescription, PrescriptionItem, PrescriptionStatus
 from app.models.user import User
 from app.schemas.user import (
@@ -34,7 +35,9 @@ from app.schemas.user import (
     PrescriptionUpdate,
     UpdateProfileRequest,
 )
+from app.schemas.drug import InteractionCheckResult
 from app.services.email_service import EmailService
+from app.services.market_drug_service import MarketDrugService
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +159,9 @@ class PrescriptionService:
         result = await self.db.execute(
             select(Prescription)
             .where(Prescription.id == prescription_id)
-            .options(selectinload(Prescription.items))
+            .options(
+                selectinload(Prescription.items).selectinload(PrescriptionItem.market_product),
+            )
         )
         p = result.scalar_one_or_none()
         if not p:
@@ -164,6 +169,33 @@ class PrescriptionService:
         if p.user_id != user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Bạn không có quyền truy cập đơn thuốc này")
         return p
+
+    async def _build_interaction_check(self, prescription: Prescription) -> InteractionCheckResult:
+        from app.services.drug_service import InteractionService
+
+        drug_ids: set[str] = {item.drug_id for item in prescription.items if item.drug_id}
+        market_svc = MarketDrugService(self.db)
+        for item in prescription.items:
+            if item.market_product_id:
+                resolved_ids = await market_svc.resolve_market_product_drug_ids(item.market_product_id)
+                drug_ids.update(resolved_ids)
+        resolved_list = sorted(drug_ids)
+        if len(resolved_list) < 2:
+            return InteractionCheckResult(
+                checked_drugs=resolved_list,
+                total_pairs=0,
+                has_interaction=False,
+                interactions=[],
+                safe_pairs=[],
+                prediction_count=0,
+                message="Cần ít nhất 2 hoạt chất/thuốc đã map DDI để kiểm tra tương tác",
+            )
+
+        return await InteractionService(self.db, self.redis).check_interactions(resolved_list)
+
+    async def _attach_interaction_check(self, prescription: Prescription) -> Prescription:
+        prescription.interaction_check = await self._build_interaction_check(prescription)
+        return prescription
 
     # ── CRUD ───────────────────────────────────────────────────────────── #
 
@@ -217,7 +249,8 @@ class PrescriptionService:
         )
 
     async def get_by_id(self, user_id: int, prescription_id: int) -> Prescription:
-        return await self._get_and_verify(user_id, prescription_id)
+        prescription = await self._get_and_verify(user_id, prescription_id)
+        return await self._attach_interaction_check(prescription)
 
     async def create(self, user_id: int, data: PrescriptionCreate) -> Prescription:
         prescription = Prescription(
@@ -230,9 +263,10 @@ class PrescriptionService:
         await self.db.flush()  # Lấy prescription.id
 
         for item_data in data.items:
+            payload = await self._normalize_prescription_item_payload(item_data.model_dump())
             item = PrescriptionItem(
                 prescription_id=prescription.id,
-                **item_data.model_dump(),
+                **payload,
             )
             self.db.add(item)
 
@@ -242,10 +276,10 @@ class PrescriptionService:
         result = await self.db.execute(
             select(Prescription)
             .where(Prescription.id == prescription.id)
-            .options(selectinload(Prescription.items))
+            .options(selectinload(Prescription.items).selectinload(PrescriptionItem.market_product))
         )
         logger.info(f"Prescription {prescription.id} created for user {user_id}")
-        return result.scalar_one()
+        return await self._attach_interaction_check(result.scalar_one())
 
     async def update(
         self,
@@ -265,9 +299,10 @@ class PrescriptionService:
             await self.db.flush()
 
             for item_data in data.items:
+                payload = await self._normalize_prescription_item_payload(item_data.model_dump())
                 item = PrescriptionItem(
                     prescription_id=prescription.id,
-                    **item_data.model_dump(),
+                    **payload,
                 )
                 self.db.add(item)
             await self.db.flush()
@@ -276,10 +311,10 @@ class PrescriptionService:
         result = await self.db.execute(
             select(Prescription)
             .where(Prescription.id == prescription_id)
-            .options(selectinload(Prescription.items))
+            .options(selectinload(Prescription.items).selectinload(PrescriptionItem.market_product))
         )
         logger.info(f"Prescription {prescription_id} updated for user {user_id}")
-        return result.scalar_one()
+        return await self._attach_interaction_check(result.scalar_one())
 
     async def delete(self, user_id: int, prescription_id: int) -> None:
         prescription = await self._get_and_verify(user_id, prescription_id)
@@ -302,23 +337,29 @@ class PrescriptionService:
         return {"deleted": deleted, "failed": failed}
 
     async def check_interactions(self, user_id: int, prescription_id: int) -> dict:
-        from app.services.drug_service import InteractionService
-
         prescription = await self._get_and_verify(user_id, prescription_id)
-        drug_ids = list({item.drug_id for item in prescription.items if item.drug_id})
+        return await self._build_interaction_check(prescription)
 
-        if len(drug_ids) < 2:
-            return {
-                "checked_drugs": drug_ids,
-                "total_pairs": 0,
-                "has_interaction": False,
-                "interactions": [],
-                "safe_pairs": [],
-                "prediction_count": 0,
-                "message": "Cần ít nhất 2 thuốc có mã drug_id để kiểm tra tương tác",
-            }
+    async def _normalize_prescription_item_payload(self, payload: dict) -> dict:
+        market_product_id = payload.get("market_product_id")
+        if not market_product_id:
+            return payload
 
-        return await InteractionService(self.db, self.redis).check_interactions(drug_ids)
+        market_product = await self.db.scalar(
+            select(MarketDrugProduct).where(MarketDrugProduct.id == market_product_id)
+        )
+        if not market_product:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Thuốc thị trường #{market_product_id} không tồn tại",
+            )
+
+        payload["drug_name"] = market_product.product_name
+        if not payload.get("drug_id"):
+            resolved_ids = await MarketDrugService(self.db).resolve_market_product_drug_ids(market_product_id)
+            if len(resolved_ids) == 1:
+                payload["drug_id"] = resolved_ids[0]
+        return payload
 
 
 # ══════════════════════════════════════════════════════════════════════════════

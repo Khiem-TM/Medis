@@ -1,61 +1,76 @@
-export interface DrugProduct {
-  id: string
+export interface DrugBrandName {
+  id: number
   drug_id: string
-  trade_name: string
+  name: string
   route: string | null
-  dosage: string | null
-  formulation: string | null
-  origin: string | null
+  strength: string | null
+  dosage_form: string | null
+  country: string | null
+  image_url: string | null
 }
 
 export interface DrugWarning {
-  id: string
+  id: number
   drug_id: string
   warning_text: string
 }
 
 export interface DrugListItem {
   id: string
-  name: string
-  atc_code: string | null
+  generic_name: string
   description: string | null
-  dosage_form: string | null
-  classification: string | null
+  name?: string
+  atc_code?: string | null
+  dosage_form?: string | null
+  classification?: string | null
 }
 
 export interface DrugDetail extends DrugListItem {
-  products: DrugProduct[]
+  chemical_formula: string | null
+  molecular_formula: string | null
+  brand_names: DrugBrandName[]
   warnings: DrugWarning[]
+  dosage_forms: string[]
+  categories: string[]
+  atc_codes: string[]
+  created_at: string
+  products?: DrugBrandName[]
 }
 
 export interface DrugSearchParams {
   page?: number
   size?: number
   search?: string
-  dosage_form?: string
 }
 
 export interface CreateDrugRequest {
   id: string
-  name: string
-  atc_code?: string
+  generic_name?: string
+  name?: string
   description?: string
+  chemical_formula?: string
+  molecular_formula?: string
+  atc_code?: string
   dosage_form?: string
   classification?: string
 }
 
 export interface UpdateDrugRequest {
+  generic_name?: string
   name?: string
-  atc_code?: string
   description?: string
+  chemical_formula?: string
+  molecular_formula?: string
+  atc_code?: string
   dosage_form?: string
   classification?: string
 }
 
 export interface CreateDrugProductRequest {
-  trade_name: string
+  name: string
   route?: string
-  dosage?: string
-  formulation?: string
-  origin?: string
+  strength?: string
+  dosage_form?: string
+  country?: string
+  image_url?: string
 }

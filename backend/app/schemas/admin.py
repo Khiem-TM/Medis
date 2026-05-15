@@ -59,24 +59,6 @@ class AdminDrugUpdate(BaseModel):
     molecular_formula: Optional[str] = None
 
 
-class AdminBrandNameCreate(BaseModel):
-    name: str
-    route: Optional[str] = None
-    strength: Optional[str] = None
-    dosage_form: Optional[str] = None
-    country: Optional[str] = None
-    image_url: Optional[str] = None
-
-
-class AdminBrandNameUpdate(BaseModel):
-    name: Optional[str] = None
-    route: Optional[str] = None
-    strength: Optional[str] = None
-    dosage_form: Optional[str] = None
-    country: Optional[str] = None
-    image_url: Optional[str] = None
-
-
 class AdminWarningCreate(BaseModel):
     warning_text: str
 

@@ -20,7 +20,8 @@ function checkInteractions() {
   fetchInteractions()
 }
 
-const interactionCount = computed(() => interactions.value?.interactions.length ?? 0)
+const effectiveInteractions = computed(() => interactions.value ?? prescription.value?.interaction_check ?? null)
+const interactionCount = computed(() => effectiveInteractions.value?.interactions.length ?? 0)
 </script>
 
 <template>
@@ -60,7 +61,7 @@ const interactionCount = computed(() => interactions.value?.interactions.length 
               @click="checkInteractions"
               class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
             >
-              Kiểm tra tương tác
+              Kiểm tra lại tương tác
             </button>
           </div>
         </div>
@@ -78,8 +79,17 @@ const interactionCount = computed(() => interactions.value?.interactions.length 
             <div class="w-8 h-8 bg-primary-fixed rounded-xl flex items-center justify-center text-sm font-bold text-primary flex-shrink-0">
               {{ i + 1 }}
             </div>
+            <img
+              v-if="item.market_product?.image_url"
+              :src="item.market_product.image_url"
+              :alt="item.drug_name"
+              class="w-16 h-16 rounded-xl object-cover border border-outline-variant bg-white flex-shrink-0"
+            />
             <div class="flex-1 min-w-0">
               <p class="font-semibold text-on-surface">{{ item.drug_name }}</p>
+              <p v-if="item.market_product" class="text-xs text-outline mt-1">
+                {{ [item.market_product.registration_number, item.market_product.dosage_form].filter(Boolean).join(' · ') }}
+              </p>
               <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-outline">
                 <span>Liều: <span class="text-on-surface-variant font-medium">{{ item.dosage }}</span></span>
                 <span v-if="item.frequency">Tần suất: <span class="text-on-surface-variant font-medium">{{ item.frequency }}</span></span>
@@ -91,36 +101,37 @@ const interactionCount = computed(() => interactions.value?.interactions.length 
       </div>
 
       <!-- Interaction results -->
-      <div v-if="showInteractions" class="bg-card rounded-2xl border border-outline-variant p-6 shadow-sm">
+      <div v-if="showInteractions || prescription.interaction_check" class="bg-card rounded-2xl border border-outline-variant p-6 shadow-sm">
         <h2 class="text-base font-semibold text-on-surface mb-4">Kết quả kiểm tra tương tác</h2>
 
         <div v-if="loadingInteractions" class="space-y-2">
           <AppSkeleton class="h-12 w-full" v-for="i in 3" :key="i" />
         </div>
 
-        <template v-else-if="interactions">
+        <template v-else-if="effectiveInteractions">
           <!-- Summary -->
           <div :class="[
             'flex items-center gap-4 p-4 rounded-xl mb-4 border',
-            interactions.has_interaction
+            effectiveInteractions.has_interaction
               ? 'bg-error-container/30 border-error/20'
               : 'bg-tertiary-fixed/40 border-tertiary/20',
           ]">
-            <div :class="['text-2xl font-bold', interactions.has_interaction ? 'text-error' : 'text-tertiary']">
+            <div :class="['text-2xl font-bold', effectiveInteractions.has_interaction ? 'text-error' : 'text-tertiary']">
               {{ interactionCount }}
             </div>
             <div>
-              <p :class="['font-semibold text-sm', interactions.has_interaction ? 'text-error' : 'text-tertiary']">
-                {{ interactions.has_interaction ? 'Phát hiện tương tác thuốc' : 'Không có tương tác đáng lo ngại' }}
+              <p :class="['font-semibold text-sm', effectiveInteractions.has_interaction ? 'text-error' : 'text-tertiary']">
+                {{ effectiveInteractions.has_interaction ? 'Phát hiện tương tác thuốc' : 'Không có tương tác đáng lo ngại' }}
               </p>
-              <p class="text-xs text-outline">{{ interactions.total_pairs }} cặp được kiểm tra</p>
+              <p class="text-xs text-outline">{{ effectiveInteractions.total_pairs }} cặp được kiểm tra</p>
+              <p v-if="effectiveInteractions.message" class="text-xs text-outline mt-1">{{ effectiveInteractions.message }}</p>
             </div>
           </div>
 
           <!-- Interaction pairs with issues -->
-          <div v-if="interactions.has_interaction" class="space-y-3">
+          <div v-if="effectiveInteractions.has_interaction" class="space-y-3">
             <div
-              v-for="interaction in interactions.interactions"
+              v-for="interaction in effectiveInteractions.interactions"
               :key="`${interaction.drug_id}-${interaction.interacts_with_id}`"
               class="border-l-4 border-error rounded-xl p-4 bg-surface-container-low"
             >

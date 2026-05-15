@@ -89,7 +89,6 @@ class DrugService:
             select(Drug)
             .where(Drug.id == drug_id)
             .options(
-                selectinload(Drug.brand_names),
                 selectinload(Drug.warnings),
                 selectinload(Drug.dosage_forms),
                 selectinload(Drug.categories),
@@ -137,6 +136,9 @@ class DrugService:
                 interacts_with_id=i.interacts_with_id,
                 interacts_with_name=i.interacts_with_name,
                 drug_name=drug_name,
+                interaction_label=i.interaction_label,
+                source=i.source.value if i.source else "database",
+                confidence_score=i.confidence_score,
             )
             for i in interactions
         ]
