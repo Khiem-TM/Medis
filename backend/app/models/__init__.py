@@ -13,7 +13,7 @@ from app.models.market_drug import (
 from app.models.prescription import Prescription, PrescriptionItem
 from app.models.health_profile import HealthProfile
 from app.models.log import ActivityLog, SystemLog
-from app.models.chat_message import ChatMessage
+from app.models.chat_message import ChatMessage, ChatSession
 from app.models.reminder import MedicationReminder
 from app.models.health_baseline import UserHealthBaseline
 from app.models.notification import Notification, NotificationType, NotificationPriority
@@ -27,7 +27,7 @@ __all__ = [
     "Prescription", "PrescriptionItem",
     "HealthProfile",
     "ActivityLog", "SystemLog",
-    "ChatMessage",
+    "ChatMessage", "ChatSession",
     "MedicationReminder",
     "UserHealthBaseline",
     "Notification", "NotificationType", "NotificationPriority",

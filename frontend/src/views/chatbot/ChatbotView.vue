@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import {
-  useChatHistory,
+  useChatSessionMessages,
+  useChatSessions,
+  useCreateChatSessionMutation,
+  useDeleteChatSessionMutation,
   useSendMessageMutation,
-  useClearHistoryMutation,
   useChatSuggestions,
 } from '@/api/chatbot.api'
 import { useToast } from '@/composables/useToast'
@@ -42,25 +44,39 @@ const toast = useToast()
 const input = ref('')
 const messagesEl = ref<HTMLDivElement | null>(null)
 const localMessages = ref<LocalMessage[]>([])
-const historyLoaded = ref(false)
+const activeSessionId = ref<string | null>(null)
 
-const { data: historyData, isLoading: loadingHistory } = useChatHistory({ page: 1, size: 30 })
+const { data: sessions, isLoading: loadingSessions } = useChatSessions()
+const { data: historyData, isLoading: loadingHistory } = useChatSessionMessages(activeSessionId, { page: 1, size: 50 })
 const { data: suggestions } = useChatSuggestions()
 const { mutate: sendMessage, isPending: sending } = useSendMessageMutation()
-const { mutate: clearHistory, isPending: clearing } = useClearHistoryMutation()
+const { mutate: createSession } = useCreateChatSessionMutation()
+const { mutate: deleteSession } = useDeleteChatSessionMutation()
 
 watch(
-  historyData,
+  sessions,
   (data) => {
-    if (data && !historyLoaded.value) {
-      historyLoaded.value = true
-      localMessages.value = [...data.items].reverse().map((m) => ({
-        id: m.id,
+    const firstSession = data?.[0]
+    if (!activeSessionId.value && firstSession) {
+      activeSessionId.value = String(firstSession.id)
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  [historyData, activeSessionId],
+  ([data]) => {
+    if (data) {
+      localMessages.value = data.items.map((m) => ({
+        id: String(m.id),
         role: m.role,
         content: m.content,
         created_at: m.created_at,
       }))
       nextTick(scrollToBottom)
+    } else if (!activeSessionId.value) {
+      localMessages.value = []
     }
   },
   { immediate: true },
@@ -81,19 +97,20 @@ function doSend() {
   localMessages.value.push({ role: 'user', content: text, optimistic: true, tempId })
   nextTick(scrollToBottom)
 
-  sendMessage(text, {
+  sendMessage({ message: text, sessionId: activeSessionId.value }, {
     onSuccess: (data) => {
+      activeSessionId.value = String(data.session.id)
       const idx = localMessages.value.findIndex((m) => m.tempId === tempId)
       if (idx !== -1) {
         localMessages.value[idx] = {
-          id: data.user_message.id,
+          id: String(data.user_message.id),
           role: 'user',
           content: data.user_message.content,
           created_at: data.user_message.created_at,
         }
       }
       localMessages.value.push({
-        id: data.assistant_message.id,
+        id: String(data.assistant_message.id),
         role: 'assistant',
         content: data.assistant_message.content,
         created_at: data.assistant_message.created_at,
@@ -112,14 +129,36 @@ function useSuggestion(text: string) {
   doSend()
 }
 
-function doClear() {
-  clearHistory(undefined, {
-    onSuccess: () => {
+function startNewSession() {
+  activeSessionId.value = null
+  localMessages.value = []
+  input.value = ''
+}
+
+function createEmptySession() {
+  createSession('Cuộc trò chuyện mới', {
+    onSuccess: (session) => {
+      activeSessionId.value = String(session.id)
       localMessages.value = []
-      historyLoaded.value = false
-      toast.success('Đã xóa lịch sử trò chuyện')
     },
-    onError: () => toast.error('Không thể xóa lịch sử'),
+    onError: () => toast.error('Không thể tạo phiên trò chuyện'),
+  })
+}
+
+function selectSession(sessionId: string) {
+  activeSessionId.value = sessionId
+}
+
+function doDeleteSession(sessionId: string) {
+  deleteSession(sessionId, {
+    onSuccess: () => {
+      if (activeSessionId.value === sessionId) {
+        activeSessionId.value = null
+        localMessages.value = []
+      }
+      toast.success('Đã xóa phiên trò chuyện')
+    },
+    onError: () => toast.error('Không thể xóa phiên trò chuyện'),
   })
 }
 
@@ -142,7 +181,15 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
 <template>
   <div class="flex h-[calc(100vh-5rem)] -mx-6 -mb-8 overflow-hidden rounded-3xl border border-outline-variant bg-surface shadow-sm">
     <!-- Left sidebar: chat history (hidden on mobile) -->
-    <ChatSidebar class="hidden lg:flex" :messages="localMessages" :loading="loadingHistory" />
+    <ChatSidebar
+      class="hidden lg:flex"
+      :sessions="sessions ?? []"
+      :active-session-id="activeSessionId"
+      :loading="loadingSessions"
+      @select="selectSession"
+      @new="startNewSession"
+      @delete="doDeleteSession"
+    />
 
     <!-- Main chat area -->
     <section class="flex-1 flex flex-col bg-white overflow-hidden">
@@ -165,7 +212,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
               <h2 class="text-base font-bold text-on-surface">Medis AI</h2>
               <span
                 class="px-2 py-0.5 bg-tertiary-fixed text-tertiary text-xs font-bold rounded-full"
-                >Gemini</span
+                >GPT-4o mini</span
               >
             </div>
             <p class="text-xs text-outline flex items-center gap-1">
@@ -174,22 +221,6 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
             </p>
           </div>
         </div>
-        <button
-          v-if="localMessages.length > 0"
-          :disabled="clearing"
-          @click="doClear"
-          class="text-xs font-medium text-outline hover:text-error transition-colors flex items-center gap-1.5 px-3 py-1.5 hover:bg-error-container/30 rounded-lg"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            />
-          </svg>
-          Xóa lịch sử
-        </button>
       </header>
 
       <!-- Health profile context banner -->

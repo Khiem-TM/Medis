@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
 
+    # GitHub Models (OpenAI-compatible endpoint)
+    GITHUB_MODELS_API_KEY: str = ""
+    GITHUB_TOKEN: str = ""
+    GITHUB_MODELS_BASE_URL: str = "https://models.github.ai/inference"
+    GITHUB_MODELS_MODEL: str = "gpt-4o-mini"
+
     # Gemini
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.5-flash"
