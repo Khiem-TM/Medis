@@ -241,7 +241,7 @@ function doUpload() {
         <h3 class="text-sm font-semibold text-on-surface mb-3">Quản lý dữ liệu</h3>
         <div class="space-y-2">
           <button
-            @click="router.push('/profile/health-profiles')"
+            @click="router.push('/profile/health')"
             class="w-full flex items-center justify-between p-3 hover:bg-surface-container-low rounded-xl transition-colors text-left"
           >
             <div class="flex items-center gap-3">

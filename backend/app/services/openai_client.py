@@ -18,4 +18,5 @@ def build_async_openai_client() -> AsyncOpenAI | None:
     return AsyncOpenAI(
         api_key=settings.OPENAI_API_KEY,
         http_client=http_client,
+        max_retries=0,
     )

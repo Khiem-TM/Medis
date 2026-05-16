@@ -21,3 +21,8 @@ export interface ChatHistoryParams {
   page?: number
   size?: number
 }
+
+export interface QuickSuggestion {
+  text: string
+  category: 'drug_usage' | 'symptom' | 'interaction'
+}

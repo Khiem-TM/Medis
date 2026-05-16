@@ -29,6 +29,11 @@ class ChatMessageResponse(BaseModel):
     created_at: datetime
 
 
+class ChatSendResponse(BaseModel):
+    user_message: ChatMessageResponse
+    assistant_message: ChatMessageResponse
+
+
 class QuickSuggestion(BaseModel):
     text: str
     category: Literal["drug_usage", "symptom", "interaction"]

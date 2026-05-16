@@ -165,7 +165,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
               <h2 class="text-base font-bold text-on-surface">Medis AI</h2>
               <span
                 class="px-2 py-0.5 bg-tertiary-fixed text-tertiary text-xs font-bold rounded-full"
-                >GPT-4o-mini</span
+                >Gemini</span
               >
             </div>
             <p class="text-xs text-outline flex items-center gap-1">

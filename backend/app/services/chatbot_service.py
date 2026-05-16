@@ -6,7 +6,6 @@ from math import ceil
 from typing import List, Optional
 
 from fastapi import Request
-from fastapi import HTTPException, status
 from sqlalchemy import delete as sql_delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,8 +15,9 @@ from app.models.chat_message import ChatMessage
 from app.models.health_profile import HealthProfile
 from app.models.prescription import Prescription, PrescriptionStatus
 from app.models.user import User
-from app.schemas.chatbot import ChatMessageResponse, QuickSuggestion
+from app.schemas.chatbot import ChatMessageResponse, ChatSendResponse, QuickSuggestion
 from app.schemas.user import PaginatedResponse, PaginationMeta
+from app.services.gemini_client import build_gemini_client
 from app.services.openai_client import build_async_openai_client
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,39 @@ _QUICK_SUGGESTIONS = [
     QuickSuggestion(text="Triệu chứng này có nguy hiểm không?", category="symptom"),
 ]
 
+_UNAVAILABLE_REPLY = (
+    "Hiện tại Medis AI chưa thể kết nối tới dịch vụ AI. "
+    "Bạn vẫn có thể tiếp tục lưu câu hỏi trong lịch sử trò chuyện. "
+    "Với vấn đề sức khỏe khẩn cấp như đau ngực, khó thở, ngất, co giật hoặc dị ứng nặng, "
+    "hãy gọi cấp cứu hoặc đến cơ sở y tế gần nhất ngay. "
+    "Thông tin này chỉ mang tính tham khảo, không thay thế khám bác sĩ."
+)
+
+_QUOTA_LIMIT_REPLY = (
+    "Hiện tại Medis AI chưa thể phản hồi vì dịch vụ AI đang bị giới hạn quota. "
+    "Câu hỏi của bạn vẫn được lưu trong lịch sử trò chuyện. "
+    "Với vấn đề sức khỏe khẩn cấp như đau ngực, khó thở, ngất, co giật hoặc dị ứng nặng, "
+    "hãy gọi cấp cứu hoặc đến cơ sở y tế gần nhất ngay. "
+    "Thông tin này chỉ mang tính tham khảo, không thay thế khám bác sĩ."
+)
+
+
+def _fallback_reply_for_openai_error(exc: Exception) -> str:
+    status_code = getattr(exc, "status_code", None)
+    body = getattr(exc, "body", None)
+    error_code = None
+    if isinstance(body, dict):
+        error = body.get("error")
+        if isinstance(error, dict):
+            error_code = error.get("code")
+
+    if status_code == 429 or error_code == "insufficient_quota":
+        logger.warning("OpenAI quota unavailable: status=%s code=%s", status_code, error_code)
+        return _QUOTA_LIMIT_REPLY
+
+    logger.warning("OpenAI chatbot request unavailable: %s", exc)
+    return _UNAVAILABLE_REPLY
+
 
 def _calc_age(dob: Optional[datetime]) -> Optional[int]:
     if not dob:
@@ -59,6 +92,7 @@ class ChatbotService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
         self.client = build_async_openai_client()
+        self.gemini_client = build_gemini_client()
 
     async def _get_health_context(self, user_id: int) -> str:
         # User info
@@ -119,7 +153,7 @@ class ChatbotService:
         user_id: int,
         content: str,
         request: Optional[Request] = None,
-    ) -> ChatMessageResponse:
+    ) -> ChatSendResponse:
         # 1. Save user message
         user_msg = ChatMessage(user_id=user_id, role="user", content=content)
         self.db.add(user_msg)
@@ -149,20 +183,22 @@ class ChatbotService:
             messages.append({"role": h.role, "content": h.content})
         messages.append({"role": "user", "content": content})
 
-        # 5. Call OpenAI
-        if self.client is None:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Tính năng chatbot AI chưa được cấu hình",
-            )
-
-        response = await self.client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=messages,
-            max_tokens=800,
-            temperature=0.7,
-        )
-        reply = response.choices[0].message.content
+        # 5. Use Gemini directly as the primary chatbot provider.
+        reply = await self._generate_with_gemini(system_prompt, messages[1:])
+        if reply is None and self.client is None:
+            logger.warning("Gemini and OpenAI clients are not configured; returning chatbot fallback")
+            reply = _UNAVAILABLE_REPLY
+        elif reply is None:
+            try:
+                response = await self.client.chat.completions.create(
+                    model=settings.OPENAI_MODEL,
+                    messages=messages,
+                    max_tokens=800,
+                    temperature=0.7,
+                )
+                reply = response.choices[0].message.content
+            except Exception as exc:
+                reply = _fallback_reply_for_openai_error(exc)
 
         # 6. Save assistant reply
         assistant_msg = ChatMessage(user_id=user_id, role="assistant", content=reply)
@@ -178,7 +214,33 @@ class ChatbotService:
         except Exception:
             pass
 
-        return ChatMessageResponse.model_validate(assistant_msg)
+        return ChatSendResponse(
+            user_message=ChatMessageResponse.model_validate(user_msg),
+            assistant_message=ChatMessageResponse.model_validate(assistant_msg),
+        )
+
+    async def _generate_with_gemini(
+        self,
+        system_prompt: str,
+        messages: list[dict[str, str]],
+    ) -> str | None:
+        if self.gemini_client is None:
+            logger.warning("Gemini client is not configured")
+            return None
+
+        try:
+            reply = await self.gemini_client.generate_text(
+                system_prompt=system_prompt,
+                messages=messages,
+                max_tokens=800,
+                temperature=0.7,
+            )
+            logger.info("Gemini chatbot fallback succeeded")
+            return reply
+        except Exception as exc:
+            status_code = getattr(getattr(exc, "response", None), "status_code", None)
+            logger.warning("Gemini chatbot request unavailable: status=%s error=%s", status_code, exc)
+            return None
 
     async def get_history(
         self,

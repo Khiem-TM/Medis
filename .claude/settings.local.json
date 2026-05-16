@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://dichvucong.dav.gov.vn/congbothuoc/api/get-list-thuoc-trong-nuoc?pageIndex=1&pageSize=5\" -H \"Accept: application/json\")"
+    ]
+  }
+}

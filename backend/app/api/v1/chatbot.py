@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.database import get_db
 from app.models.user import User
-from app.schemas.chatbot import ChatMessageCreate, ChatMessageResponse, QuickSuggestion
+from app.schemas.chatbot import ChatMessageCreate, ChatMessageResponse, ChatSendResponse, QuickSuggestion
 from app.schemas.user import PaginatedResponse
 from app.services.chatbot_service import ChatbotService
 
@@ -28,6 +28,7 @@ async def get_suggestions():
 
 @router.post(
     "/message",
+    response_model=ChatSendResponse,
     summary="Gửi tin nhắn và nhận phản hồi từ AI",
     description=(
         "Gửi câu hỏi về sức khỏe, thuốc hoặc triệu chứng. "
@@ -40,13 +41,9 @@ async def send_message(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    reply = await _svc(db).send_message(current_user.id, data.content, request)
+    result = await _svc(db).send_message(current_user.id, data.content, request)
     await db.commit()
-    return {
-        "success": True,
-        "message": "Đã nhận phản hồi từ AI",
-        "data": reply.model_dump(),
-    }
+    return result
 
 
 @router.get(
