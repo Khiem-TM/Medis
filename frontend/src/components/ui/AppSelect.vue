@@ -18,7 +18,7 @@ defineEmits<{
 
 <template>
   <div class="flex flex-col gap-1">
-    <label v-if="label" :for="id" class="text-sm font-medium text-on-surface-variant">
+    <label v-if="label" :for="id" class="text-xs font-semibold uppercase tracking-[0.16em] text-outline">
       {{ label }}
       <span v-if="required" class="text-error ml-0.5">*</span>
     </label>
@@ -27,12 +27,13 @@ defineEmits<{
       :value="modelValue"
       :disabled="disabled"
       :class="[
-        'w-full rounded-lg border px-3 py-2 text-sm text-on-surface transition-colors focus:outline-none focus:ring-2 appearance-none bg-card',
+        'w-full appearance-none rounded-2xl border px-3.5 py-3 text-sm text-on-surface transition-colors focus:outline-none focus:ring-2',
         error
           ? 'border-error focus:ring-error/30'
           : 'border-outline-variant focus:ring-primary/30 focus:border-primary',
-        disabled ? 'bg-surface-container-low cursor-not-allowed' : '',
+        disabled ? 'cursor-not-allowed bg-surface-container-low' : '',
       ]"
+      style="background: rgba(255,255,255,0.62); backdrop-filter: blur(10px);"
       @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
     >
       <option v-if="placeholder" value="">{{ placeholder }}</option>

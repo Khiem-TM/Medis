@@ -6,7 +6,7 @@ from math import ceil
 from typing import List, Optional
 
 from fastapi import Request
-from openai import AsyncOpenAI
+from fastapi import HTTPException, status
 from sqlalchemy import delete as sql_delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -18,6 +18,7 @@ from app.models.prescription import Prescription, PrescriptionStatus
 from app.models.user import User
 from app.schemas.chatbot import ChatMessageResponse, QuickSuggestion
 from app.schemas.user import PaginatedResponse, PaginationMeta
+from app.services.openai_client import build_async_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def _calc_age(dob: Optional[datetime]) -> Optional[int]:
 class ChatbotService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.client = build_async_openai_client()
 
     async def _get_health_context(self, user_id: int) -> str:
         # User info
@@ -149,6 +150,12 @@ class ChatbotService:
         messages.append({"role": "user", "content": content})
 
         # 5. Call OpenAI
+        if self.client is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Tính năng chatbot AI chưa được cấu hình",
+            )
+
         response = await self.client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=messages,

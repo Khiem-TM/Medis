@@ -4,7 +4,6 @@ import type { Ref } from 'vue'
 import { api } from './axios'
 import type { ActivityLog, ActivityLogSearchParams } from '@/types/activity.types'
 import type { PaginatedResponse } from '@/types/api.types'
-import { downloadBlob } from '@/utils/download'
 
 export const activityKeys = {
   all: ['activity'] as const,

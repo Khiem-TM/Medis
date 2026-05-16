@@ -3,7 +3,6 @@ import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from openai import AsyncOpenAI
 from app.config import settings
 from app.models.health_baseline import UserHealthBaseline, KidneyFunction, LiverFunction
 from app.models.user import User
@@ -11,6 +10,7 @@ from app.schemas.onboarding import (
     OnboardingStep1Request, OnboardingStep2Request, OnboardingStep3Request,
     HealthBaselineResponse, ParsedConditionsResponse, AllergyItem, MedicationItem
 )
+from app.services.openai_client import build_async_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class OnboardingService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.client = None
 
     async def _get_or_create_baseline(self, user_id: int) -> UserHealthBaseline:
         result = await self.db.execute(
@@ -63,6 +63,12 @@ class OnboardingService:
     async def parse_conditions_with_ai(self, text: str) -> ParsedConditionsResponse:
         """Use GPT-4o-mini to parse Vietnamese free text into structured data."""
         try:
+            client = self.client or build_async_openai_client()
+            self.client = client
+            if client is None:
+                logger.warning("OpenAI API key is not configured; skipping onboarding AI parsing")
+                return ParsedConditionsResponse(raw_text=text)
+
             response = await self.client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 response_format={"type": "json_object"},

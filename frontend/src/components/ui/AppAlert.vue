@@ -11,7 +11,7 @@ const emit = defineEmits<{ dismiss: [] }>()
 <template>
   <div
     :class="[
-      'rounded-lg border p-4 flex gap-3',
+      'glass-panel rounded-2xl border p-4 flex gap-3',
       type === 'success'
         ? 'bg-tertiary-fixed border-tertiary/30 text-tertiary'
         : type === 'error'

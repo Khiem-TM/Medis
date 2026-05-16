@@ -18,7 +18,7 @@ defineEmits<{
 
 <template>
   <div class="flex flex-col gap-1">
-    <label v-if="label" :for="id" class="text-sm font-medium text-on-surface-variant">
+    <label v-if="label" :for="id" class="text-xs font-semibold uppercase tracking-[0.16em] text-outline">
       {{ label }}
       <span v-if="required" class="text-error ml-0.5">*</span>
     </label>
@@ -29,12 +29,13 @@ defineEmits<{
       :disabled="disabled"
       :rows="rows ?? 3"
       :class="[
-        'w-full rounded-lg border px-3 py-2 text-sm text-on-surface placeholder-outline resize-y transition-colors focus:outline-none focus:ring-2',
+        'w-full resize-y rounded-2xl border px-3.5 py-3 text-sm text-on-surface placeholder-outline transition-colors focus:outline-none focus:ring-2',
         error
           ? 'border-error focus:ring-error/30 focus:border-error'
           : 'border-outline-variant focus:ring-primary/30 focus:border-primary',
-        disabled ? 'bg-surface-container-low cursor-not-allowed' : 'bg-card',
+        disabled ? 'bg-surface-container-low cursor-not-allowed' : '',
       ]"
+      style="background: rgba(255,255,255,0.62); backdrop-filter: blur(10px);"
       @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
     />
     <p v-if="error" class="text-xs text-error">{{ error }}</p>

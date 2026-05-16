@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis - Lịch trình</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#006b5f",
+                        "glass-surface": "rgba(255, 255, 255, 0.7)",
+                        "error-red": "#B00020",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "outline-variant": "#bcc9c5",
+                        "active-green": "#43A047",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "on-primary-fixed": "#00201c",
+                        "inverse-primary": "#70d8c8",
+                        "tertiary-container": "#a54dcc",
+                        "on-tertiary-fixed": "#320047",
+                        "surface-container-highest": "#e2e2e2",
+                        "secondary": "#4555b7",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#f8d8ff",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f0f1f1",
+                        "primary-fixed-dim": "#70d8c8",
+                        "primary-fixed": "#8df5e4",
+                        "background": "#f9f9f9",
+                        "primary-container": "#008376",
+                        "on-surface": "#1a1c1c",
+                        "on-secondary-fixed-variant": "#2c3c9e",
+                        "on-secondary-fixed": "#000e5e",
+                        "on-primary-fixed-variant": "#005048",
+                        "secondary-fixed": "#dee0ff",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f9f9f9",
+                        "on-background": "#1a1c1c",
+                        "warning-orange": "#E65100",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "outline": "#6d7a77",
+                        "on-primary-container": "#f4fffb",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#721199",
+                        "on-surface-variant": "#3d4946",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary-container": "#182a8e",
+                        "primary": "#00685d",
+                        "on-error": "#ffffff",
+                        "completed-gray": "#9E9E9E",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-variant": "#e2e2e2",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "secondary-container": "#8999ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#8a30b0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "container-padding": "24px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .symbol-filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Subtle background gradient to fulfill Luminous Clarity aesthetic */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 100% 0%, rgba(141, 245, 228, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 0% 100%, rgba(235, 178, 255, 0.1) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- Shared Component: SideNavBar -->
+<nav class="hidden md:flex flex-col h-full w-[280px] left-0 top-0 fixed bg-glass-surface/50 backdrop-blur-2xl border-r border-glass-border shadow-lg py-stack-lg gap-stack-md z-40">
+<!-- Header -->
+<div class="px-container-padding mb-stack-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary symbol-filled">water_drop</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-black text-primary">Medis Ether</h1>
+<p class="font-caption text-caption text-on-surface-variant">Luminous Clarity</p>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:backdrop-blur-3xl hover:bg-white/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary border-l-4 border-primary hover:backdrop-blur-3xl hover:bg-white/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined symbol-filled">event</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:backdrop-blur-3xl hover:bg-white/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-md text-label-md">Health Records</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:backdrop-blur-3xl hover:bg-white/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">medication</span>
+<span class="font-label-md text-label-md">Medications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:backdrop-blur-3xl hover:bg-white/20 transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md text-label-md">AI Insights</span>
+</a>
+</div>
+<!-- CTA & Footer -->
+<div class="px-container-padding flex flex-col gap-stack-md mt-auto">
+<button class="w-full py-3 px-4 rounded-xl bg-error-container text-on-error-container font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-error-red/20 transition-colors">
+<span class="material-symbols-outlined text-[20px]">sos</span>
+                Emergency SOS
+            </button>
+<div class="flex flex-col gap-1 border-t border-glass-border pt-stack-sm">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-all ease-in-out duration-300" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Logout</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 md:ml-[280px] flex flex-col min-h-screen relative w-full">
+<!-- Shared Component: TopAppBar -->
+<header class="w-full h-16 sticky top-0 z-50 flex justify-between items-center px-container-padding bg-glass-surface/70 backdrop-blur-xl border-b border-glass-border shadow-sm backdrop-saturate-150">
+<!-- Mobile Brand (Hidden on Desktop to avoid duplication with sidebar) -->
+<div class="md:hidden flex items-center">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Medis Ether</h1>
+</div>
+<!-- Empty spacer for desktop to push search/actions to right -->
+<div class="hidden md:block flex-1"></div>
+<div class="flex items-center gap-4 ml-auto">
+<!-- Search (on_right) -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 rounded-full bg-surface-container-lowest/50 border border-glass-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-[240px] font-body-sm text-body-sm text-on-surface backdrop-blur-md" placeholder="Search..." type="text"/>
+</div>
+<!-- Trailing Icons -->
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors duration-200 cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<!-- Profile Image -->
+<div class="w-9 h-9 rounded-full bg-tertiary-container border-2 border-surface-container-lowest overflow-hidden flex-shrink-0 ml-2 cursor-pointer">
+<img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAeRIYOFKj-ktKSJezCZAAObD9s3XxFdTlKLuz8gDefJrUyZZEGcvTE-JCcqJWJyNm45xqU2dz-lh6Q-g2IjEpfH9qV0yOZ6NNIrYRBjNkCpDM_g-H8YIQ0m4laDP9_dy_vtkZ8qlAd58LX9X0u3bfkV_fjHzS0JJwzimqEQRBSgU2P-gW_SwVzQ90jKNbA31FXK8zMlV7iWW11hWzfvIefTCYsYkJXOc7fwjQiQgnjj2txIlGiSWacEcywtPyzv97O7rdCFJAr-KF"/>
+</div>
+</div>
+</header>
+<!-- Page Content Canvas -->
+<main class="flex-1 p-container-padding max-w-4xl mx-auto w-full pb-[120px]">
+<!-- Header Section -->
+<div class="mb-stack-lg flex justify-between items-end">
+<div>
+<p class="font-label-md text-label-md text-primary mb-1 uppercase tracking-wider">Hôm nay</p>
+<h2 class="font-display-hero text-display-hero text-on-surface">Lịch trình</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Thứ Năm, 24 Tháng 10, 2024</p>
+</div>
+<!-- Quick Date Nav (Optional contextual addition for schedule view) -->
+<div class="hidden sm:flex bg-surface-container-lowest/80 backdrop-blur-md border border-glass-border rounded-full p-1 shadow-sm">
+<button class="p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">chevron_left</span></button>
+<button class="px-4 py-2 rounded-full bg-primary/10 text-primary font-label-md text-label-md transition-colors">Hôm nay</button>
+<button class="p-2 rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors"><span class="material-symbols-outlined text-[20px]">chevron_right</span></button>
+</div>
+</div>
+<!-- Timeline View -->
+<div class="relative mt-8">
+<!-- Main Vertical Timeline Line -->
+<div class="absolute left-[70px] top-4 bottom-0 w-px bg-outline-variant/40"></div>
+<!-- Timeline Slot 1: Morning -->
+<div class="relative flex gap-6 mb-stack-lg group">
+<!-- Time Label -->
+<div class="w-[58px] text-right pt-4">
+<span class="font-headline-sm text-headline-sm text-on-surface block">08:00</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Sáng</span>
+</div>
+<!-- Timeline Marker -->
+<div class="absolute left-[66px] top-[22px] w-[9px] h-[9px] rounded-full bg-primary ring-[6px] ring-background z-10 transition-transform group-hover:scale-125"></div>
+<!-- Cards Container -->
+<div class="flex-1 flex flex-col gap-stack-sm">
+<!-- Ether Tile: Taken Medication -->
+<div class="bg-surface-container-lowest/60 backdrop-blur-md border border-glass-border rounded-2xl p-stack-md flex items-center justify-between shadow-[0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-active-green/10 flex items-center justify-center text-active-green">
+<span class="material-symbols-outlined text-[24px]">pill</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                                        Metformin 
+                                        <span class="font-label-md text-label-md bg-surface-variant px-2 py-0.5 rounded-full text-on-surface-variant">500mg</span>
+</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">restaurant</span>
+                                        Uống sau bữa ăn sáng
+                                    </p>
+</div>
+</div>
+<!-- Status Toggle (Completed) -->
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-active-green hidden sm:block">Đã uống</span>
+<button class="w-14 h-8 rounded-full bg-active-green flex items-center px-1 cursor-pointer transition-colors border border-transparent shadow-sm">
+<div class="w-6 h-6 rounded-full bg-white ml-auto flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-active-green text-[14px] symbol-filled">check</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Ether Tile: Taken Medication 2 -->
+<div class="bg-surface-container-lowest/60 backdrop-blur-md border border-glass-border rounded-2xl p-stack-md flex items-center justify-between shadow-[0_4px_16px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-active-green/10 flex items-center justify-center text-active-green">
+<span class="material-symbols-outlined text-[24px]">medication_liquid</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                                        Vitamin D3
+                                        <span class="font-label-md text-label-md bg-surface-variant px-2 py-0.5 rounded-full text-on-surface-variant">1000 IU</span>
+</h3>
+</div>
+</div>
+<!-- Status Toggle (Completed) -->
+<div class="flex items-center gap-3">
+<button class="w-14 h-8 rounded-full bg-active-green flex items-center px-1 cursor-pointer transition-colors shadow-sm">
+<div class="w-6 h-6 rounded-full bg-white ml-auto flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-active-green text-[14px] symbol-filled">check</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Slot 2: Afternoon (Pending) -->
+<div class="relative flex gap-6 mb-stack-lg group">
+<div class="w-[58px] text-right pt-4">
+<span class="font-headline-sm text-headline-sm text-primary block">13:30</span>
+<span class="font-label-md text-label-md text-primary/70">Chiều</span>
+</div>
+<!-- Active Marker (Current/Next up) -->
+<div class="absolute left-[62px] top-[22px] w-[17px] h-[17px] rounded-full bg-primary/20 flex items-center justify-center z-10">
+<div class="w-[9px] h-[9px] rounded-full bg-primary"></div>
+</div>
+<div class="flex-1 flex flex-col gap-stack-sm">
+<!-- Ether Tile: Pending Medication (Active Focus) -->
+<div class="bg-white/80 backdrop-blur-xl border border-primary/30 rounded-2xl p-stack-md flex items-center justify-between shadow-[0_8px_32px_rgba(0,104,93,0.08)] relative overflow-hidden ring-1 ring-primary/10">
+<!-- Subtle highlight glow -->
+<div class="absolute -left-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">Gauge</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                                        Lisinopril
+                                        <span class="font-label-md text-label-md bg-surface-variant px-2 py-0.5 rounded-full text-on-surface-variant">10mg</span>
+</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Uống với nhiều nước</p>
+</div>
+</div>
+<!-- Status Toggle (Pending) -->
+<div class="flex items-center gap-3 relative z-10">
+<span class="font-label-md text-label-md text-on-surface-variant hidden sm:block">Chưa uống</span>
+<button class="w-14 h-8 rounded-full bg-surface-variant border border-outline-variant/50 flex items-center px-1 cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center">
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Slot 3: Evening (Missed/Warning) -->
+<div class="relative flex gap-6 mb-stack-lg group">
+<div class="w-[58px] text-right pt-4 opacity-50">
+<span class="font-headline-sm text-headline-sm text-on-surface block">20:00</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Tối</span>
+</div>
+<div class="absolute left-[66px] top-[22px] w-[9px] h-[9px] rounded-full bg-outline-variant ring-[6px] ring-background z-10 opacity-50"></div>
+<div class="flex-1 flex flex-col gap-stack-sm opacity-60 hover:opacity-100 transition-opacity">
+<!-- Ether Tile: Upcoming -->
+<div class="bg-surface-container-lowest/40 backdrop-blur-sm border border-glass-border rounded-2xl p-stack-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[24px]">prescriptions</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                                        Atorvastatin
+                                        <span class="font-label-md text-label-md bg-surface-variant px-2 py-0.5 rounded-full text-on-surface-variant">20mg</span>
+</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">bedtime</span>
+                                        Trước khi ngủ
+                                    </p>
+</div>
+</div>
+<!-- Status Toggle (Disabled/Upcoming state) -->
+<div class="flex items-center gap-3">
+<button class="w-14 h-8 rounded-full bg-surface-container-high flex items-center px-1 cursor-default opacity-50">
+<div class="w-6 h-6 rounded-full bg-surface-variant"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) for adding new reminder -->
+<button class="fixed bottom-8 right-8 md:right-12 z-50 bg-primary text-on-primary h-14 px-6 rounded-full flex items-center gap-2 shadow-[0_8px_24px_rgba(0,104,93,0.3)] hover:bg-primary-container hover:shadow-[0_12px_32px_rgba(0,104,93,0.4)] hover:-translate-y-1 transition-all duration-300 font-label-md text-label-md uppercase tracking-wider group">
+<span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform duration-300">add</span>
+<span class="hidden sm:inline">Thêm lịch nhắc</span>
+</button>
+</div>
+</body></html>

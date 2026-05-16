@@ -7,15 +7,26 @@ const uiStore = useUiStore()
 </script>
 
 <template>
-  <div class="min-h-screen" style="background: #F3F5F7;">
+  <div class="min-h-screen relative overflow-x-hidden">
+    <div class="pointer-events-none fixed inset-0">
+      <div class="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full bg-primary-fixed/35 blur-3xl" />
+      <div class="absolute bottom-[-10rem] right-[-4rem] h-[26rem] w-[26rem] rounded-full bg-tertiary-fixed/30 blur-3xl" />
+    </div>
+
     <AppSidebar />
     <AppNavbar />
+    <button
+      v-if="uiStore.mobileSidebarOpen"
+      type="button"
+      class="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] lg:hidden"
+      @click="uiStore.setMobileSidebar(false)"
+    />
 
     <main
-      class="pt-14 min-h-screen transition-[margin] duration-200"
-      :class="uiStore.sidebarOpen ? 'lg:ml-60' : 'lg:ml-16'"
+      class="relative z-10 min-h-screen pt-20 transition-all duration-300"
+      :class="uiStore.sidebarOpen ? 'lg:pl-[19rem]' : 'lg:pl-[7.25rem]'"
     >
-      <div class="p-6 max-w-screen-2xl">
+      <div class="mx-auto max-w-screen-2xl px-4 pb-8 sm:px-6 lg:px-8">
         <slot />
       </div>
     </main>

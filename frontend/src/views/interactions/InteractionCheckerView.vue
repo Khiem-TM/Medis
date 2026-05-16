@@ -135,6 +135,14 @@ function doGenericCheck() {
   })
 }
 
+function getErrorMessage(error: unknown) {
+  if (typeof error === 'object' && error !== null) {
+    const maybeAxios = error as { response?: { data?: { detail?: string } }; message?: string }
+    return maybeAxios.response?.data?.detail || maybeAxios.message || 'Đã xảy ra lỗi'
+  }
+  return 'Đã xảy ra lỗi'
+}
+
 async function doMarketCheck() {
   if (!canCheckMarket.value) return
   marketChecking.value = true
@@ -144,8 +152,8 @@ async function doMarketCheck() {
     marketResult.value = await marketDrugsApi.checkInteractions(
       selectedProducts.value.map((p) => p.id),
     )
-  } catch (e: any) {
-    marketError.value = e?.response?.data?.detail || e?.message || 'Đã xảy ra lỗi'
+  } catch (error) {
+    marketError.value = getErrorMessage(error)
   } finally {
     marketChecking.value = false
   }

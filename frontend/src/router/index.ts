@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import { useOnboardingStore } from '@/stores/onboarding.store'
 
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
-    requiresAdmin?: boolean
     requiresGuest?: boolean
-    layout?: 'app' | 'auth' | 'admin' | 'none'
+    layout?: 'app' | 'auth' | 'none'
     title?: string
+    skipOnboarding?: boolean
   }
 }
 
@@ -15,21 +16,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
-    // Public / Guest
     {
       path: '/',
       name: 'landing',
       component: () => import('@/views/LandingView.vue'),
-      meta: { layout: 'none', title: 'Medis - Quản lý Thuốc & Sức khỏe' },
+      meta: { layout: 'none', title: 'Medis' },
     },
-    {
-      path: '/design-system',
-      name: 'design-system',
-      component: () => import('@/views/DesignSystemView.vue'),
-      meta: { layout: 'none', title: 'Design System' },
-    },
-
-    // Auth routes (guest only)
     {
       path: '/login',
       name: 'login',
@@ -64,16 +56,20 @@ const router = createRouter({
       path: '/verify-email',
       name: 'verify-email',
       component: () => import('@/views/auth/VerifyEmailView.vue'),
-      meta: { layout: 'auth', title: 'Xác nhận email' },
+      meta: { layout: 'auth', title: 'Xác thực email', skipOnboarding: true },
     },
     {
       path: '/auth/callback',
       name: 'oauth-callback',
       component: () => import('@/views/auth/OAuthCallbackView.vue'),
-      meta: { layout: 'auth', title: 'Đang đăng nhập...' },
+      meta: { layout: 'auth', title: 'Đang đăng nhập...', skipOnboarding: true },
     },
-
-    // Authenticated app routes
+    {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: () => import('@/views/onboarding/OnboardingView.vue'),
+      meta: { layout: 'none', requiresAuth: true, title: 'Thiết lập sức khỏe', skipOnboarding: true },
+    },
     {
       path: '/dashboard',
       name: 'dashboard',
@@ -102,125 +98,85 @@ const router = createRouter({
       path: '/profile/health',
       name: 'health-profiles',
       component: () => import('@/views/profile/HealthProfilesView.vue'),
-      meta: { layout: 'app', requiresAuth: true, title: 'Hồ sơ khám bệnh' },
+      meta: { layout: 'app', requiresAuth: true, title: 'Hồ sơ sức khỏe' },
     },
     {
       path: '/profile/health/:id',
       name: 'health-profile-detail',
       component: () => import('@/views/profile/HealthProfileDetailView.vue'),
-      meta: { layout: 'app', requiresAuth: true, title: 'Chi tiết hồ sơ khám' },
+      meta: { layout: 'app', requiresAuth: true, title: 'Chi tiết hồ sơ' },
     },
-
-    // Drug routes (public, optional auth)
     {
       path: '/drugs',
       name: 'drugs',
       component: () => import('@/views/drugs/DrugSearchView.vue'),
-      meta: { layout: 'app', title: 'Tra cứu thuốc' },
+      meta: { layout: 'app', title: 'Tra cứu thuốc', skipOnboarding: true },
     },
     {
       path: '/drugs/:id',
       name: 'drug-detail',
       component: () => import('@/views/drugs/DrugDetailView.vue'),
-      meta: { layout: 'app', title: 'Chi tiết thuốc' },
+      meta: { layout: 'app', title: 'Chi tiết thuốc', skipOnboarding: true },
     },
     {
       path: '/market-drugs/:id',
       name: 'market-drug-detail',
       component: () => import('@/views/drugs/MarketDrugDetailView.vue'),
-      meta: { layout: 'app', title: 'Chi tiết thuốc thị trường' },
+      meta: { layout: 'app', title: 'Chi tiết thuốc thị trường', skipOnboarding: true },
     },
-
-    // Interaction checker (requires auth)
     {
       path: '/interactions',
       name: 'interactions',
       component: () => import('@/views/interactions/InteractionCheckerView.vue'),
-      meta: { layout: 'app', requiresAuth: true, title: 'Kiểm tra tương tác thuốc' },
+      meta: { layout: 'app', requiresAuth: true, title: 'Kiểm tra tương tác' },
     },
-
-    // Chatbot (requires auth)
     {
       path: '/chatbot',
       name: 'chatbot',
       component: () => import('@/views/chatbot/ChatbotView.vue'),
-      meta: { layout: 'app', requiresAuth: true, title: 'Chatbot AI Sức khỏe' },
+      meta: { layout: 'app', requiresAuth: true, title: 'Chatbot AI' },
     },
-
-    // Recommendations (requires auth)
     {
       path: '/recommendations',
       name: 'recommendations',
       component: () => import('@/views/recommendations/RecommendationView.vue'),
       meta: { layout: 'app', requiresAuth: true, title: 'Gợi ý thuốc AI' },
     },
-
-    // Medication schedule (requires auth)
     {
       path: '/schedule',
       name: 'schedule',
       component: () => import('@/views/profile/ScheduleView.vue'),
-      meta: { layout: 'app', requiresAuth: true, title: 'Lịch uống thuốc' },
+      meta: { layout: 'app', requiresAuth: true, title: 'Lịch dùng thuốc' },
     },
-
-    // Admin routes
-    {
-      path: '/admin',
-      redirect: '/admin/users',
-    },
-    {
-      path: '/admin/users',
-      name: 'admin-users',
-      component: () => import('@/views/admin/AdminUsersView.vue'),
-      meta: { layout: 'admin', requiresAdmin: true, title: 'Quản lý người dùng' },
-    },
-    {
-      path: '/admin/users/:id',
-      name: 'admin-user-detail',
-      component: () => import('@/views/admin/AdminUserDetailView.vue'),
-      meta: { layout: 'admin', requiresAdmin: true, title: 'Chi tiết người dùng' },
-    },
-    {
-      path: '/admin/drugs',
-      name: 'admin-drugs',
-      component: () => import('@/views/admin/AdminDrugsView.vue'),
-      meta: { layout: 'admin', requiresAdmin: true, title: 'Quản lý thuốc' },
-    },
-    {
-      path: '/admin/interactions',
-      name: 'admin-interactions',
-      component: () => import('@/views/admin/AdminInteractionsView.vue'),
-      meta: { layout: 'admin', requiresAdmin: true, title: 'Quản lý tương tác' },
-    },
-    {
-      path: '/admin/logs',
-      name: 'admin-logs',
-      component: () => import('@/views/admin/AdminLogsView.vue'),
-      meta: { layout: 'admin', requiresAdmin: true, title: 'Nhật ký hệ thống' },
-    },
-
-    // Error pages
     {
       path: '/forbidden',
       name: 'forbidden',
       component: () => import('@/views/errors/ForbiddenView.vue'),
-      meta: { layout: 'none', title: 'Không có quyền truy cập' },
+      meta: { layout: 'none', title: 'Không có quyền truy cập', skipOnboarding: true },
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/errors/NotFoundView.vue'),
-      meta: { layout: 'none', title: 'Không tìm thấy trang' },
+      meta: { layout: 'none', title: 'Không tìm thấy trang', skipOnboarding: true },
     },
   ],
 })
 
 let initializationPromise: Promise<void> | null = null
 
+async function safeLoadOnboardingStatus() {
+  const onboardingStore = useOnboardingStore()
+  try {
+    return await onboardingStore.loadStatus()
+  } catch {
+    return null
+  }
+}
+
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  // Initialize auth state once on first navigation
   if (!authStore.initialized) {
     if (!initializationPromise) {
       initializationPromise = authStore.initialize()
@@ -228,36 +184,35 @@ router.beforeEach(async (to) => {
     await initializationPromise
   }
 
-  // Set page title
   if (to.meta.title) {
     document.title = `${to.meta.title} | Medis`
   }
 
-  // Admin guard (also requires auth)
-  if (to.meta.requiresAdmin) {
-    if (!authStore.isAuthenticated) {
-      return { name: 'login', query: { redirect: to.fullPath } }
-    }
-    if (!authStore.isAdmin) {
-      return { name: 'forbidden' }
-    }
-    return true
-  }
-
-  // Auth guard
-  if (to.meta.requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      return { name: 'login', query: { redirect: to.fullPath } }
-    }
-    return true
-  }
-
-  // Guest guard: redirect authenticated users away from auth pages
-  if (to.meta.requiresGuest) {
-    if (authStore.isAuthenticated) {
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    const status = await safeLoadOnboardingStatus()
+    if (!status) {
       return { name: 'dashboard' }
     }
-    return true
+    return status.onboarding_completed ? { name: 'dashboard' } : { name: 'onboarding' }
+  }
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (authStore.isAuthenticated) {
+    const status = await safeLoadOnboardingStatus()
+    if (!status) {
+      return true
+    }
+
+    if (!status.onboarding_completed && !to.meta.skipOnboarding) {
+      return { name: 'onboarding' }
+    }
+
+    if (status.onboarding_completed && to.name === 'onboarding' && !to.query.update) {
+      return { name: 'dashboard' }
+    }
   }
 
   return true

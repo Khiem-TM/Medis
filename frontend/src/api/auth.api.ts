@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/vue-query'
 import { api } from './axios'
-import type { TokenResponse, UserResponse, LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest } from '@/types/auth.types'
+import type { TokenResponse, UserResponse, LoginRequest, RegisterRequest, ForgotPasswordRequest } from '@/types/auth.types'
 
 // Raw API functions
 export const authApi = {

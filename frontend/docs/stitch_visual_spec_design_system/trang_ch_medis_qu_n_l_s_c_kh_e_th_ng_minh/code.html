@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medis - Quản lý thuốc &amp; sức khỏe thông minh hơn với AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#4555b7",
+                        "outline": "#6d7a77",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#f0f1f1",
+                        "surface-container-high": "#e8e8e8",
+                        "inverse-primary": "#70d8c8",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f9f9f9",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#f8d8ff",
+                        "tertiary": "#8a30b0",
+                        "primary-fixed": "#8df5e4",
+                        "primary": "#00685d",
+                        "surface-tint": "#006b5f",
+                        "glass-surface": "rgba(255, 255, 255, 0.7)",
+                        "secondary-fixed": "#dee0ff",
+                        "on-surface-variant": "#3d4946",
+                        "on-surface": "#1a1c1c",
+                        "surface-dim": "#dadada",
+                        "on-tertiary-fixed-variant": "#721199",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#8999ff",
+                        "surface-variant": "#e2e2e2",
+                        "on-primary-container": "#f4fffb",
+                        "on-primary-fixed-variant": "#005048",
+                        "on-background": "#1a1c1c",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary-container": "#182a8e",
+                        "surface-container-highest": "#e2e2e2",
+                        "tertiary-container": "#a54dcc",
+                        "completed-gray": "#9E9E9E",
+                        "active-green": "#43A047",
+                        "warning-orange": "#E65100",
+                        "on-secondary-fixed-variant": "#2c3c9e",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "on-primary-fixed": "#00201c",
+                        "primary-fixed-dim": "#70d8c8",
+                        "surface-bright": "#f9f9f9",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#bcc9c5",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "surface-container-low": "#f3f3f3",
+                        "error-red": "#B00020",
+                        "primary-container": "#008376",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#320047",
+                        "on-secondary-fixed": "#000e5e",
+                        "surface": "#f9f9f9",
+                        "on-tertiary-container": "#fffbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "stack-md": "16px",
+                        "margin-page": "40px",
+                        "unit": "4px",
+                        "container-padding": "24px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+            background-image: radial-gradient(circle at 15% 50%, rgba(112, 216, 200, 0.15), transparent 25%), radial-gradient(circle at 85% 30%, rgba(138, 48, 176, 0.1), transparent 25%);
+            background-attachment: fixed;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(0, 104, 93, 0.05) 0%, rgba(69, 85, 183, 0.05) 100%);
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-glass-surface dark:bg-glass-surface backdrop-blur-md docked full-width top-0 sticky border-b border-glass-border dark:border-glass-border shadow-sm flex justify-between items-center w-full px-margin-page py-4 z-50 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-gutter">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed-dim">Medis</span>
+<div class="hidden md:flex gap-stack-md ml-stack-lg">
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 text-label-md font-label-md" href="#">Tính năng</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">Tra cứu thuốc</a>
+<a class="text-on-surface-variant dark:text-outline-variant font-medium hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200 text-label-md font-label-md" href="#">Giới thiệu</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<a class="hidden md:block text-on-surface-variant font-medium hover:text-primary transition-colors text-label-md font-label-md" href="#">Đăng nhập</a>
+<a class="bg-primary text-on-primary px-4 py-2 rounded-lg font-medium text-label-md font-label-md hover:bg-surface-tint transition-colors shadow-sm" href="#">Bắt đầu miễn phí</a>
+</div>
+</nav>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="hero-gradient pt-24 pb-32 px-margin-page overflow-hidden">
+<div class="max-w-screen-2xl mx-auto grid md:grid-cols-2 gap-stack-lg items-center">
+<div class="flex flex-col gap-stack-md">
+<h1 class="text-display-hero font-display-hero text-on-surface">Quản lý thuốc &amp; sức khỏe thông minh hơn với AI</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-lg">Medis sử dụng công nghệ AI tiên tiến giúp bạn theo dõi lịch trình dùng thuốc, phân tích tương tác và cung cấp những lời khuyên y tế chuẩn xác ngay trên thiết bị của bạn.</p>
+<div class="flex gap-stack-md mt-stack-sm">
+<a class="bg-primary text-on-primary px-6 py-3 rounded-lg font-medium text-label-md font-label-md shadow-sm hover:bg-surface-tint transition-colors" href="#">Bắt đầu miễn phí</a>
+<a class="bg-white border border-outline-variant text-on-surface px-6 py-3 rounded-lg font-medium text-label-md font-label-md shadow-sm hover:bg-surface-container-low transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+                            Xem demo
+                        </a>
+</div>
+</div>
+<div class="relative h-[500px] hidden md:block">
+<!-- Glassmorphism App UI Card Mockup -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-[480px] h-[400px] glass-card rounded-2xl p-container-padding flex flex-col gap-stack-md transform rotate-1 hover:rotate-0 transition-transform duration-500">
+<div class="flex justify-between items-center border-b border-glass-border pb-4">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Lịch trình hôm nay</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Thứ Hai, 12 Tháng 10</p>
+</div>
+<span class="material-symbols-outlined text-primary bg-primary-container/20 p-2 rounded-full">calendar_today</span>
+</div>
+<div class="flex-grow flex flex-col gap-stack-sm">
+<div class="bg-white/50 rounded-lg p-4 flex items-center gap-4 border border-glass-border">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">medication</span>
+</div>
+<div class="flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface">Paracetamol 500mg</h4>
+<p class="text-caption font-caption text-on-surface-variant">Sau bữa ăn sáng</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">08:00</span>
+</div>
+<div class="bg-white/50 rounded-lg p-4 flex items-center gap-4 border border-glass-border">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">vaccines</span>
+</div>
+<div class="flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface">Vitamin C 1000mg</h4>
+<p class="text-caption font-caption text-on-surface-variant">Kèm nhiều nước</p>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">12:30</span>
+</div>
+</div>
+<div class="mt-auto bg-primary-container/10 p-4 rounded-lg flex items-start gap-3 border border-primary-container/20">
+<span class="material-symbols-outlined text-primary mt-1">smart_toy</span>
+<div>
+<p class="text-body-sm font-body-sm text-on-surface font-medium">Trợ lý AI Medis</p>
+<p class="text-caption font-caption text-on-surface-variant">Nhắc nhở: Bạn đã uống đủ 2 lít nước hôm nay chưa?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Bar -->
+<section class="border-y border-outline-variant bg-surface">
+<div class="max-w-screen-2xl mx-auto px-margin-page py-6 grid grid-cols-2 md:grid-cols-4 gap-gutter text-center divide-x divide-outline-variant">
+<div>
+<h3 class="text-headline-md font-headline-md text-primary">5.000+</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1 uppercase tracking-wider">Hoạt chất thuốc</p>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-primary">10.000+</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1 uppercase tracking-wider">Tương tác</p>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-primary">AI-Powered</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1 uppercase tracking-wider">Phân tích thông minh</p>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-primary">Miễn phí</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1 uppercase tracking-wider">Cho người dùng cá nhân</p>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="py-32 px-margin-page bg-background">
+<div class="max-w-screen-2xl mx-auto">
+<div class="text-center mb-16 max-w-2xl mx-auto">
+<h2 class="text-headline-lg font-headline-lg text-on-surface mb-4">Tính năng nổi bật</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Mọi công cụ bạn cần để quản lý sức khỏe một cách chủ động và an toàn nhất, được thiết kế tối giản, dễ sử dụng.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Feature Card 1 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">prescriptions</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Đơn thuốc thông minh</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Số hóa đơn thuốc của bạn bằng camera, AI tự động nhận diện tên thuốc và liều dùng.</p>
+</div>
+<!-- Feature Card 2 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Cảnh báo tương tác</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Hệ thống phân tích tự động cảnh báo nếu các loại thuốc bạn đang dùng có thể gây tương tác xấu.</p>
+</div>
+<!-- Feature Card 3 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary mb-4">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Trợ lý y tế AI</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Chatbot thông minh giải đáp các thắc mắc về sức khỏe và hướng dẫn sử dụng thuốc 24/7.</p>
+</div>
+<!-- Feature Card 4 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Tra cứu chuyên sâu</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Thư viện thuốc khổng lồ với thông tin chi tiết về tác dụng, chống chỉ định và tác dụng phụ.</p>
+</div>
+<!-- Feature Card 5 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+<span class="material-symbols-outlined">lightbulb</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Gợi ý cá nhân hóa</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">AI phân tích thói quen và hồ sơ sức khỏe để đưa ra lời khuyên cải thiện lối sống.</p>
+</div>
+<!-- Feature Card 6 -->
+<div class="glass-card rounded-2xl p-container-padding hover:-translate-y-1 transition-transform duration-300">
+<div class="w-12 h-12 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary mb-4">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-2">Nhắc nhở kịp thời</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Không bao giờ quên lịch uống thuốc với hệ thống thông báo đa kênh, thông minh.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-24 px-margin-page bg-surface-container-high border-t border-outline-variant">
+<div class="max-w-4xl mx-auto text-center glass-card rounded-2xl p-12 bg-gradient-to-br from-primary-container/20 to-tertiary-container/20 border-white/50">
+<h2 class="text-headline-lg font-headline-lg text-on-surface mb-4">Sẵn sàng bắt đầu?</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-8 max-w-xl mx-auto">Tham gia cùng hàng ngàn người dùng đang quản lý sức khỏe thông minh hơn với Medis ngay hôm nay.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<a class="bg-primary text-on-primary px-8 py-3 rounded-lg font-medium text-label-md font-label-md shadow-md hover:bg-surface-tint transition-all hover:scale-105" href="#">Tạo tài khoản miễn phí</a>
+<a class="bg-white/80 border border-outline-variant text-on-surface px-8 py-3 rounded-lg font-medium text-label-md font-label-md shadow-sm hover:bg-white transition-all" href="#">Tìm hiểu thêm</a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-inverse-surface dark:bg-surface-container-lowest w-full py-stack-lg px-margin-page border-t border-outline-variant dark:border-outline-variant text-center md:text-left">
+<div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-gutter">
+<div class="mb-4 md:mb-0 text-headline-sm font-headline-sm font-bold text-primary-fixed-dim dark:text-primary">Medis</div>
+<div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4 md:mb-0">
+<a class="text-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-all text-label-md font-label-md" href="#">Privacy Policy</a>
+<a class="text-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-all text-label-md font-label-md" href="#">Terms of Service</a>
+<a class="text-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-all text-label-md font-label-md" href="#">Cookie Policy</a>
+<a class="text-surface-variant dark:text-on-surface-variant hover:text-primary-fixed-dim dark:hover:text-primary transition-all text-label-md font-label-md" href="#">Contact Support</a>
+</div>
+<div class="text-body-sm font-body-sm text-surface-variant dark:text-on-surface-variant">© 2024 Medis Health Management. All rights reserved.</div>
+</div>
+</footer>
+</body></html>

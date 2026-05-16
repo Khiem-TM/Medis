@@ -5,7 +5,6 @@ import { usePrescriptionDetail, usePrescriptionInteractions } from '@/api/prescr
 import { formatDate } from '@/utils/format'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
-import AppAlert from '@/components/ui/AppAlert.vue'
 
 const route = useRoute()
 const router = useRouter()

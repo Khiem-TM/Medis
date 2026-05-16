@@ -2,6 +2,7 @@
 import { reactive, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { z } from 'zod'
+import { API_BASE_URL } from '@/api/axios'
 import { useAuthStore } from '@/stores/auth.store'
 import { useLoginMutation } from '@/api/auth.api'
 import { loginSchema } from '@/schemas/auth.schema'
@@ -53,30 +54,25 @@ function onSubmit() {
   })
 }
 
-const googleLoginUrl = `${import.meta.env.VITE_API_URL}/auth/google/login`
+const googleLoginUrl = import.meta.env.VITE_GOOGLE_AUTH_URL || `${API_BASE_URL}/auth/google/login`
 </script>
 
 <template>
   <div class="min-h-screen flex">
     <!-- Left panel — gradient (hidden on mobile) -->
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-primary-container relative overflow-hidden flex-col justify-between p-12">
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-primary-container relative overflow-hidden flex-col justify-center p-12">
       <!-- Decorative blurred circles -->
       <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
       <div class="absolute bottom-12 -left-16 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
 
       <!-- Logo -->
-      <div class="relative flex items-center gap-3">
-        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
+      <div class="absolute top-12 left-12 flex items-center gap-3">
+        <img src="@/assets/logo.png" alt="Medis Logo" class="w-10 h-10 object-contain rounded-xl shadow-sm" />
         <span class="text-2xl font-bold text-white">Medis</span>
       </div>
 
       <!-- Main content -->
-      <div class="relative">
+      <div class="relative z-10">
         <h2 class="text-4xl font-extrabold text-white leading-snug mb-4">
           Quản lý sức khỏe<br />thông minh hơn
         </h2>
@@ -112,7 +108,7 @@ const googleLoginUrl = `${import.meta.env.VITE_API_URL}/auth/google/login`
       </div>
 
       <!-- Footer text -->
-      <p class="relative text-white/50 text-xs">© 2026 Medis. Quản lý sức khỏe thông minh.</p>
+      <p class="absolute bottom-12 left-12 text-white/50 text-xs">© 2026 Medis. Quản lý sức khỏe thông minh.</p>
     </div>
 
     <!-- Right panel — form -->
@@ -120,11 +116,7 @@ const googleLoginUrl = `${import.meta.env.VITE_API_URL}/auth/google/login`
       <div class="w-full max-w-md">
         <!-- Mobile logo -->
         <div class="lg:hidden mb-8 flex items-center gap-2">
-          <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
+          <img src="@/assets/logo.png" alt="Medis Logo" class="w-10 h-10 object-contain rounded-xl shadow-sm" />
           <span class="text-xl font-bold text-on-surface">Medis</span>
         </div>
 

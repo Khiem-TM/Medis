@@ -83,12 +83,7 @@ function onSubmit() {
     <div class="relative w-full max-w-md bg-card rounded-2xl shadow-sm border border-outline-variant p-8">
       <!-- Logo -->
       <div class="flex items-center gap-2 mb-8">
-        <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
+        <img src="@/assets/logo.png" alt="Medis Logo" class="w-10 h-10 object-contain rounded-xl shadow-sm" />
         <span class="text-xl font-bold text-on-surface">Medis</span>
       </div>
 

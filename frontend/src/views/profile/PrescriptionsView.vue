@@ -3,6 +3,8 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { usePrescriptions, useCreatePrescriptionMutation, useDeletePrescriptionMutation } from '@/api/prescriptions.api'
+import { useRecommendationMutation } from '@/api/recommendations.api'
+import type { DrugSuggestion } from '@/api/recommendations.api'
 import { usePagination } from '@/composables/usePagination'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
@@ -38,9 +40,14 @@ const queryParams = computed<PrescriptionSearchParams>(() => ({
 const { data, isLoading } = usePrescriptions(queryParams)
 const { mutate: createPrescription, isPending: creating } = useCreatePrescriptionMutation()
 const { mutate: deletePrescription, isPending: deleting } = useDeletePrescriptionMutation()
+const { mutate: getRecommendations, isPending: loadingSuggestions } = useRecommendationMutation()
 
 const showModal = ref(false)
 const formErrors = reactive<Record<string, string>>({})
+const symptoms = ref('')
+const suggestions = ref<DrugSuggestion[]>([])
+const showSuggestionPanel = ref(false)
+const addedSuggestionIndices = ref<Set<number>>(new Set())
 const form = reactive({
   name: '',
   notes: '',
@@ -54,6 +61,40 @@ function resetForm() {
   form.status = 'active'
   form.items = [{ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null }]
   Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  symptoms.value = ''
+  suggestions.value = []
+  showSuggestionPanel.value = false
+  addedSuggestionIndices.value = new Set()
+}
+
+function fetchSuggestions() {
+  if (!symptoms.value.trim()) return
+  getRecommendations({ symptoms: symptoms.value }, {
+    onSuccess: (result) => {
+      suggestions.value = result.suggestions
+      addedSuggestionIndices.value = new Set()
+    },
+    onError: () => toast.error('Không thể lấy gợi ý thuốc. Vui lòng thử lại.'),
+  })
+}
+
+function addSuggestionToItems(s: DrugSuggestion, idx: number) {
+  const emptyIdx = form.items.findIndex(it => !it.drug_name && !it.market_product_id)
+  const item = {
+    market_product_id: undefined as number | undefined,
+    drug_id: s.drug_id ?? undefined,
+    drug_name: s.drug_name,
+    dosage: s.reference_dosage || '',
+    frequency: '',
+    duration: '',
+    selected_product: null as MarketDrugProduct | null,
+  }
+  if (emptyIdx >= 0) {
+    form.items[emptyIdx] = item
+  } else {
+    form.items.push(item)
+  }
+  addedSuggestionIndices.value = new Set([...addedSuggestionIndices.value, idx])
 }
 
 function addItem() {
@@ -291,6 +332,94 @@ const statusOptions = [
         </div>
         <AppTextarea v-model="form.notes" label="Ghi chú" placeholder="Ghi chú thêm..." :rows="2" />
 
+        <!-- AI suggestion panel -->
+        <div class="rounded-xl border border-primary/20 bg-primary-fixed/30 overflow-hidden">
+          <button
+            type="button"
+            class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
+            @click="showSuggestionPanel = !showSuggestionPanel"
+          >
+            <span class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.75 3.75 0 01-5.303 0l-.347-.347z" />
+              </svg>
+              Gợi ý thuốc bằng AI
+            </span>
+            <svg
+              class="w-4 h-4 transition-transform"
+              :class="showSuggestionPanel ? 'rotate-180' : ''"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <div v-if="showSuggestionPanel" class="px-4 pb-4 space-y-3 border-t border-primary/10">
+            <p class="text-xs text-outline mt-3">Nhập triệu chứng hoặc tên bệnh để AI gợi ý thuốc phù hợp</p>
+            <div class="flex gap-2">
+              <textarea
+                v-model="symptoms"
+                rows="2"
+                placeholder="VD: Đau đầu, sốt nhẹ, ho khan..."
+                class="flex-1 rounded-xl border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface placeholder:text-outline resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                @keydown.enter.ctrl.prevent="fetchSuggestions"
+              />
+              <AppButton
+                type="button"
+                variant="gradient"
+                :loading="loadingSuggestions"
+                :disabled="!symptoms.trim()"
+                class="self-end"
+                @click="fetchSuggestions"
+              >
+                Gợi ý
+              </AppButton>
+            </div>
+
+            <!-- Suggestion results -->
+            <div v-if="suggestions.length" class="space-y-2">
+              <p class="text-xs font-medium text-on-surface-variant">{{ suggestions.length }} gợi ý từ AI:</p>
+              <div
+                v-for="(s, idx) in suggestions"
+                :key="idx"
+                class="flex items-start gap-3 rounded-xl border p-3 transition-colors"
+                :class="addedSuggestionIndices.has(idx)
+                  ? 'border-tertiary/30 bg-tertiary-fixed/20'
+                  : 'border-outline-variant bg-surface hover:bg-surface-container-low'"
+              >
+                <div class="flex-1 min-w-0 space-y-0.5">
+                  <p class="text-sm font-semibold text-on-surface truncate">{{ s.drug_name }}</p>
+                  <p class="text-xs text-outline truncate">{{ s.active_ingredient }}</p>
+                  <p class="text-xs text-primary truncate">{{ s.indication }}</p>
+                  <p v-if="s.reference_dosage" class="text-xs text-on-surface-variant">Liều: {{ s.reference_dosage }}</p>
+                  <p v-if="s.warnings" class="text-xs text-error mt-0.5">⚠ {{ s.warnings }}</p>
+                </div>
+                <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span
+                    class="text-xs font-bold px-2 py-0.5 rounded-full"
+                    :class="s.suitability_score >= 80
+                      ? 'bg-tertiary-fixed text-tertiary'
+                      : s.suitability_score >= 60
+                        ? 'bg-secondary-container text-secondary'
+                        : 'bg-surface-container text-outline'"
+                  >
+                    {{ s.suitability_score }}%
+                  </span>
+                  <button
+                    v-if="!addedSuggestionIndices.has(idx)"
+                    type="button"
+                    class="text-xs font-medium text-primary border border-primary/30 rounded-lg px-2.5 py-1 hover:bg-primary hover:text-white transition-colors"
+                    @click="addSuggestionToItems(s, idx)"
+                  >
+                    + Thêm
+                  </button>
+                  <span v-else class="text-xs text-tertiary font-medium">✓ Đã thêm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Drug items -->
         <div>
           <div class="flex items-center justify-between mb-2">
@@ -302,7 +431,18 @@ const statusOptions = [
           <div v-for="(item, i) in form.items" :key="i" class="flex gap-2 items-start border border-outline-variant rounded-xl p-3 mb-2 bg-surface-container-low">
             <div class="flex-1 grid grid-cols-2 gap-2">
               <div class="col-span-2">
+                <!-- AI-suggested drug (no market product linked yet) -->
+                <div v-if="item.drug_name && !item.selected_product" class="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary-fixed/20 px-3 py-2">
+                  <svg class="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.75 3.75 0 01-5.303 0l-.347-.347z" />
+                  </svg>
+                  <span class="text-sm font-semibold text-on-surface flex-1 truncate">{{ item.drug_name }}</span>
+                  <span class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">AI</span>
+                  <button type="button" class="text-xs text-outline hover:text-primary ml-1" @click="item.drug_name = ''; item.drug_id = undefined">Đổi</button>
+                </div>
+                <!-- Normal market drug search -->
                 <MarketDrugSearchField
+                  v-else
                   :model-value="item.selected_product"
                   placeholder="Chọn thuốc từ danh mục DAV *"
                   @update:model-value="onSelectDrug(i, $event)"

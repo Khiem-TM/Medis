@@ -5,8 +5,7 @@ import { useDrugSearch, useCreateDrugMutation, useUpdateDrugMutation, useDeleteD
 import { usePagination } from '@/composables/usePagination'
 import { useDebounce } from '@/composables/useDebounce'
 import { useToast } from '@/composables/useToast'
-import { useConfirm } from '@/composables/useConfirm'
-import type { DrugSearchParams, CreateDrugRequest, UpdateDrugRequest } from '@/types/drug.types'
+import type { DrugSearchParams, CreateDrugRequest, DrugListItem, UpdateDrugRequest } from '@/types/drug.types'
 import AppPagination from '@/components/ui/AppPagination.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppModal from '@/components/ui/AppModal.vue'
@@ -15,7 +14,6 @@ import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
 
 const router = useRouter()
 const toast = useToast()
-const confirm = useConfirm()
 
 const { page, size, params: paginationParams, setPage, setSize } = usePagination(20)
 const searchInput = ref('')
@@ -54,9 +52,15 @@ function doCreate() {
   })
 }
 
-function openEdit(row: any) {
+function openEdit(row: DrugListItem) {
   editId.value = row.id
-  editForm.value = { name: row.name, atc_code: row.atc_code, description: row.description, dosage_form: row.dosage_form, classification: row.classification }
+  editForm.value = {
+    name: row.name ?? row.generic_name,
+    atc_code: row.atc_code ?? undefined,
+    description: row.description ?? undefined,
+    dosage_form: row.dosage_form ?? undefined,
+    classification: row.classification ?? undefined,
+  }
   showEdit.value = true
 }
 
@@ -67,8 +71,8 @@ function doEdit() {
   })
 }
 
-function openDelete(row: any) {
-  confirmState.value = { open: true, id: row.id, name: row.name }
+function openDelete(row: DrugListItem) {
+  confirmState.value = { open: true, id: row.id, name: row.name ?? row.generic_name }
 }
 
 function doDelete() {

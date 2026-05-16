@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import { computed } from 'vue'
+import { computed, unref } from 'vue'
 import type { Ref } from 'vue'
 import { api } from './axios'
 import type { AdminStats, AdminUserDetail, UpdateAdminUserRequest, AdminUserSearchParams, SystemLog, SystemLogSearchParams, AdminActivityLogSearchParams } from '@/types/admin.types'
@@ -39,8 +39,12 @@ export const adminApi = {
     api.get('/admin/logs/activity/export', { responseType: 'blob' }).then((r) => r.data as Blob),
 }
 
-export function useAdminStats() {
-  return useQuery({ queryKey: adminKeys.stats(), queryFn: adminApi.getStats })
+export function useAdminStats(enabled?: Ref<boolean> | boolean) {
+  return useQuery({
+    queryKey: adminKeys.stats(),
+    queryFn: adminApi.getStats,
+    enabled: enabled === undefined ? true : computed(() => unref(enabled)),
+  })
 }
 
 export function useAdminUsers(params: Ref<AdminUserSearchParams>) {

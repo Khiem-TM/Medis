@@ -1,16 +1,22 @@
 import axios from 'axios'
 import type { AxiosRequestConfig } from 'axios'
+import { ref } from 'vue'
 import type { ApiError } from '@/types/api.types'
 
-const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1'
+export const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL
+  || API_BASE_URL.replace(/^http/, 'ws').replace(/\/api\/v1\/?$/, '')
 const REFRESH_TOKEN_KEY = 'medis_refresh_token'
+const accessToken = ref<string | null>(null)
 
 // Simple in-memory token store to avoid circular dep with Pinia store
 export const tokenManager = {
-  accessToken: null as string | null,
-
   setAccessToken(token: string | null) {
-    this.accessToken = token
+    accessToken.value = token
+  },
+
+  getAccessToken() {
+    return accessToken.value
   },
 
   getRefreshToken(): string | null {
@@ -26,7 +32,7 @@ export const tokenManager = {
   },
 
   clear() {
-    this.accessToken = null
+    accessToken.value = null
     localStorage.removeItem(REFRESH_TOKEN_KEY)
   },
 }
@@ -49,15 +55,16 @@ function processQueue(error: unknown, token: string | null = null) {
 }
 
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 })
 
 // Request interceptor: attach access token
 api.interceptors.request.use((config) => {
-  if (tokenManager.accessToken) {
-    config.headers.Authorization = `Bearer ${tokenManager.accessToken}`
+  const token = tokenManager.getAccessToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
@@ -94,7 +101,7 @@ api.interceptors.response.use(
         const refreshToken = tokenManager.getRefreshToken()
         if (!refreshToken) throw new Error('No refresh token')
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refresh_token: refreshToken,
         })
 

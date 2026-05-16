@@ -8,7 +8,7 @@ import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import { healthProfileSchema } from '@/schemas/health-profile.schema'
 import { formatDate } from '@/utils/format'
-import type { HealthProfileSearchParams } from '@/types/health-profile.types'
+import type { CreateHealthProfileRequest, HealthProfileSearchParams } from '@/types/health-profile.types'
 import AppPagination from '@/components/ui/AppPagination.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -64,8 +64,16 @@ function validateForm() {
 
 function submitForm() {
   if (!validateForm()) return
-  const payload = Object.fromEntries(Object.entries(form).filter(([, v]) => v !== ''))
-  createHealthProfile(payload as any, {
+  const payload: CreateHealthProfileRequest = {
+    diagnosis_name: form.diagnosis_name,
+    exam_date: form.exam_date,
+    ...(form.facility ? { facility: form.facility } : {}),
+    ...(form.doctor ? { doctor: form.doctor } : {}),
+    ...(form.symptoms ? { symptoms: form.symptoms } : {}),
+    ...(form.conclusion ? { conclusion: form.conclusion } : {}),
+    ...(form.notes ? { notes: form.notes } : {}),
+  }
+  createHealthProfile(payload, {
     onSuccess: () => { toast.success('Tạo hồ sơ khám bệnh thành công'); showModal.value = false; resetForm() },
     onError: (e) => toast.error((e as { message?: string })?.message || 'Tạo hồ sơ thất bại'),
   })

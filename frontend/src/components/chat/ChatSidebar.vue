@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth.store'
-import type { ChatMessage } from '@/types/chatbot.types'
 
 const props = defineProps<{
   messages: Array<{ role: 'user' | 'assistant'; content: string; created_at?: string }>

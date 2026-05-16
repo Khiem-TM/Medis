@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cập nhật tình trạng sức khỏe - Medis Ether</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#006b5f",
+                        "glass-surface": "rgba(255, 255, 255, 0.7)",
+                        "error-red": "#B00020",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "outline-variant": "#bcc9c5",
+                        "active-green": "#43A047",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "on-primary-fixed": "#00201c",
+                        "inverse-primary": "#70d8c8",
+                        "tertiary-container": "#a54dcc",
+                        "on-tertiary-fixed": "#320047",
+                        "surface-container-highest": "#e2e2e2",
+                        "secondary": "#4555b7",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#f8d8ff",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f0f1f1",
+                        "primary-fixed-dim": "#70d8c8",
+                        "primary-fixed": "#8df5e4",
+                        "background": "#f9f9f9",
+                        "primary-container": "#008376",
+                        "on-surface": "#1a1c1c",
+                        "on-secondary-fixed-variant": "#2c3c9e",
+                        "on-secondary-fixed": "#000e5e",
+                        "on-primary-fixed-variant": "#005048",
+                        "secondary-fixed": "#dee0ff",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f9f9f9",
+                        "on-background": "#1a1c1c",
+                        "warning-orange": "#E65100",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "outline": "#6d7a77",
+                        "on-primary-container": "#f4fffb",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#721199",
+                        "on-surface-variant": "#3d4946",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary-container": "#182a8e",
+                        "primary": "#00685d",
+                        "on-error": "#ffffff",
+                        "completed-gray": "#9E9E9E",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-variant": "#e2e2e2",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "secondary-container": "#8999ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#8a30b0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1rem"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "container-padding": "24px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Base styles for the Luminous Clarity aesthetic */
+        body {
+            background-color: #f9f9f9;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(141, 245, 228, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(248, 216, 255, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        
+        /* Custom scrollbar for textareas */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(109, 122, 119, 0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-container-padding font-body-md text-on-surface">
+<!-- Main Content Canvas (Navigation suppressed for transactional flow) -->
+<main class="w-full max-w-2xl bg-glass-surface/80 backdrop-blur-2xl border border-glass-border rounded-2xl shadow-sm flex flex-col overflow-hidden relative">
+<!-- Subtle inner highlight -->
+<div class="absolute inset-0 rounded-2xl border border-white/60 pointer-events-none"></div>
+<!-- Progress Header -->
+<header class="px-8 pt-8 pb-6 relative z-10">
+<!-- Progress Bar -->
+<div class="flex gap-2 mb-6">
+<div class="h-1.5 flex-1 bg-primary rounded-full shadow-[0_0_8px_rgba(0,104,93,0.4)]"></div>
+<div class="h-1.5 flex-1 bg-surface-variant rounded-full"></div>
+<div class="h-1.5 flex-1 bg-surface-variant rounded-full"></div>
+</div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary tracking-tight">Cập nhật tình trạng sức khỏe</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Bước 1: Thông tin cơ bản</p>
+</header>
+<!-- Form Content (Step 1) -->
+<div class="px-8 pb-8 space-y-stack-lg relative z-10 flex-1">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<!-- Height Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Chiều cao (cm)</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">height</span>
+<input class="w-full bg-surface-container-lowest/60 border border-glass-border rounded-xl py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-outline/60 backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" placeholder="Ví dụ: 170" type="number"/>
+</div>
+</div>
+<!-- Weight Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Cân nặng (kg)</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">weight</span>
+<input class="w-full bg-surface-container-lowest/60 border border-glass-border rounded-xl py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-outline/60 backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" placeholder="Ví dụ: 65" type="number"/>
+</div>
+</div>
+<!-- Gender Selection (Bento-style chips) -->
+<div class="flex flex-col gap-2 md:col-span-2 mt-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Giới tính sinh học</label>
+<div class="flex gap-4">
+<!-- Active State -->
+<button class="flex-1 py-4 border border-primary bg-primary/5 rounded-xl font-headline-sm text-headline-sm text-primary flex items-center justify-center gap-3 transition-all shadow-[0_4px_12px_rgba(0,104,93,0.08)] relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-50"></div>
+<span class="material-symbols-outlined relative z-10" style="font-variation-settings: 'FILL' 1;">male</span>
+<span class="relative z-10">Nam</span>
+</button>
+<!-- Inactive State -->
+<button class="flex-1 py-4 border border-glass-border bg-surface-container-lowest/40 rounded-xl font-headline-sm text-headline-sm text-outline flex items-center justify-center gap-3 hover:bg-surface-container-lowest/80 transition-all backdrop-blur-sm">
+<span class="material-symbols-outlined">female</span> 
+                            Nữ
+                        </button>
+</div>
+</div>
+<!-- Blood Type Dropdown -->
+<div class="flex flex-col gap-2 md:col-span-2 mt-2">
+<label class="font-label-md text-label-md text-on-surface-variant">Nhóm máu</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors z-10">bloodtype</span>
+<select class="w-full appearance-none bg-surface-container-lowest/60 border border-glass-border rounded-xl py-4 pl-12 pr-12 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] cursor-pointer">
+<option disabled="" selected="" value="">Chưa xác định</option>
+<option value="A">Nhóm máu A</option>
+<option value="B">Nhóm máu B</option>
+<option value="AB">Nhóm máu AB</option>
+<option value="O">Nhóm máu O</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline pointer-events-none">unfold_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Footer Actions -->
+<footer class="px-8 py-5 border-t border-glass-border bg-glass-surface/90 backdrop-blur-md flex justify-between items-center relative z-10 mt-auto">
+<button class="font-label-md text-label-md text-outline hover:text-on-surface transition-colors px-4 py-2">
+                Thiết lập sau
+            </button>
+<button class="bg-primary text-on-primary font-label-md text-label-md px-6 py-3 rounded-full hover:bg-primary/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                Tiếp tục: Bệnh lý &amp; Dị ứng
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</footer>
+</main>
+</body></html>

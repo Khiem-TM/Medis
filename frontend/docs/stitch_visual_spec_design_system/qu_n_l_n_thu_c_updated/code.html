@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quản lý Đơn thuốc</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#8df5e4",
+                        "on-secondary-container": "#182a8e",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "primary-container": "#008376",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#70d8c8",
+                        "on-surface-variant": "#3d4946",
+                        "on-secondary-fixed": "#000e5e",
+                        "on-primary-fixed": "#00201c",
+                        "tertiary-fixed": "#f8d8ff",
+                        "on-error-container": "#93000a",
+                        "completed-gray": "#9E9E9E",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container-highest": "#e2e2e2",
+                        "inverse-surface": "#2f3131",
+                        "tertiary-container": "#a54dcc",
+                        "on-surface": "#1a1c1c",
+                        "warning-orange": "#E65100",
+                        "active-green": "#43A047",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "glass-surface": "rgba(255, 255, 255, 0.7)",
+                        "tertiary": "#8a30b0",
+                        "outline": "#6d7a77",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2c3c9e",
+                        "secondary-container": "#8999ff",
+                        "on-tertiary-fixed-variant": "#721199",
+                        "primary-fixed-dim": "#70d8c8",
+                        "surface-dim": "#dadada",
+                        "error-red": "#B00020",
+                        "on-error": "#ffffff",
+                        "on-background": "#1a1c1c",
+                        "on-primary-fixed-variant": "#005048",
+                        "surface-variant": "#e2e2e2",
+                        "surface-tint": "#006b5f",
+                        "secondary": "#4555b7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dee0ff",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "outline-variant": "#bcc9c5",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#320047",
+                        "inverse-on-surface": "#f0f1f1",
+                        "primary": "#00685d",
+                        "surface": "#f9f9f9",
+                        "background": "#f9f9f9",
+                        "on-primary-container": "#f4fffb",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "margin-page": "40px",
+                        "gutter": "24px",
+                        "container-padding": "24px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased relative min-h-screen">
+<!-- Ambient Background -->
+<div class="fixed inset-0 z-0 pointer-events-none">
+<div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-primary-fixed/30 to-transparent blur-[120px]"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-tertiary-fixed/30 to-transparent blur-[120px]"></div>
+</div>
+<!-- SideNavBar -->
+<nav class="fixed h-screen w-[280px] left-0 top-0 bg-glass-surface/70 dark:bg-inverse-surface/40 backdrop-blur-xl border-r border-glass-border shadow-[16px_0_32px_rgba(0,0,0,0.04)] flex flex-col gap-stack-md py-margin-page px-stack-md z-50 hidden md:flex">
+<!-- Logo -->
+<div class="mb-stack-lg px-stack-md flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">Medis</h1>
+<p class="font-caption text-caption text-on-surface-variant">Health Management</p>
+</div>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 flex flex-col gap-unit"><a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span>Bጐng điጁu khiጃn</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl bg-glass-surface dark:bg-surface-variant/20 text-primary dark:text-primary-fixed border-l-4 border-primary dark:border-primary-fixed font-bold scale-[0.98] transition-transform font-label-md text-label-md shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span>Đġn thuጃc</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">monitor_heart</span>
+<span>Hጳ sጓ sጓc khoጃ</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">medication</span>
+<span>Thuጃc vጐ tıጐng tጱc</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+<span>Chatbot</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-stack-sm rounded-xl text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span>Lጡch tr!nh</span>
+</a></div>
+<!-- Footer Nav -->
+</nav>
+<!-- TopNavBar -->
+<header class="sticky top-0 right-0 w-full z-40 bg-glass-surface/40 dark:bg-transparent backdrop-blur-md border-b border-glass-border flex justify-between items-center h-16 px-gutter ml-0 md:ml-[280px]">
+<!-- Mobile Menu & Breadcrumbs -->
+<div class="flex items-center gap-stack-sm">
+<button class="md:hidden p-2 rounded-full text-on-surface-variant hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="hidden sm:flex items-center gap-unit text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<span>Trang chủ</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-bold">Đơn thuốc</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-stack-sm"><button class="p-2 rounded-full text-on-surface-variant hover:bg-primary/10 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-warning-orange rounded-full"></span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant ml-unit border border-glass-border overflow-hidden cursor-pointer hover:opacity-80 transition-opacity duration-200">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkHT9UvQgu8KHTdJl0E8alUbjq5XpmqCKUVvDzPlkA2up7O7zBofldZPH5eRk8Po0v3qsKhk_yWGIIa_eolGVfXBKIgHyMMY4Eyg371E4jEL6bKSH1o30myIFSn-11E6N9ctBVYIZFBIsC6SL-ovh8CJyxZfdmh1Zwk8Giaq5LX2M4EvzF2N30qcoDtxvsEAmymRw4meJRpiUP0B677Dln0DG44pcgEfPlP7t-FvHtDCL9XfORDlDYqxrtkAtgQI8_Q8Dm3RUB_8KA"/>
+</div></div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-0 md:ml-[280px] p-gutter md:p-margin-page relative z-10 flex flex-col gap-stack-lg max-w-[1200px] mx-auto">
+<!-- Header Section -->
+<section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-stack-md">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-unit">Quản lý Đơn thuốc</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Xem, tìm kiếm và tạo mới đơn thuốc cho bệnh nhân.</p>
+</div>
+<button class="bg-primary hover:bg-surface-tint text-on-primary px-stack-md py-[10px] rounded-xl font-label-md text-label-md flex items-center gap-unit transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Tạo đơn thuốc</span>
+</button>
+</section>
+<!-- Search & Filter Bar -->
+<section class="bg-glass-surface backdrop-blur-md border border-glass-border rounded-2xl p-stack-sm flex flex-col sm:flex-row gap-stack-sm shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-transparent border-none focus:ring-2 focus:ring-primary rounded-xl pl-10 pr-4 py-2 font-body-sm text-body-sm text-on-surface placeholder:text-outline transition-all" placeholder="Tìm kiếm theo tên bệnh nhân, mã đơn..." type="text"/>
+</div>
+<div class="w-[1px] bg-glass-border hidden sm:block"></div>
+<div class="flex gap-unit">
+<button class="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 transition-colors font-label-md text-label-md flex items-center gap-unit">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Lọc
+                </button>
+<button class="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-variant/50 transition-colors font-label-md text-label-md flex items-center gap-unit">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+                    Sắp xếp
+                </button>
+</div>
+</section>
+<!-- Data Table Section -->
+<section class="bg-glass-surface backdrop-blur-md border border-glass-border rounded-2xl overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.03)] flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-glass-border bg-surface-variant/20">
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Mã Đơn</th>
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Bệnh nhân</th>
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center">Số thuốc</th>
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Trạng thái</th>
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Ngày tạo</th>
+<th class="py-stack-md px-stack-md font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm divide-y divide-glass-border/50">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-variant/10 transition-colors group">
+<td class="py-stack-md px-stack-md font-medium text-primary">#RX-8492</td>
+<td class="py-stack-md px-stack-md">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-md">NA</div>
+<span class="font-medium text-on-surface">Nguyễn Văn A</span>
+</div>
+</td>
+<td class="py-stack-md px-stack-md text-center">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant font-label-md">3</span>
+</td>
+<td class="py-stack-md px-stack-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-active-green/10 text-active-green font-label-md text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-active-green"></span>
+                                    Đang dùng
+                                </span>
+</td>
+<td class="py-stack-md px-stack-md text-on-surface-variant">12 Th10 2023</td>
+<td class="py-stack-md px-stack-md text-right">
+<button class="p-2 rounded-xl text-outline hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-variant/10 transition-colors group">
+<td class="py-stack-md px-stack-md font-medium text-primary">#RX-8491</td>
+<td class="py-stack-md px-stack-md">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container font-label-md">TB</div>
+<span class="font-medium text-on-surface">Trần Thị B</span>
+</div>
+</td>
+<td class="py-stack-md px-stack-md text-center">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant font-label-md">1</span>
+</td>
+<td class="py-stack-md px-stack-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-completed-gray/10 text-completed-gray font-label-md text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-completed-gray"></span>
+                                    Hoàn thành
+                                </span>
+</td>
+<td class="py-stack-md px-stack-md text-on-surface-variant">10 Th10 2023</td>
+<td class="py-stack-md px-stack-md text-right">
+<button class="p-2 rounded-xl text-outline hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-variant/10 transition-colors group">
+<td class="py-stack-md px-stack-md font-medium text-primary">#RX-8490</td>
+<td class="py-stack-md px-stack-md">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-md">LM</div>
+<span class="font-medium text-on-surface">Lê Văn M</span>
+</div>
+</td>
+<td class="py-stack-md px-stack-md text-center">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant font-label-md">5</span>
+</td>
+<td class="py-stack-md px-stack-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-active-green/10 text-active-green font-label-md text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-active-green"></span>
+                                    Đang dùng
+                                </span>
+</td>
+<td class="py-stack-md px-stack-md text-on-surface-variant">08 Th10 2023</td>
+<td class="py-stack-md px-stack-md text-right">
+<button class="p-2 rounded-xl text-outline hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-variant/10 transition-colors group">
+<td class="py-stack-md px-stack-md font-medium text-primary">#RX-8489</td>
+<td class="py-stack-md px-stack-md">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container font-label-md">PH</div>
+<span class="font-medium text-on-surface">Phạm Thị H</span>
+</div>
+</td>
+<td class="py-stack-md px-stack-md text-center">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant font-label-md">2</span>
+</td>
+<td class="py-stack-md px-stack-md">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning-orange/10 text-warning-orange font-label-md text-[10px]">
+<span class="w-1.5 h-1.5 rounded-full bg-warning-orange"></span>
+                                    Sắp hết
+                                </span>
+</td>
+<td class="py-stack-md px-stack-md text-on-surface-variant">05 Th10 2023</td>
+<td class="py-stack-md px-stack-md text-right">
+<button class="p-2 rounded-xl text-outline hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="border-t border-glass-border p-stack-sm flex items-center justify-between bg-surface-variant/10">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị 1-4 trên 24 kết quả</span>
+<div class="flex gap-unit">
+<button class="p-2 rounded-xl text-outline hover:bg-surface-variant transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-xl bg-primary text-on-primary font-label-md flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded-xl text-on-surface-variant hover:bg-surface-variant transition-colors font-label-md flex items-center justify-center">2</button>
+<button class="w-8 h-8 rounded-xl text-on-surface-variant hover:bg-surface-variant transition-colors font-label-md flex items-center justify-center">3</button>
+<button class="p-2 rounded-xl text-outline hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

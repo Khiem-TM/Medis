@@ -52,8 +52,6 @@ function scoreTextColor(score: number) {
   if (score >= 40) return 'text-warning'
   return 'text-error'
 }
-
-const errorMessage = (error.value as { message?: string } | null)?.message
 </script>
 
 <template>
@@ -87,7 +85,7 @@ const errorMessage = (error.value as { message?: string } | null)?.message
       <p class="text-xs text-outline mt-1.5">{{ symptoms.length }}/1000 ký tự (tối thiểu 10)</p>
 
       <div v-if="error" class="mt-3 p-3 bg-error-container border border-error/20 rounded-xl text-sm text-error">
-        {{ (error as any)?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.' }}
+        {{ (error as { message?: string } | null)?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.' }}
       </div>
 
       <div class="mt-4 flex flex-wrap gap-3">

@@ -1,56 +1,79 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Navy brand palette */
-  --color-navy-900: #0C1D42;
-  --color-navy-800: #142853;
-  --color-navy-700: #1E3568;
-  --color-navy-600: #2C447F;
-  --color-navy-500: #3D5793;
+  --color-surface: #f9f9f9;
+  --color-surface-dim: #dadada;
+  --color-surface-bright: #f9f9f9;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #e2e2e2;
+  --color-surface-variant: #e2e2e2;
+  --color-background: #f9f9f9;
+  --color-page-bg: #f9f9f9;
+  --color-card: rgba(255, 255, 255, 0.72);
+  --color-glass-surface: rgba(255, 255, 255, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.45);
+  --color-primary: #00685d;
+  --color-primary-dk: #005048;
+  --color-primary-container: #008376;
+  --color-primary-fixed: #8df5e4;
+  --color-primary-fixed-dim: #70d8c8;
+  --color-secondary: #4555b7;
+  --color-secondary-container: #8999ff;
+  --color-secondary-fixed: #dee0ff;
+  --color-secondary-fixed-dim: #bbc3ff;
+  --color-tertiary: #8a30b0;
+  --color-tertiary-container: #a54dcc;
+  --color-tertiary-fixed: #f8d8ff;
+  --color-tertiary-fixed-dim: #ebb2ff;
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #3d4946;
+  --color-on-background: #1a1c1c;
+  --color-outline: #6d7a77;
+  --color-outline-variant: #bcc9c5;
+  --color-border: rgba(109, 122, 119, 0.22);
+  --color-text: #1a1c1c;
+  --color-muted: #667874;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-danger: #ba1a1a;
+  --color-warning: #e65100;
+  --color-info: #4555b7;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
 
-  /* Primary (interactive accent blue) */
-  --color-primary: #2563EB;
-  --color-primary-dk: #1D4FD8;
-  --color-primary-container: #3B82F6;
-  --color-primary-fixed: #DCEDFF;
-  --color-primary-fixed-dim: #BFDBFE;
+@utility glass-panel {
+  background: var(--color-card);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--glass-shadow);
+}
 
-  /* Secondary */
-  --color-secondary: #1E3568;
-  --color-secondary-container: #BFDBFE;
+@utility glass-panel-strong {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  box-shadow: var(--glass-shadow-strong);
+}
 
-  /* Tertiary - green */
-  --color-tertiary: #10B981;
-  --color-tertiary-fixed: #D1FAE5;
+@utility soft-divider {
+  border-color: rgba(109, 122, 119, 0.14);
+}
 
-  /* Error */
-  --color-error: #EF4444;
-  --color-error-container: #FEE2E2;
+@utility ether-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.35) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
 
-  /* Surface system */
-  --color-surface: #F3F5F7;
-  --color-surface-container-low: #F8FAFB;
-  --color-surface-container: #EFF3F8;
-  --color-surface-container-high: #E4EBF5;
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-  /* On-surface text */
-  --color-on-surface: #0C1D42;
-  --color-on-surface-variant: #2A3A5E;
-
-  /* Structural */
-  --color-outline: #5A6985;
-  --color-outline-variant: rgba(12, 29, 66, 0.12);
-
-  /* Semantic aliases */
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
-  --color-info: #2563EB;
-  --color-page-bg: #F3F5F7;
-  --color-card: #FFFFFF;
-  --color-border: rgba(12, 29, 66, 0.08);
-  --color-text: #0C1D42;
-  --color-muted: #5A6985;
-
-  /* Font */
-  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

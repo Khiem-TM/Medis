@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useReminders, useTodaySchedule, useCreateReminderMutation, useUpdateReminderMutation, useDeleteReminderMutation } from '@/api/reminders.api'
 import { useToast } from '@/composables/useToast'
 import type { MedicationReminder, CreateReminderRequest } from '@/types/reminder.types'

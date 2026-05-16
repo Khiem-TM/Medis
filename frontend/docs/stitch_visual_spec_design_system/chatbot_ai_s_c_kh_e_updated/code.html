@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Chatbot - Medis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#e8e8e8",
+                      "primary-fixed": "#8df5e4",
+                      "on-secondary-container": "#182a8e",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-container": "#fffbff",
+                      "primary-container": "#008376",
+                      "on-primary": "#ffffff",
+                      "inverse-primary": "#70d8c8",
+                      "on-surface-variant": "#3d4946",
+                      "on-secondary-fixed": "#000e5e",
+                      "on-primary-fixed": "#00201c",
+                      "tertiary-fixed": "#f8d8ff",
+                      "on-error-container": "#93000a",
+                      "completed-gray": "#9E9E9E",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-low": "#f3f3f3",
+                      "surface-container-highest": "#e2e2e2",
+                      "inverse-surface": "#2f3131",
+                      "tertiary-container": "#a54dcc",
+                      "on-surface": "#1a1c1c",
+                      "warning-orange": "#E65100",
+                      "active-green": "#43A047",
+                      "tertiary-fixed-dim": "#ebb2ff",
+                      "glass-surface": "rgba(255, 255, 255, 0.7)",
+                      "tertiary": "#8a30b0",
+                      "outline": "#6d7a77",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#2c3c9e",
+                      "secondary-container": "#8999ff",
+                      "on-tertiary-fixed-variant": "#721199",
+                      "primary-fixed-dim": "#70d8c8",
+                      "surface-dim": "#dadada",
+                      "error-red": "#B00020",
+                      "on-error": "#ffffff",
+                      "on-background": "#1a1c1c",
+                      "on-primary-fixed-variant": "#005048",
+                      "surface-variant": "#e2e2e2",
+                      "surface-tint": "#006b5f",
+                      "secondary": "#4555b7",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#dee0ff",
+                      "secondary-fixed-dim": "#bbc3ff",
+                      "outline-variant": "#bcc9c5",
+                      "error": "#ba1a1a",
+                      "surface-container": "#eeeeee",
+                      "on-tertiary-fixed": "#320047",
+                      "inverse-on-surface": "#f0f1f1",
+                      "primary": "#00685d",
+                      "surface": "#f9f9f9",
+                      "background": "#f9f9f9",
+                      "on-primary-container": "#f4fffb",
+                      "glass-border": "rgba(255, 255, 255, 0.4)",
+                      "surface-bright": "#f9f9f9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "32px",
+                      "unit": "4px",
+                      "margin-page": "40px",
+                      "gutter": "24px",
+                      "container-padding": "24px",
+                      "stack-md": "16px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "display-hero": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-hero": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            background-image: radial-gradient(at 0% 0%, hsla(172,67%,85%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(283,72%,85%,1) 0, transparent 50%);
+            background-color: #f9f9f9;
+            background-attachment: fixed;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+      </style>
+</head>
+<body class="text-on-surface font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="fixed h-screen w-[280px] left-0 top-0 bg-glass-surface/70 dark:bg-inverse-surface/40 backdrop-blur-xl border-r border-glass-border shadow-[16px_0_32px_rgba(0,0,0,0.04)] flex flex-col gap-stack-md py-margin-page px-stack-md hidden md:flex z-50">
+<div class="flex items-center gap-stack-sm px-stack-md mb-stack-lg">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold font-headline-md">M</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Medis</h1>
+<p class="font-caption text-caption text-on-surface-variant">Health Management</p>
+</div>
+</div>
+<ul class="flex flex-col gap-unit flex-grow"><li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Bảng điều khiển
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+                    Đơn thuốc
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+                    Hồ sơ sức khoẻ
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">medication</span>
+                    Thuốc và tương tác
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg bg-glass-surface dark:bg-surface-variant/20 text-primary dark:text-primary-fixed border-l-4 border-primary dark:border-primary-fixed font-bold font-label-md text-label-md hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+                    Chatbot
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-stack-md py-3 rounded-lg text-on-surface-variant dark:text-outline hover:text-primary dark:hover:text-primary-fixed hover:bg-glass-surface/50 dark:hover:bg-white/5 transition-all duration-300 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                    Lịch trình
+                </a>
+</li></ul>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[280px] flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="sticky top-0 right-0 w-full z-40 bg-glass-surface/40 dark:bg-transparent backdrop-blur-md border-b border-glass-border flex justify-between items-center h-16 px-gutter">
+<div class="flex items-center gap-stack-md">
+<!-- Mobile Menu Button (Hidden on Desktop) -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<div class="hidden md:block font-headline-md text-headline-md text-primary dark:text-primary-fixed font-bold">Medis AI</div>
+</div>
+<div class="flex items-center gap-stack-sm"><button class="p-2 text-on-surface-variant dark:text-outline hover:bg-primary/10 dark:hover:bg-primary-fixed/10 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant dark:text-outline hover:bg-primary/10 dark:hover:bg-primary-fixed/10 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center ml-stack-sm overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCARWlK7IcK0u01PiEOoFPoPsGAyxOZpwNBPuMhBmGfHiFhAIA9HVtzDtsCknIiNNILRETgHFVMbcBjbgqXJdRc1DR2wG100zV0fn2CuDhHNi9BsQqWZgZPQVGzvumlSH21iDFY88rKoUp3Wuz8roC0a_J5MxB_LBkPahtxx4WO20kgxhGPs5rgAOn7bhpK_m58Ug8zK_5Fq1vvwpg14NN533pRn_cdaff8nxA9IpqPnMDGihdqY1fUyVYILYDIDFC9UpB0hv3AsKzo"/>
+</div></div>
+</header>
+<!-- Chat Interface -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Chat History Sidebar (Collapsible on smaller screens if needed, but keeping visible for this layout) -->
+<aside class="w-64 border-r border-glass-border bg-glass-surface/30 backdrop-blur-md flex flex-col hidden lg:flex">
+<div class="p-stack-md border-b border-glass-border">
+<button class="w-full bg-primary text-on-primary py-2 px-4 rounded-lg font-label-md text-label-md flex items-center justify-center gap-unit hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined" data-icon="add" style="font-size: 18px;">add</span>
+                        Phiên trò chuyện mới
+                    </button>
+</div>
+<div class="flex-1 overflow-y-auto p-stack-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-stack-sm px-unit">Hôm nay</h3>
+<ul class="flex flex-col gap-unit mb-stack-md">
+<li>
+<a class="block p-2 rounded-lg bg-glass-surface border border-glass-border text-primary font-body-sm text-body-sm truncate hover:bg-glass-surface/80 transition-colors" href="#">
+                                Tư vấn liều lượng Paracetamol
+                            </a>
+</li>
+<li>
+<a class="block p-2 rounded-lg text-on-surface-variant hover:bg-glass-surface/50 font-body-sm text-body-sm truncate transition-colors" href="#">
+                                Tương tác thuốc Amoxicillin
+                            </a>
+</li>
+</ul>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-stack-sm px-unit">Hôm qua</h3>
+<ul class="flex flex-col gap-unit">
+<li>
+<a class="block p-2 rounded-lg text-on-surface-variant hover:bg-glass-surface/50 font-body-sm text-body-sm truncate transition-colors" href="#">
+                                Lịch tiêm phòng cúm
+                            </a>
+</li>
+<li>
+<a class="block p-2 rounded-lg text-on-surface-variant hover:bg-glass-surface/50 font-body-sm text-body-sm truncate transition-colors" href="#">
+                                Đau đầu buồn nôn
+                            </a>
+</li>
+</ul>
+</div>
+</aside>
+<!-- Main Chat Area -->
+<div class="flex-1 flex flex-col bg-transparent relative">
+<!-- Context Banner -->
+<div class="absolute top-0 left-0 w-full z-10 p-stack-md">
+<div class="glass-panel rounded-xl p-3 flex items-center justify-between border border-tertiary/20 bg-tertiary-fixed/40">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="person_book" style="font-size: 18px;">person_book</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-tertiary">Ngữ cảnh hồ sơ sức khỏe</p>
+<p class="font-caption text-caption text-on-surface-variant">Đang xét: Tiền sử dị ứng Penicillin, Huyết áp cao.</p>
+</div>
+</div>
+<button class="text-tertiary hover:bg-tertiary/10 p-1 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="edit" style="font-size: 18px;">edit</span>
+</button>
+</div>
+</div>
+<!-- Messages Area -->
+<div class="flex-1 overflow-y-auto p-gutter pt-24 pb-32 flex flex-col gap-stack-md">
+<!-- AI Message -->
+<div class="flex gap-stack-sm max-w-[80%]">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary mt-1">
+<span class="material-symbols-outlined" data-icon="smart_toy" style="font-size: 20px;">smart_toy</span>
+</div>
+<div class="glass-panel rounded-2xl rounded-tl-none p-4 text-on-surface font-body-md text-body-md">
+<p>Xin chào! Tôi là trợ lý y tế AI của Medis. Tôi đã xem xét hồ sơ của bạn, lưu ý về dị ứng Penicillin và huyết áp cao. Hôm nay tôi có thể giúp gì cho bạn?</p>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-stack-sm max-w-[80%] self-end flex-row-reverse">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex-shrink-0 flex items-center justify-center mt-1 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close up portrait of a female doctor smiling warmly in a bright modern medical facility. She is wearing a white lab coat over a teal scrub top. The background is softly blurred showing high tech equipment, establishing a professional and ethereal light mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVoO0-nUYiAAPWIrkLqP9WGP689Jb-nuYoIlwZw92tcK_upkwxMY5F3j4FUMdQgnF8YiTNt8On1i0rUMeAzQNgH2x3_914iBGszKrQb6AHjj27D70xmMIaD9o8ueeJWittE6VKhGuFPx2F1cOalUhi4fjoP7THaayFn-aRD6XCFBqnzmXtb3o9zPRGzzbR8kBuNxIp_6wyMy-PHgYAt2NV_0Mat9vOSFKZhzGEx3WyYCwVIc8zs3JeK3xH_CLDVfjs_5u-HIN2GZxe"/>
+</div>
+<div class="bg-primary text-on-primary rounded-2xl rounded-tr-none p-4 font-body-md text-body-md shadow-sm">
+<p>Chào bác sĩ AI, dạo này tôi hay bị đau đầu nhẹ vào buổi chiều. Không biết có phải do thuốc huyết áp không?</p>
+</div>
+</div>
+<!-- AI Message -->
+<div class="flex gap-stack-sm max-w-[80%]">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary mt-1">
+<span class="material-symbols-outlined" data-icon="smart_toy" style="font-size: 20px;">smart_toy</span>
+</div>
+<div class="glass-panel rounded-2xl rounded-tl-none p-4 text-on-surface font-body-md text-body-md flex flex-col gap-stack-sm">
+<p>Đau đầu vào buổi chiều có thể do nhiều nguyên nhân. Dựa trên hồ sơ của bạn, thuốc huyết áp bạn đang dùng (Amlodipine) thỉnh thoảng có thể gây tác dụng phụ này, đặc biệt nếu mới thay đổi liều lượng.</p>
+<p>Tuy nhiên, cũng có thể do căng thẳng, mỏi mắt, hoặc thiếu nước. Bạn có đo huyết áp gần đây khi bị đau đầu không?</p>
+<div class="bg-surface-variant/30 rounded-lg p-3 border border-glass-border mt-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-warning-orange" data-icon="info" style="font-size: 16px;">info</span>
+<span class="font-label-md text-label-md text-on-surface">Lưu ý y tế</span>
+</div>
+<p class="font-caption text-caption text-on-surface-variant">Thông tin này chỉ mang tính tham khảo, không thay thế chẩn đoán của bác sĩ trực tiếp.</p>
+</div>
+</div>
+</div>
+<!-- Typing Indicator -->
+<div class="flex gap-stack-sm max-w-[80%]">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary mt-1">
+<span class="material-symbols-outlined" data-icon="smart_toy" style="font-size: 20px;">smart_toy</span>
+</div>
+<div class="glass-panel rounded-2xl rounded-tl-none p-4 flex items-center gap-1 w-16 h-12">
+<div class="w-2 h-2 rounded-full bg-primary/60 animate-pulse"></div>
+<div class="w-2 h-2 rounded-full bg-primary/60 animate-pulse" style="animation-delay: 0.2s"></div>
+<div class="w-2 h-2 rounded-full bg-primary/60 animate-pulse" style="animation-delay: 0.4s"></div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="absolute bottom-0 left-0 w-full p-gutter bg-gradient-to-t from-[#f9f9f9] to-transparent">
+<div class="glass-panel rounded-full p-2 flex items-center gap-stack-sm max-w-4xl mx-auto shadow-lg">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-primary/10">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-on-surface-variant/50 px-2 h-10 outline-none" placeholder="Nhập triệu chứng hoặc câu hỏi của bạn..." type="text"/>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-primary/10">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+<button class="w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center hover:bg-primary-container transition-colors shadow-sm ml-1">
+<span class="material-symbols-outlined" data-icon="send" style="font-size: 18px; margin-left: 2px;">send</span>
+</button>
+</div>
+<p class="text-center font-caption text-caption text-on-surface-variant mt-2">AI có thể cung cấp thông tin không chính xác. Vui lòng tham khảo ý kiến bác sĩ.</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>

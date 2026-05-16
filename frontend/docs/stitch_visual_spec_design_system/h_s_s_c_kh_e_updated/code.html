@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hồ sơ sức khỏe - Medis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#8df5e4",
+                        "on-secondary-container": "#182a8e",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "primary-container": "#008376",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#70d8c8",
+                        "on-surface-variant": "#3d4946",
+                        "on-secondary-fixed": "#000e5e",
+                        "on-primary-fixed": "#00201c",
+                        "tertiary-fixed": "#f8d8ff",
+                        "on-error-container": "#93000a",
+                        "completed-gray": "#9E9E9E",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container-highest": "#e2e2e2",
+                        "inverse-surface": "#2f3131",
+                        "tertiary-container": "#a54dcc",
+                        "on-surface": "#1a1c1c",
+                        "warning-orange": "#E65100",
+                        "active-green": "#43A047",
+                        "tertiary-fixed-dim": "#ebb2ff",
+                        "glass-surface": "rgba(255, 255, 255, 0.7)",
+                        "tertiary": "#8a30b0",
+                        "outline": "#6d7a77",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2c3c9e",
+                        "secondary-container": "#8999ff",
+                        "on-tertiary-fixed-variant": "#721199",
+                        "primary-fixed-dim": "#70d8c8",
+                        "surface-dim": "#dadada",
+                        "error-red": "#B00020",
+                        "on-error": "#ffffff",
+                        "on-background": "#1a1c1c",
+                        "on-primary-fixed-variant": "#005048",
+                        "surface-variant": "#e2e2e2",
+                        "surface-tint": "#006b5f",
+                        "secondary": "#4555b7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dee0ff",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "outline-variant": "#bcc9c5",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#320047",
+                        "inverse-on-surface": "#f0f1f1",
+                        "primary": "#00685d",
+                        "surface": "#f9f9f9",
+                        "background": "#f9f9f9",
+                        "on-primary-container": "#f4fffb",
+                        "glass-border": "rgba(255, 255, 255, 0.4)",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "unit": "4px",
+                        "margin-page": "40px",
+                        "gutter": "24px",
+                        "container-padding": "24px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "caption": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background: linear-gradient(135deg, #f0f7f6 0%, #e6eff5 100%);
+            min-height: 100vh;
+        }
+        .bg-glass {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        .bg-glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.04);
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, #00685d, #4555b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="text-on-background font-body-md antialiased overflow-hidden flex">
+<!-- Ambient Background Gradients -->
+<div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#8df5e4] rounded-full blur-[120px] opacity-30"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#bbc3ff] rounded-full blur-[120px] opacity-30"></div>
+</div>
+<!-- SideNavBar -->
+<nav class="fixed h-screen w-[280px] left-0 top-0 bg-glass-surface/70 dark:bg-inverse-surface/40 backdrop-blur-xl border-r border-glass-border shadow-[16px_0_32px_rgba(0,0,0,0.04)] flex flex-col gap-stack-md py-margin-page px-stack-md z-50">
+<div class="flex items-center gap-3 px-4 mb-8">
+<span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">health_and_safety</span>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Medis</h1>
+<p class="font-caption text-caption text-on-surface-variant">Quản lý Sức khỏe</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto space-y-2"><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-glass-surface/50 transition-all duration-300" href="#"><span class="material-symbols-outlined">dashboard</span><span class="font-label-md text-label-md">Bጐng điጐu khiጐn</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-glass-surface/50 transition-all duration-300" href="#"><span class="material-symbols-outlined">receipt_long</span><span class="font-label-md text-label-md">Đān thu጑c</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-glass-surface text-primary border-l-4 border-primary font-bold shadow-sm scale-[0.98] transition-transform" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monitor_heart</span><span class="font-label-md text-label-md">Hጓ sı sጹc khጓe</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-glass-surface/50 transition-all duration-300" href="#"><span class="material-symbols-outlined">medication</span><span class="font-label-md text-label-md">Thu጑c vက tİ጑ng tခc</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-glass-surface/50 transition-all duration-300" href="#"><span class="material-symbols-outlined">smart_toy</span><span class="font-label-md text-label-md">Chatbot</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-glass-surface/50 transition-all duration-300" href="#"><span class="material-symbols-outlined">calendar_month</span><span class="font-label-md text-label-md">L጑ch trnh</span></a></div>
+</nav>
+<!-- Main Content Area -->
+<div class="ml-[280px] flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="sticky top-0 right-0 w-full z-40 bg-glass-surface/40 backdrop-blur-md border-b border-glass-border flex justify-between items-center h-16 px-gutter">
+<div class="flex-1 flex items-center">
+<!-- Search on left -->
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-glass-surface border border-glass-border rounded-full pl-10 pr-4 py-2 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Tìm kiếm hồ sơ bệnh án..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4"><button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary/10 transition-colors"><span class="material-symbols-outlined">notifications</span></button><button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary/10 transition-colors"><span class="material-symbols-outlined">settings</span></button><div class="w-10 h-10 rounded-full bg-primary/20 overflow-hidden border border-glass-border cursor-pointer"><img alt="User Profile" class="w-full h-full object-cover" data-alt="A close up portrait of a young professional woman smiling warmly, bathed in soft, natural morning light, setting a calm and welcoming tone appropriate for a modern health app profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz-rMcNsp43PxABQ1C1KFUmpwBpH45lorfEoGyZBMofN1faL8bMJLyHL4gY0u1PAxrTee7oGki6FfNfWLu7fH6afwuI8mQkBAegVreCMLFhjgkaZ7p1EIOBuVm4WxWx4EaXiX8h3Pa6WVc82oyWP_NLsN_9SCVi-t_U06gsaSHkAJWDWphtFErHt2ocvzg-HFtJygBAa7Ag1MxB_p1eb_c7PA1h6VT3D-dI4WD2xI3Ox2LRvfmUOyz8j-ilMTa97RvmwP_DxMahwYv"/></div></div>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto p-margin-page p-6 md:p-8">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Hồ sơ Sức khỏe</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Quản lý và theo dõi lịch sử khám chữa bệnh của bạn.</p>
+</div>
+<!-- Filters -->
+<div class="flex gap-4">
+<div class="relative">
+<select class="appearance-none bg-glass-card border border-glass-border rounded-xl px-4 py-2.5 pr-10 text-body-sm font-label-md text-on-surface focus:outline-none focus:border-primary cursor-pointer">
+<option>Tất cả thời gian</option>
+<option>6 tháng qua</option>
+<option>Năm nay</option>
+<option>Năm ngoái</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-label-md text-label-md hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                        Bộ lọc nâng cao
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout for Records -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Record Card 1 -->
+<div class="bg-glass-card rounded-[24px] p-6 hover:shadow-[0_8px_32px_rgba(0,104,93,0.08)] transition-all duration-300 border border-white/60 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">pulmonology</span>
+</div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full font-caption text-caption font-bold">Khám tổng quát</div>
+<span class="font-label-md text-label-md text-outline">12 Tháng 10, 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Viêm phế quản nhẹ</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Bệnh viện Đa khoa Tâm Anh</p>
+<div class="flex items-center gap-3 pt-4 border-t border-glass-border">
+<div class="w-8 h-8 rounded-full bg-secondary-container overflow-hidden">
+<img alt="Doctor" class="w-full h-full object-cover" data-alt="A professional headshot of a male doctor in his 40s wearing a white coat and glasses, projecting confidence and empathy against a clean light background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC44W17NP5TCUPuMl8A2ToX1egr3UW1xPpJcb5zXWFU8_o0XmFlTwBMX2MPkjkrCJ1s-3Y8XRLvyDmhKIcXNMdM8E_uhaYdbRMAQr7HPD8Sq9ZUSZip9XrIyva7X-tJteuP9jL9yNOVOlnu5xAl74X7rP5BGE1QGkRpXd1i2rO9K5Duw9RowAB1hlePSt_qmG5HwG75LdqubJQW-6IJ2Dd6k8FoW8qeCDPF3NdfCaDCQOHVydxTuoDhb8fcWFoAtLxFZ3lNC6NB9JlD"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">BS. Nguyễn Văn An</p>
+<p class="font-caption text-caption text-outline">Khoa Nội</p>
+</div>
+<button class="ml-auto w-8 h-8 rounded-full flex items-center justify-center bg-surface-container hover:bg-primary/10 text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Record Card 2 -->
+<div class="bg-glass-card rounded-[24px] p-6 hover:shadow-[0_8px_32px_rgba(0,104,93,0.08)] transition-all duration-300 border border-white/60 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-tertiary">cardiology</span>
+</div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="bg-tertiary/10 text-tertiary px-3 py-1 rounded-full font-caption text-caption font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                            Theo dõi định kỳ
+                        </div>
+<span class="font-label-md text-label-md text-outline">05 Tháng 9, 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Kiểm tra huyết áp</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Phòng khám Tim mạch Sài Gòn</p>
+<div class="flex items-center gap-3 pt-4 border-t border-glass-border">
+<div class="w-8 h-8 rounded-full bg-secondary-container overflow-hidden">
+<img alt="Doctor" class="w-full h-full object-cover" data-alt="A headshot of a female cardiologist in her 50s with a warm smile, wearing professional clinical attire, set against a bright, sterile yet welcoming medical office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDisczfvHIllLAEiCA1HAT7RknaX871KXs9cPBpDNc0v1U6ixEOhABk7aUXbt6-KuT_8WqdQ5wwuIbVzBU18I5jWs5k2LHUjeeWAdLa_5uYgqaVdvJ9ANO4p1BfA7pgdLCYA7XOgfZ1TsSEtw5HTCsosR6g_oKQD722u7cc-Yst2nk5KrFiDElR7dms-KFqC3wrPEtQnj1o_buEoMZUKC35sDPeSwRmdo7UJ-GxrmFPqIaORaSj1H3-0EOrJYjX0HaBpjiW-54g46Nz"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">BS. Trần Thị Mai</p>
+<p class="font-caption text-caption text-outline">Khoa Tim mạch</p>
+</div>
+<button class="ml-auto w-8 h-8 rounded-full flex items-center justify-center bg-surface-container hover:bg-tertiary/10 text-tertiary transition-colors">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Record Card 3 -->
+<div class="bg-glass-card rounded-[24px] p-6 hover:shadow-[0_8px_32px_rgba(0,104,93,0.08)] transition-all duration-300 border border-white/60 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-secondary">dermatology</span>
+</div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="bg-secondary/10 text-secondary px-3 py-1 rounded-full font-caption text-caption font-bold">Khám chuyên khoa</div>
+<span class="font-label-md text-label-md text-outline">22 Tháng 7, 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Viêm da cơ địa</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Bệnh viện Da liễu TW</p>
+<div class="flex items-center gap-3 pt-4 border-t border-glass-border">
+<div class="w-8 h-8 rounded-full bg-secondary-container overflow-hidden">
+<img alt="Doctor" class="w-full h-full object-cover" data-alt="A professional portrait of a young male dermatologist, looking attentive and knowledgeable, framed in a clean, brightly lit modern clinic environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk4xYVg4S82TTI3k8CNI_KXU9Vc2HXsBhpzX8i4JY7OES-9kikVSaqyh8bKbUYpDCiWsAq6yz0IMNcS0Vq2rs_5WSP9zzyaIX3K2JJ5_tESSOGL3DhIQNkb5s-bHpkzeIz0vHP_bkZKUSINFYyumcHGp9_Me5XSy_es-2kNKoC2HepshciWQH_KZmucaqR7hpPJPCjhZZRzxAo3orbJh0z-f9KRCuytSOsUUZsfqeD1vyaT83B9gVeao5BmcuV67xbqmu9ytrM_QJ4"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">BS. Lê Hoàng</p>
+<p class="font-caption text-caption text-outline">Khoa Da liễu</p>
+</div>
+<button class="ml-auto w-8 h-8 rounded-full flex items-center justify-center bg-surface-container hover:bg-secondary/10 text-secondary transition-colors">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

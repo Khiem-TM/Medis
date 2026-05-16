@@ -1,5 +1,4 @@
 import { ref, computed } from 'vue'
-import type { PaginationMeta } from '@/types/api.types'
 
 export function usePagination(initialSize = 10) {
   const page = ref(1)

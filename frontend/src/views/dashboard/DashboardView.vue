@@ -11,14 +11,14 @@ import type { ActivityAction } from '@/types/activity.types'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.isAdmin)
 
-const { data: stats, isLoading: loadingStats } = useAdminStats()
+const { data: stats } = useAdminStats(isAdmin)
 const prescriptionParams = ref({ page: 1, size: 5 })
 const { data: prescriptions, isLoading: loadingRx } = usePrescriptions(computed(() => prescriptionParams.value))
 const activityParams = ref({ page: 1, size: 5 })
 const { data: activityData, isLoading: loadingActivity } = useActivityLogs(computed(() => activityParams.value))
 
-const isAdmin = computed(() => authStore.isAdmin)
 const userName = computed(() => authStore.user?.full_name || authStore.user?.username || 'Bạn')
 const activeCount = computed(() => prescriptions.value?.items.filter((r) => r.status === 'active').length ?? 0)
 const totalCount = computed(() => prescriptions.value?.meta.total ?? 0)
@@ -30,32 +30,32 @@ const quickActions = [
     sub: 'Tư vấn về triệu chứng & thuốc',
     icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
     path: '/chatbot',
-    iconBg: '#EDE9FE',
-    iconColor: '#7C3AED',
+    iconBg: '#F8D8FF',
+    iconColor: '#8A30B0',
   },
   {
     label: 'Thêm đơn thuốc',
     sub: 'Nhập thủ công hoặc ảnh đơn',
     icon: 'M12 4v16m8-8H4',
     path: '/profile/prescriptions',
-    iconBg: '#DCEDFF',
-    iconColor: '#2563EB',
+    iconBg: '#8DF5E4',
+    iconColor: '#00685D',
   },
   {
     label: 'Tra cứu tương tác',
     sub: 'Kiểm tra 2–20 thuốc',
     icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
     path: '/interactions',
-    iconBg: '#D1FAE5',
-    iconColor: '#059669',
+    iconBg: '#DEE0FF',
+    iconColor: '#4555B7',
   },
   {
     label: 'Tra cứu thuốc',
     sub: 'Tìm theo tên / hoạt chất',
     icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
     path: '/drugs',
-    iconBg: '#EFF3F8',
-    iconColor: '#0C1D42',
+    iconBg: '#F3F3F3',
+    iconColor: '#1A1C1C',
   },
 ]
 
@@ -85,15 +85,15 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
 </script>
 
 <template>
-  <div class="space-y-5">
+  <div class="flex flex-col gap-8">
 
     <!-- Hero row: gradient card + ring stats -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8">
 
       <!-- Hero gradient card -->
       <div
-        class="relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between min-h-[200px]"
-        style="background: linear-gradient(135deg, #0C1D42 0%, #1E3568 60%, #2C447F 100%);"
+        class="glass-panel-strong relative overflow-hidden rounded-[2rem] p-6 flex flex-col justify-between min-h-[220px]"
+        style="background: linear-gradient(135deg, rgba(0,104,93,0.96) 0%, rgba(69,85,183,0.88) 55%, rgba(138,48,176,0.86) 100%);"
       >
         <div class="absolute -top-10 -right-10 w-44 h-44 rounded-full pointer-events-none" style="background: rgba(255,255,255,0.04);"></div>
         <div class="absolute bottom-4 left-1/3 w-32 h-32 rounded-full pointer-events-none" style="background: rgba(255,255,255,0.03);"></div>
@@ -215,7 +215,7 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
     </div>
 
     <!-- Quick action tiles -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
       <button
         v-for="action in quickActions"
         :key="action.path"
@@ -244,7 +244,7 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
     </div>
 
     <!-- Main grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
       <!-- Recent prescriptions (7 cols) -->
       <section
@@ -308,7 +308,7 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
       </section>
 
       <!-- Right column (5 cols) -->
-      <section class="lg:col-span-5 flex flex-col gap-4">
+      <section class="lg:col-span-5 flex flex-col gap-6">
 
         <!-- AI highlight card -->
         <div
@@ -338,6 +338,30 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
               Thử gợi ý AI ngay →
             </button>
           </div>
+        </div>
+
+        <!-- Update Profile Card -->
+        <div
+          class="bg-white rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          style="border: 1px solid rgba(12,29,66,0.08); box-shadow: 0 1px 2px rgba(12,29,66,.04);"
+        >
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <span class="text-sm font-bold tracking-tight" style="color: #0C1D42;">Hồ sơ sức khỏe</span>
+            </div>
+            <p class="text-xs ml-10" style="color: #8A95AC;">Cập nhật thông tin bệnh nền, dị ứng để AI tư vấn chính xác hơn.</p>
+          </div>
+          <button 
+            @click="router.push('/onboarding?update=true')"
+            class="whitespace-nowrap w-full sm:w-auto text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#F0FAF9] text-[#00897B] border border-[#00897B]/20 hover:bg-[#E0F5F3] transition-colors"
+          >
+            Cập nhật ngay
+          </button>
         </div>
 
         <!-- Recent activity -->

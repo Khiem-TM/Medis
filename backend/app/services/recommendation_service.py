@@ -10,7 +10,6 @@ from uuid import uuid4
 import openpyxl
 import openpyxl.styles
 from fastapi import HTTPException, status
-from openai import AsyncOpenAI
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -25,6 +24,7 @@ from app.schemas.recommendation import (
     RecommendationRequest,
     RecommendationResponse,
 )
+from app.services.openai_client import build_async_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ def _calc_age(dob: Optional[datetime]) -> Optional[int]:
 class RecommendationService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.client = build_async_openai_client()
 
     async def recommend(
         self,
@@ -137,6 +137,12 @@ class RecommendationService:
             diagnoses=diagnoses,
             current_drugs=current_drug_names,
         )
+
+        if self.client is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Tính năng gợi ý AI chưa được cấu hình",
+            )
 
         ai_response = await self.client.chat.completions.create(
             model=settings.OPENAI_MODEL,

@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserResponse | null>(null)
   const initialized = ref(false)
 
-  const isAuthenticated = computed(() => !!tokenManager.accessToken)
+  const isAuthenticated = computed(() => !!tokenManager.getAccessToken())
   const isAdmin = computed(() => user.value?.role === 'admin')
 
   function setTokens(accessToken: string, refreshToken: string) {
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     // expose for computed access in components
     get accessToken() {
-      return tokenManager.accessToken
+      return tokenManager.getAccessToken()
     },
     get refreshToken() {
       return tokenManager.getRefreshToken()

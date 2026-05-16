@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MedicationReminder } from '@/types/reminder.types'
 
-const props = defineProps<{
+defineProps<{
   reminder: MedicationReminder
   compact?: boolean
 }>()

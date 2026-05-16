@@ -13,6 +13,9 @@ export interface Toast {
 export const useUiStore = defineStore('ui', () => {
   const sidebarOpen = ref(true)
   const mobileSidebarOpen = ref(false)
+  const notificationDropdownOpen = ref(false)
+  const commandPaletteOpen = ref(false)
+  const isOffline = ref(!navigator.onLine)
   const toasts = ref<Toast[]>([])
 
   function toggleSidebar() {
@@ -21,6 +24,22 @@ export const useUiStore = defineStore('ui', () => {
 
   function setMobileSidebar(open: boolean) {
     mobileSidebarOpen.value = open
+  }
+
+  function toggleMobileSidebar() {
+    mobileSidebarOpen.value = !mobileSidebarOpen.value
+  }
+
+  function setNotificationDropdown(open: boolean) {
+    notificationDropdownOpen.value = open
+  }
+
+  function setCommandPalette(open: boolean) {
+    commandPaletteOpen.value = open
+  }
+
+  function setOffline(value: boolean) {
+    isOffline.value = value
   }
 
   function addToast(toast: Omit<Toast, 'id'>): string {
@@ -58,9 +77,16 @@ export const useUiStore = defineStore('ui', () => {
   return {
     sidebarOpen,
     mobileSidebarOpen,
+    notificationDropdownOpen,
+    commandPaletteOpen,
+    isOffline,
     toasts,
     toggleSidebar,
     setMobileSidebar,
+    toggleMobileSidebar,
+    setNotificationDropdown,
+    setCommandPalette,
+    setOffline,
     addToast,
     removeToast,
     success,
