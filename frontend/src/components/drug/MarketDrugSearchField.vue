@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: MarketDrugProduct | null]
+  'update:customText': [value: string]
 }>()
 
 const search = ref(props.modelValue?.product_name ?? '')
@@ -23,6 +24,12 @@ const open = ref(false)
 watch(() => props.modelValue, (value) => {
   if (value && value.product_name !== search.value) search.value = value.product_name
   if (!value && !open.value) search.value = ''
+})
+
+watch(search, (val) => {
+  if (!props.modelValue) {
+    emit('update:customText', val)
+  }
 })
 
 watch(debounced, async (q) => {
@@ -53,6 +60,7 @@ function selectProduct(product: MarketDrugProduct) {
 function clearProduct() {
   emit('update:modelValue', null)
   search.value = ''
+  emit('update:customText', '')
   results.value = []
   open.value = false
 }

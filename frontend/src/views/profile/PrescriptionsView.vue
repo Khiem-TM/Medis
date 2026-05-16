@@ -52,14 +52,14 @@ const form = reactive({
   name: '',
   notes: '',
   status: 'active' as 'active' | 'completed',
-  items: [{ market_product_id: undefined as number | undefined, drug_id: undefined as string | undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null as MarketDrugProduct | null }],
+  items: [{ market_product_id: undefined as number | undefined, drug_id: undefined as string | undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null as MarketDrugProduct | null, is_ai_suggestion: false }],
 })
 
 function resetForm() {
   form.name = ''
   form.notes = ''
   form.status = 'active'
-  form.items = [{ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null }]
+  form.items = [{ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null, is_ai_suggestion: false }]
   Object.keys(formErrors).forEach((k) => delete formErrors[k])
   symptoms.value = ''
   suggestions.value = []
@@ -88,6 +88,7 @@ function addSuggestionToItems(s: DrugSuggestion, idx: number) {
     frequency: '',
     duration: '',
     selected_product: null as MarketDrugProduct | null,
+    is_ai_suggestion: true,
   }
   if (emptyIdx >= 0) {
     form.items[emptyIdx] = item
@@ -98,7 +99,7 @@ function addSuggestionToItems(s: DrugSuggestion, idx: number) {
 }
 
 function addItem() {
-  form.items.push({ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null })
+  form.items.push({ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null, is_ai_suggestion: false })
 }
 
 function removeItem(i: number) {
@@ -158,6 +159,7 @@ function onSelectDrug(index: number, product: MarketDrugProduct | null) {
   item.market_product_id = product?.id
   item.drug_name = product?.product_name ?? ''
   item.drug_id = product?.resolved_drug_ids.length === 1 ? product.resolved_drug_ids[0] : undefined
+  item.is_ai_suggestion = false
 }
 
 async function deleteItem(id: string) {
@@ -432,20 +434,20 @@ const statusOptions = [
             <div class="flex-1 grid grid-cols-2 gap-2">
               <div class="col-span-2">
                 <!-- AI-suggested drug (no market product linked yet) -->
-                <div v-if="item.drug_name && !item.selected_product" class="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary-fixed/20 px-3 py-2">
+                <div v-if="item.is_ai_suggestion" class="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary-fixed/20 px-3 py-2">
                   <svg class="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.75 3.75 0 01-5.303 0l-.347-.347z" />
                   </svg>
                   <span class="text-sm font-semibold text-on-surface flex-1 truncate">{{ item.drug_name }}</span>
                   <span class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded-md font-medium">AI</span>
-                  <button type="button" class="text-xs text-outline hover:text-primary ml-1" @click="item.drug_name = ''; item.drug_id = undefined">Đổi</button>
+                  <button type="button" class="text-xs text-outline hover:text-primary ml-1" @click="item.drug_name = ''; item.drug_id = undefined; item.is_ai_suggestion = false">Đổi</button>
                 </div>
-                <!-- Normal market drug search -->
                 <MarketDrugSearchField
                   v-else
                   :model-value="item.selected_product"
-                  placeholder="Chọn thuốc từ danh mục DAV *"
+                  placeholder="Nhập tên thuốc hoặc chọn từ gợi ý *"
                   @update:model-value="onSelectDrug(i, $event)"
+                  @update:customText="item.drug_name = $event; item.market_product_id = undefined"
                 />
                 <p v-if="formErrors[`items.${i}.drug_name`]" class="text-xs text-error mt-1">{{ formErrors[`items.${i}.drug_name`] }}</p>
               </div>

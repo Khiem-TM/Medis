@@ -12,7 +12,7 @@ export const prescriptionItemSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['drug_name'],
-      message: 'Vui lòng chọn thuốc từ danh mục',
+      message: 'Vui lòng nhập tên thuốc hoặc chọn từ danh mục',
     })
   }
 })
