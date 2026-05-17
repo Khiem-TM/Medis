@@ -18,6 +18,7 @@ from app.models.chat_message import ChatMessage, ChatSession
 from app.models.reminder import MedicationReminder
 from app.models.health_baseline import UserHealthBaseline
 from app.models.notification import Notification, NotificationType, NotificationPriority
+from app.models.vital_record import VitalRecord
 
 __all__ = [
     "User",
@@ -34,4 +35,5 @@ __all__ = [
     "Notification", "NotificationType", "NotificationPriority",
     "MedicationIntakeLog", "IntakeStatus",
     "MedicationType", "PrescriptionStatus",
+    "VitalRecord",
 ]

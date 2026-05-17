@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import date
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -59,11 +61,14 @@ async def delete_reminder(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy nhắc nhở")
 
 
-@router.get("/today", response_model=list[ReminderResponse], summary="Lịch uống thuốc hôm nay")
+@router.get("/today", response_model=list[ReminderResponse], summary="Lịch uống thuốc theo ngày")
 async def today_schedule(
+    target_date: date = Query(default=None, description="Ngày cần xem (YYYY-MM-DD). Mặc định: hôm nay"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if target_date:
+        return await _svc(db).get_schedule_for_date(current_user.id, target_date)
     return await _svc(db).get_today_schedule(current_user.id)
 
 

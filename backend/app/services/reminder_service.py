@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, time
+from datetime import date, datetime, time
 from typing import List, Optional
 
 from sqlalchemy import select, and_
@@ -106,6 +106,27 @@ class ReminderService:
         await self.db.delete(reminder)
         await self.db.commit()
         return True
+
+    async def get_schedule_for_date(self, user_id: int, target_date: date) -> List[ReminderResponse]:
+        today_abbr = DAY_MAP[target_date.weekday()]
+        result = await self.db.execute(
+            select(MedicationReminder).where(
+                and_(
+                    MedicationReminder.user_id == user_id,
+                    MedicationReminder.is_active == True,  # noqa: E712
+                )
+            ).order_by(MedicationReminder.reminder_time)
+        )
+        reminders = result.scalars().all()
+
+        filtered = []
+        for r in reminders:
+            if r.frequency == "daily":
+                filtered.append(r)
+            elif r.days_of_week and today_abbr in r.days_of_week.lower():
+                filtered.append(r)
+
+        return [_to_response(r) for r in filtered]
 
     async def get_today_schedule(self, user_id: int) -> List[ReminderResponse]:
         today_abbr = DAY_MAP[datetime.now().weekday()]

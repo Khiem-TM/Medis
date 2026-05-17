@@ -94,9 +94,25 @@ class MedicationTrackingService:
         logger.info(f"Intake confirmed: user={user_id} reminder={reminder_id} status={new_status}")
         return MedicationIntakeLogResponse.model_validate(log)
 
+    async def get_logs_for_date(self, user_id: int, target_date: date) -> list[MedicationIntakeLogResponse]:
+        result = await self.db.execute(
+            select(MedicationIntakeLog).where(
+                and_(
+                    MedicationIntakeLog.user_id == user_id,
+                    MedicationIntakeLog.scheduled_date == target_date,
+                )
+            ).order_by(MedicationIntakeLog.scheduled_time)
+        )
+        return [MedicationIntakeLogResponse.model_validate(lg) for lg in result.scalars().all()]
+
     async def get_stats(self, user_id: int, period: str = "week") -> IntakeStatsResponse:
-        """Tính tỉ lệ tuân thủ uống thuốc trong 7 hoặc 30 ngày gần nhất."""
-        days = 7 if period == "week" else 30
+        """Tính tỉ lệ tuân thủ uống thuốc trong 1, 7 hoặc 30 ngày gần nhất."""
+        if period == "today":
+            days = 1
+        elif period == "week":
+            days = 7
+        else:
+            days = 30
         start = date.today() - timedelta(days=days - 1)
 
         result = await self.db.execute(

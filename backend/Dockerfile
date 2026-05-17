@@ -13,7 +13,10 @@ COPY alembic.ini .
 COPY migrations ./migrations
 COPY app ./app
 COPY static ./static
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/docker-entrypoint.sh"]

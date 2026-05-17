@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useReminders, useTodaySchedule, useCreateReminderMutation, useUpdateReminderMutation, useDeleteReminderMutation, useConfirmIntakeMutation } from '@/api/reminders.api'
-import { useIntakeHistory } from '@/api/intakes.api'
+import { useIntakesByDate } from '@/api/intakes.api'
 import { useToast } from '@/composables/useToast'
 import type { MedicationReminder, CreateReminderRequest } from '@/types/reminder.types'
 import type { IntakeStatus } from '@/types/intake.types'
@@ -23,11 +23,11 @@ const { mutate: deleteReminder } = useDeleteReminderMutation()
 const { mutate: confirmIntake, isPending: confirming, variables: confirmingVar } = useConfirmIntakeMutation()
 
 const todayStr = new Date().toISOString().slice(0, 10)
-const { data: intakeHistory } = useIntakeHistory(ref(1), ref(200))
+const { data: todayLogs } = useIntakesByDate(ref(todayStr))
 const intakeStatusMap = computed<Record<number, IntakeStatus | null>>(() => {
   const map: Record<number, IntakeStatus | null> = {}
-  intakeHistory.value?.items
-    .filter((lg) => lg.scheduled_date === todayStr && lg.reminder_id !== null)
+  todayLogs.value
+    ?.filter((lg) => lg.reminder_id !== null)
     .forEach((lg) => { map[lg.reminder_id!] = lg.status })
   return map
 })
