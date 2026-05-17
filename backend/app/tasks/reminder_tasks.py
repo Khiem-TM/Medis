@@ -52,6 +52,86 @@ async def _send_daily_summaries_async():
         return count
 
 
+async def _expire_periodic_prescriptions_async():
+    """Daily task: mark active periodic prescriptions past end_date as completed."""
+    from datetime import date
+
+    from sqlalchemy import select
+    from sqlalchemy import update as sql_update
+
+    from app.database import AsyncSessionLocal
+    from app.models.notification import NotificationPriority, NotificationType
+    from app.models.prescription import MedicationType, Prescription, PrescriptionItem, PrescriptionStatus
+    from app.models.reminder import MedicationReminder
+    from app.services.notification_service import NotificationService
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(Prescription).where(
+                Prescription.status == PrescriptionStatus.active,
+                Prescription.medication_type == MedicationType.periodic,
+                Prescription.end_date < date.today(),
+            )
+        )
+        prescriptions = result.scalars().all()
+        count = 0
+        for p in prescriptions:
+            p.status = PrescriptionStatus.completed
+
+            item_ids_stmt = select(PrescriptionItem.id).where(
+                PrescriptionItem.prescription_id == p.id
+            )
+            await db.execute(
+                sql_update(MedicationReminder)
+                .where(MedicationReminder.prescription_item_id.in_(item_ids_stmt))
+                .values(is_active=False)
+            )
+
+            try:
+                await NotificationService(db).create_and_send(
+                    user_id=p.user_id,
+                    type=NotificationType.system,
+                    title="Đơn thuốc đã kết thúc",
+                    body=f"Đơn thuốc '{p.name}' đã hết hạn và được tự động hoàn thành.",
+                    priority=NotificationPriority.medium,
+                )
+            except Exception as e:
+                logger.error(f"Notification failed for prescription {p.id}: {e}")
+            count += 1
+
+        await db.commit()
+        logger.info(f"Expired {count} periodic prescriptions")
+        return count
+
+
+async def _mark_missed_intakes_async():
+    """Hourly task: mark pending intake logs older than 90 min as missed."""
+    from datetime import datetime, timedelta
+
+    from sqlalchemy import select
+
+    from app.database import AsyncSessionLocal
+    from app.models.intake_log import IntakeStatus, MedicationIntakeLog
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(MedicationIntakeLog).where(
+                MedicationIntakeLog.status == IntakeStatus.pending
+            )
+        )
+        logs = result.scalars().all()
+        cutoff = datetime.now() - timedelta(minutes=90)
+        count = 0
+        for log in logs:
+            scheduled_naive = datetime.combine(log.scheduled_date, log.scheduled_time)
+            if scheduled_naive < cutoff:
+                log.status = IntakeStatus.missed
+                count += 1
+        await db.commit()
+        logger.info(f"Marked {count} intake logs as missed")
+        return count
+
+
 try:
     from app.celery_app import celery_app, CELERY_AVAILABLE
 
@@ -68,6 +148,14 @@ try:
         def send_daily_summaries():
             return _run_async(_send_daily_summaries_async())
 
+        @celery_app.task(name="app.tasks.reminder_tasks.expire_periodic_prescriptions")
+        def expire_periodic_prescriptions():
+            return _run_async(_expire_periodic_prescriptions_async())
+
+        @celery_app.task(name="app.tasks.reminder_tasks.mark_missed_intakes")
+        def mark_missed_intakes():
+            return _run_async(_mark_missed_intakes_async())
+
 except Exception as e:
     logger.warning(f"Could not register Celery tasks: {e}")
 
@@ -79,3 +167,11 @@ async def trigger_due_reminders():
 
 async def trigger_daily_summaries():
     return await _send_daily_summaries_async()
+
+
+async def trigger_expire_periodic_prescriptions():
+    return await _expire_periodic_prescriptions_async()
+
+
+async def trigger_mark_missed_intakes():
+    return await _mark_missed_intakes_async()

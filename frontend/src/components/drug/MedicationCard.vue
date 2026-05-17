@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import type { MedicationReminder } from '@/types/reminder.types'
+import type { IntakeStatus } from '@/types/intake.types'
 
 defineProps<{
   reminder: MedicationReminder
   compact?: boolean
+  intakeStatus?: IntakeStatus | null
+  confirmLoading?: boolean
 }>()
 
 const emit = defineEmits<{
   toggle: [id: number, active: boolean]
   edit: [reminder: MedicationReminder]
   delete: [id: number]
+  confirm: [id: number]
 }>()
 
 function getFrequencyLabel(freq: string, days: string | null) {
@@ -44,8 +48,39 @@ function getFrequencyLabel(freq: string, days: string | null) {
       </div>
 
       <!-- Status + actions -->
-      <div class="flex items-center gap-2 flex-shrink-0">
+      <div class="flex flex-col items-end gap-2 flex-shrink-0">
+        <!-- Intake status badge / confirm button -->
+        <div v-if="reminder.is_active" class="flex items-center">
+          <span v-if="intakeStatus === 'taken'" class="text-xs font-bold text-green-600 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+            Đã uống
+          </span>
+          <span v-else-if="intakeStatus === 'late'" class="text-xs font-bold text-amber-500 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+            Đã uống (trễ)
+          </span>
+          <span v-else-if="intakeStatus === 'missed'" class="text-xs font-bold text-red-500 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Bỏ lỡ
+          </span>
+          <button
+            v-else
+            @click="emit('confirm', reminder.id)"
+            :disabled="confirmLoading"
+            class="px-3 py-1 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            Đã uống
+          </button>
+        </div>
+
         <!-- Active toggle -->
+        <div class="flex items-center gap-2">
         <button
           @click="emit('toggle', reminder.id, !reminder.is_active)"
           :class="[
@@ -78,6 +113,7 @@ function getFrequencyLabel(freq: string, days: string | null) {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
+        </div>
       </div>
     </div>
   </div>

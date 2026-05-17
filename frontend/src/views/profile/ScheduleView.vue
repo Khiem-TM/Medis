@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useReminders, useTodaySchedule, useCreateReminderMutation, useUpdateReminderMutation, useDeleteReminderMutation } from '@/api/reminders.api'
+import { ref, computed } from 'vue'
+import { useReminders, useTodaySchedule, useCreateReminderMutation, useUpdateReminderMutation, useDeleteReminderMutation, useConfirmIntakeMutation } from '@/api/reminders.api'
+import { useIntakeHistory } from '@/api/intakes.api'
 import { useToast } from '@/composables/useToast'
 import type { MedicationReminder, CreateReminderRequest } from '@/types/reminder.types'
+import type { IntakeStatus } from '@/types/intake.types'
 import MedicationCard from '@/components/drug/MedicationCard.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
@@ -18,6 +20,24 @@ const { data: todaySchedule, isLoading: loadingToday } = useTodaySchedule()
 const { mutate: createReminder, isPending: creating } = useCreateReminderMutation()
 const { mutate: updateReminder, isPending: updating } = useUpdateReminderMutation()
 const { mutate: deleteReminder } = useDeleteReminderMutation()
+const { mutate: confirmIntake, isPending: confirming, variables: confirmingVar } = useConfirmIntakeMutation()
+
+const todayStr = new Date().toISOString().slice(0, 10)
+const { data: intakeHistory } = useIntakeHistory(ref(1), ref(200))
+const intakeStatusMap = computed<Record<number, IntakeStatus | null>>(() => {
+  const map: Record<number, IntakeStatus | null> = {}
+  intakeHistory.value?.items
+    .filter((lg) => lg.scheduled_date === todayStr && lg.reminder_id !== null)
+    .forEach((lg) => { map[lg.reminder_id!] = lg.status })
+  return map
+})
+
+function doConfirm(reminderId: number) {
+  confirmIntake({ reminderId }, {
+    onSuccess: () => toast.success('Đã xác nhận uống thuốc'),
+    onError: () => toast.error('Xác nhận thất bại'),
+  })
+}
 
 const form = ref<CreateReminderRequest>({
   drug_name: '',
@@ -132,6 +152,10 @@ const todayLabel = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'nume
           <p :class="['text-sm mt-1 font-medium truncate', r.is_active ? 'opacity-90' : 'text-on-surface-variant']">
             {{ r.drug_name }}
           </p>
+          <p v-if="intakeStatusMap[r.id] === 'taken' || intakeStatusMap[r.id] === 'late'"
+            class="text-xs mt-1 opacity-80">✓ Đã uống</p>
+          <p v-else-if="intakeStatusMap[r.id] === 'missed'"
+            class="text-xs mt-1 opacity-70">✗ Bỏ lỡ</p>
         </div>
       </div>
     </div>
@@ -155,9 +179,12 @@ const todayLabel = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'nume
           v-for="r in reminders"
           :key="r.id"
           :reminder="r"
+          :intake-status="intakeStatusMap[r.id] ?? null"
+          :confirm-loading="confirming && confirmingVar?.reminderId === r.id"
           @toggle="doToggle"
           @edit="openEdit"
           @delete="doDelete"
+          @confirm="doConfirm"
         />
       </div>
     </div>

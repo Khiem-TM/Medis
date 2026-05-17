@@ -129,12 +129,13 @@ async def list_prescriptions(
     size: int = Query(10, ge=1, le=100),
     search: Optional[str] = Query(None, description="Tìm theo tên đơn thuốc"),
     status: Optional[str] = Query(None, description="Lọc: active | completed"),
+    medication_type: Optional[str] = Query(None, description="Lọc: chronic | periodic"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
 ):
     svc = _prescription_svc(db, redis)
-    return await svc.get_list(current_user.id, page, size, search, status)
+    return await svc.get_list(current_user.id, page, size, search, status, medication_type)
 
 
 @router.post(
@@ -221,6 +222,22 @@ async def delete_many_prescriptions(
     result = await svc.delete_many(current_user.id, body.ids)
     await db.commit()
     return result
+
+
+@router.patch(
+    "/me/prescriptions/{prescription_id}/complete-early",
+    response_model=PrescriptionResponse,
+    summary="Kết thúc sớm đơn thuốc theo kỳ",
+    description="Đánh dấu đã khỏi bệnh trước kỳ — chỉ áp dụng cho đơn thuốc theo kỳ đang active.",
+)
+async def complete_prescription_early(
+    prescription_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    svc = _prescription_svc(db, redis)
+    return await svc.complete_early(current_user.id, prescription_id)
 
 
 @router.get(

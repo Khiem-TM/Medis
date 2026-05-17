@@ -30,15 +30,15 @@ function formatTime(dateString?: string | null) {
 
 <template>
   <div
-    class="bg-white border-r border-[#E5E7EB] flex flex-col h-full transition-all duration-300 relative shrink-0"
+    class="bg-surface-container-low border-r border-outline-variant flex flex-col h-full transition-all duration-300 relative shrink-0"
     :class="isCollapsed ? 'w-16' : 'w-72'"
   >
     <div
-      class="h-16 flex items-center border-b border-[#E5E7EB]"
+      class="h-16 flex items-center border-b border-outline-variant"
       :class="isCollapsed ? 'justify-center' : 'justify-between px-4'"
     >
       <div v-show="!isCollapsed" class="flex items-center gap-2 min-w-0">
-        <h2 class="text-[17px] font-bold tracking-tight whitespace-nowrap" style="color: #0C1D42;">
+        <h2 class="text-[17px] font-bold tracking-tight whitespace-nowrap text-on-surface">
           Phiên trò chuyện
         </h2>
         <button
@@ -73,21 +73,21 @@ function formatTime(dateString?: string | null) {
           v-for="session in sessions"
           :key="session.id"
           class="group p-4 rounded-[1rem] cursor-pointer transition-colors border"
-          :class="String(session.id) === activeSessionId ? 'bg-[#F0F4FF] border-[#4555B7]/10' : 'border-transparent hover:bg-[#F9FAFB]'"
+          :class="String(session.id) === activeSessionId ? 'bg-surface-container-highest border-primary/20 shadow-sm' : 'border-transparent hover:bg-surface-container-high/50'"
           @click="$emit('select', String(session.id))"
         >
           <div class="flex items-start gap-2">
             <div class="flex-1 min-w-0">
               <p
                 class="text-[13px] font-bold mb-1 line-clamp-1"
-                :style="String(session.id) === activeSessionId ? 'color: #0C1D42;' : 'color: #5A6985;'"
+                :class="String(session.id) === activeSessionId ? 'text-on-surface' : 'text-on-surface-variant'"
               >
                 {{ session.title }}
               </p>
-              <p class="text-[12px] line-clamp-1" style="color: #8A95AC;">
+              <p class="text-[12px] line-clamp-1 text-on-surface-variant/70">
                 {{ session.last_message_preview || 'Phiên mới' }}
               </p>
-              <p class="text-[11px] mt-1" style="color: #8A95AC;">
+              <p class="text-[11px] mt-1 text-outline">
                 {{ formatTime(session.last_message_at || session.updated_at) }} · {{ session.message_count }} tin nhắn
               </p>
             </div>

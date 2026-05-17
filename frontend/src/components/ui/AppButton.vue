@@ -27,12 +27,12 @@ defineProps<{
         : variant === 'gradient'
           ? 'text-white hover:opacity-92 focus:ring-primary/40 shadow-sm'
           : variant === 'secondary'
-            ? 'bg-white/70 text-on-surface hover:bg-white focus:ring-outline-variant'
+            ? 'bg-surface-container-low/70 text-on-surface hover:bg-surface-container-low focus:ring-outline-variant'
             : variant === 'ghost'
-              ? 'bg-transparent text-outline hover:bg-white/55 hover:text-on-surface focus:ring-outline-variant'
+              ? 'bg-transparent text-outline hover:bg-surface-container-low/60 hover:text-on-surface focus:ring-outline-variant'
               : variant === 'danger'
                 ? 'bg-error text-white hover:opacity-90 focus:ring-error/40 shadow-sm'
-                : 'border border-outline-variant bg-white/60 text-on-surface-variant hover:bg-white/90 focus:ring-outline-variant',
+                : 'border border-outline-variant bg-surface-container-lowest/60 text-on-surface-variant hover:bg-surface-container-lowest focus:ring-outline-variant',
       variant === 'gradient' ? 'bg-gradient-to-r from-primary to-secondary' : '',
       full ? 'w-full' : '',
     ]"

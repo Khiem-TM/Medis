@@ -15,18 +15,15 @@ function goCheckInteractions() {
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-6">
+  <div class="w-full max-w-6xl mx-auto px-4 py-8">
     <!-- Back button -->
     <button
-      type="button"
-      class="flex items-center gap-2 text-sm mb-6 transition-colors hover:opacity-70"
-      style="color: #5A6985;"
       @click="router.back()"
+      class="w-14 h-10 rounded-xl flex items-center justify-center bg-surface-container-lowest border border-outline-variant text-on-surface shadow-sm hover:bg-surface-container-low transition-all mb-8"
     >
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
-      Quay lại
     </button>
 
     <!-- Loading -->
@@ -51,12 +48,11 @@ function goCheckInteractions() {
     <!-- Content -->
     <template v-else-if="product">
       <!-- Hero Card -->
-      <div class="bg-white rounded-2xl overflow-hidden mb-4" style="border: 1px solid rgba(12,29,66,0.08);">
+      <div class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm mt-8 border border-outline-variant/30">
         <div class="flex flex-col sm:flex-row gap-0">
           <!-- Image panel -->
           <div
-            class="sm:w-56 flex-shrink-0 flex items-center justify-center p-6"
-            style="background: #F8FAFB; border-right: 1px solid rgba(12,29,66,0.06);"
+            class="sm:w-56 flex-shrink-0 flex items-center justify-center p-6 bg-surface-container-low border-r border-outline-variant/20"
           >
             <img
               v-if="product.image_url"
@@ -64,7 +60,7 @@ function goCheckInteractions() {
               :alt="product.product_name"
               class="w-40 h-40 object-contain"
             />
-            <div v-else class="w-40 h-40 flex items-center justify-center rounded-xl" style="background: #EFF6FF;">
+            <div v-else class="w-40 h-40 flex items-center justify-center rounded-xl bg-primary-container/10">
               <svg class="w-16 h-16" style="color: #93C5FD;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
@@ -72,7 +68,7 @@ function goCheckInteractions() {
           </div>
 
           <!-- Info panel -->
-          <div class="flex-1 p-6">
+          <div class="flex-1 p-6 text-on-surface">
             <!-- Status badges -->
             <div class="flex flex-wrap gap-2 mb-3">
               <span
@@ -100,16 +96,16 @@ function goCheckInteractions() {
             </div>
 
             <!-- Name -->
-            <h1 class="text-2xl font-bold mb-1" style="color: #0C1D42;">{{ product.product_name }}</h1>
+            <h1 class="text-2xl font-bold mb-1 text-on-surface">{{ product.product_name }}</h1>
 
             <!-- Registration number -->
-            <p class="text-sm font-mono mb-4" style="color: #8A95AC;">Số ĐK: {{ product.registration_number }}</p>
+            <p class="text-sm font-mono mb-4 text-on-surface-variant">Số ĐK: {{ product.registration_number }}</p>
 
             <!-- Key info grid -->
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
               <div v-if="product.packaging">
-                <dt class="text-xs font-medium uppercase tracking-wide mb-0.5" style="color: #B5BCCB;">Đóng gói</dt>
-                <dd style="color: #2A3A5E;">{{ product.packaging }}</dd>
+                <dt class="text-xs font-medium uppercase tracking-wide mb-0.5 text-outline">Đóng gói</dt>
+                <dd class="text-on-surface-variant font-medium">{{ product.packaging }}</dd>
               </div>
               <div v-if="product.route_name">
                 <dt class="text-xs font-medium uppercase tracking-wide mb-0.5" style="color: #B5BCCB;">Đường dùng</dt>
@@ -117,7 +113,7 @@ function goCheckInteractions() {
               </div>
               <div v-if="product.quality_standard">
                 <dt class="text-xs font-medium uppercase tracking-wide mb-0.5" style="color: #B5BCCB;">Tiêu chuẩn</dt>
-                <dd style="color: #2A3A5E;">{{ product.quality_standard }}</dd>
+                <dd class="text-on-surface-variant font-medium">{{ product.quality_standard }}</dd>
               </div>
               <div v-if="product.shelf_life">
                 <dt class="text-xs font-medium uppercase tracking-wide mb-0.5" style="color: #B5BCCB;">Tuổi thọ</dt>
@@ -137,39 +133,47 @@ function goCheckInteractions() {
       </div>
 
       <!-- Ingredients Card -->
-      <div class="bg-white rounded-2xl p-6 mb-4" style="border: 1px solid rgba(12,29,66,0.08);">
-        <h2 class="text-base font-semibold mb-4" style="color: #0C1D42;">Thành phần hoạt chất</h2>
+      <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm mt-8 border border-outline-variant/30">
+        <h2 class="text-base font-semibold mb-4 text-on-surface">Thành phần hoạt chất</h2>
 
         <!-- Structured ingredients with DDI mapping -->
-        <ul v-if="product.ingredient_summary.length > 0" class="space-y-2">
-          <li
+        <div v-if="product.ingredient_summary.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
             v-for="(ing, idx) in product.ingredient_summary"
             :key="idx"
-            class="flex items-start gap-3"
+            class="flex items-center gap-5 p-5 rounded-2xl border transition-all hover:shadow-md bg-surface-container-low border-outline-variant/50 hover:bg-surface-container-lowest"
           >
-            <span class="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style="background: #1D4FD8;" />
-            <span class="text-sm" style="color: #2A3A5E;">{{ ing }}</span>
-            <span
+            <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: #E0E7FF; color: #4338CA;">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <span class="text-sm font-medium flex-1 text-on-surface">{{ ing }}</span>
+            <RouterLink
               v-if="product.resolved_drug_ids[idx]"
-              class="text-xs px-2 py-0.5 rounded-full font-mono ml-auto flex-shrink-0"
-              style="background: #EFF6FF; color: #1D4FD8;"
+              :to="`/drugs/${product.resolved_drug_ids[idx]}`"
+              class="text-xs px-3 py-1.5 rounded-full font-medium flex-shrink-0 transition-all hover:bg-[#1D4FD8] hover:text-white flex items-center gap-1.5 border"
+              style="background: #EFF6FF; color: #1D4FD8; border-color: #BFDBFE;"
             >
               DDI: {{ product.resolved_drug_ids[idx] }}
-            </span>
-          </li>
-        </ul>
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </RouterLink>
+          </div>
+        </div>
 
         <!-- Raw ingredients fallback -->
-        <div v-if="product.raw_ingredients_text" class="mt-4 pt-4" style="border-top: 1px solid rgba(12,29,66,0.06);">
-          <p class="text-xs font-medium uppercase tracking-wide mb-1" style="color: #B5BCCB;">Nguyên liệu thô (DAV)</p>
-          <p class="text-sm" style="color: #8A95AC;">{{ product.raw_ingredients_text }}</p>
+        <div v-if="product.raw_ingredients_text" class="mt-4 pt-4 border-t soft-divider">
+          <p class="text-xs font-medium uppercase tracking-wide mb-1 text-outline">Nguyên liệu thô (DAV)</p>
+          <p class="text-sm text-on-surface-variant">{{ product.raw_ingredients_text }}</p>
         </div>
       </div>
 
       <!-- DDI warning if no mapping -->
       <div
         v-if="product.resolved_drug_ids.length === 0"
-        class="rounded-xl px-4 py-3 mb-4 flex items-start gap-3"
+        class="rounded-2xl px-6 py-4 flex items-start gap-3 mt-8"
         style="background: #FFFBEB; border: 1px solid #FDE68A;"
       >
         <svg class="w-5 h-5 flex-shrink-0 mt-0.5" style="color: #D97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -184,7 +188,7 @@ function goCheckInteractions() {
       <button
         type="button"
         :disabled="product.resolved_drug_ids.length === 0"
-        class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+        class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-sm font-bold transition-all mt-8"
         :class="product.resolved_drug_ids.length > 0
           ? 'text-white hover:opacity-90 active:scale-95'
           : 'cursor-not-allowed opacity-40 text-white'"

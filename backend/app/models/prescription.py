@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import Date, DateTime, Enum as SAEnum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -21,6 +21,11 @@ class PrescriptionStatus(str, enum.Enum):
     completed = "completed"
 
 
+class MedicationType(str, enum.Enum):
+    chronic = "chronic"
+    periodic = "periodic"
+
+
 class Prescription(Base):
     __tablename__ = "prescriptions"
 
@@ -33,6 +38,13 @@ class Prescription(Base):
         nullable=False,
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    medication_type: Mapped[MedicationType] = mapped_column(
+        SAEnum(MedicationType),
+        default=MedicationType.periodic,
+        nullable=False,
+    )
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

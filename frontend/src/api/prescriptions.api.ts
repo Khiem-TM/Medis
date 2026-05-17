@@ -24,6 +24,8 @@ export const prescriptionsApi = {
   deleteMany: (ids: string[]) => api.delete('/users/me/prescriptions', { data: { ids } }).then((r) => r.data),
   checkInteractions: (id: string) =>
     api.get<InteractionCheckResult>(`/users/me/prescriptions/${id}/interactions`).then((r) => r.data),
+  completeEarly: (id: string) =>
+    api.patch<Prescription>(`/users/me/prescriptions/${id}/complete-early`).then((r) => r.data),
 }
 
 export function usePrescriptions(params: Ref<PrescriptionSearchParams>) {
@@ -69,6 +71,14 @@ export function useDeletePrescriptionMutation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: prescriptionsApi.delete,
+    onSuccess: () => qc.invalidateQueries({ queryKey: prescriptionKeys.all }),
+  })
+}
+
+export function useCompleteEarlyMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: prescriptionsApi.completeEarly,
     onSuccess: () => qc.invalidateQueries({ queryKey: prescriptionKeys.all }),
   })
 }

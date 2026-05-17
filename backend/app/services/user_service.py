@@ -18,7 +18,8 @@ from sqlalchemy.orm import selectinload
 from app.core.security import hash_password, verify_password
 from app.models.health_profile import HealthProfile
 from app.models.market_drug import MarketDrugProduct
-from app.models.prescription import Prescription, PrescriptionItem, PrescriptionStatus
+from app.models.prescription import Prescription, PrescriptionItem, PrescriptionStatus, MedicationType
+from app.models.reminder import MedicationReminder
 from app.models.user import User
 from app.schemas.user import (
     BulkDeleteRequest,
@@ -206,6 +207,7 @@ class PrescriptionService:
         size: int,
         search: Optional[str] = None,
         status_filter: Optional[str] = None,
+        medication_type: Optional[str] = None,
     ) -> PaginatedResponse:
         stmt = select(Prescription).where(Prescription.user_id == user_id)
 
@@ -213,6 +215,8 @@ class PrescriptionService:
             stmt = stmt.where(Prescription.name.ilike(f"%{search}%"))
         if status_filter:
             stmt = stmt.where(Prescription.status == status_filter)
+        if medication_type:
+            stmt = stmt.where(Prescription.medication_type == medication_type)
 
         total = await self.db.scalar(select(func.count()).select_from(stmt.subquery()))
 
@@ -231,6 +235,9 @@ class PrescriptionService:
                 id=p.id,
                 name=p.name,
                 status=p.status,
+                medication_type=p.medication_type,
+                start_date=p.start_date,
+                end_date=p.end_date,
                 drug_count=len(p.items),
                 created_at=p.created_at,
                 updated_at=p.updated_at,
@@ -258,6 +265,9 @@ class PrescriptionService:
             name=data.name,
             notes=data.notes,
             status=data.status or PrescriptionStatus.active,
+            medication_type=data.medication_type,
+            start_date=data.start_date,
+            end_date=data.end_date,
         )
         self.db.add(prescription)
         await self.db.flush()  # Lấy prescription.id
@@ -339,6 +349,51 @@ class PrescriptionService:
     async def check_interactions(self, user_id: int, prescription_id: int) -> dict:
         prescription = await self._get_and_verify(user_id, prescription_id)
         return await self._build_interaction_check(prescription)
+
+    async def complete_early(self, user_id: int, prescription_id: int) -> Prescription:
+        """Người dùng kết thúc sớm đơn thuốc theo kỳ (đã khỏi bệnh trước kỳ)."""
+        from sqlalchemy import update as sql_update
+
+        prescription = await self._get_and_verify(user_id, prescription_id)
+
+        if prescription.status != PrescriptionStatus.active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Đơn thuốc đã hoàn thành hoặc không ở trạng thái active",
+            )
+        if prescription.medication_type != MedicationType.periodic:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Chỉ đơn thuốc theo kỳ mới có thể kết thúc sớm",
+            )
+
+        prescription.status = PrescriptionStatus.completed
+
+        # Deactivate all reminders linked to this prescription's items
+        item_ids_stmt = select(PrescriptionItem.id).where(
+            PrescriptionItem.prescription_id == prescription_id
+        )
+        await self.db.execute(
+            sql_update(MedicationReminder)
+            .where(MedicationReminder.prescription_item_id.in_(item_ids_stmt))
+            .values(is_active=False)
+        )
+        await self.db.flush()
+
+        # Notify user
+        from app.services.notification_service import NotificationService
+        from app.models.notification import NotificationType, NotificationPriority
+
+        await NotificationService(self.db).create_and_send(
+            user_id=user_id,
+            type=NotificationType.system,
+            title="Đơn thuốc đã kết thúc sớm",
+            body=f"Bạn đã đánh dấu đơn thuốc '{prescription.name}' là đã khỏi sớm.",
+            priority=NotificationPriority.low,
+        )
+        await self.db.commit()
+
+        return await self._get_and_verify(user_id, prescription_id)
 
     async def _normalize_prescription_item_payload(self, payload: dict) -> dict:
         market_product_id = payload.get("market_product_id")

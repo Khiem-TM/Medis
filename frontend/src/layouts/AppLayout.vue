@@ -7,7 +7,7 @@ const uiStore = useUiStore()
 </script>
 
 <template>
-  <div class="min-h-screen relative overflow-x-hidden">
+  <div class="min-h-screen relative overflow-x-hidden bg-page-bg text-on-surface transition-colors duration-300">
     <div class="pointer-events-none fixed inset-0">
       <div class="absolute left-[-8rem] top-[-8rem] h-80 w-80 rounded-full bg-primary-fixed/35 blur-3xl" />
       <div class="absolute bottom-[-10rem] right-[-4rem] h-[26rem] w-[26rem] rounded-full bg-tertiary-fixed/30 blur-3xl" />

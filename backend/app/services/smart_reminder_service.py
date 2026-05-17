@@ -78,6 +78,17 @@ class SmartReminderService:
         logger.info(
             f"Reminder sent: user={reminder.user_id}, drug={reminder.drug_name}, level={escalation_level}"
         )
+        await self._ensure_intake_log(reminder)
+
+    async def _ensure_intake_log(self, reminder: MedicationReminder) -> None:
+        """Tạo pending intake log khi reminder nổ, idempotent, best-effort."""
+        from app.services.tracking_service import MedicationTrackingService
+        try:
+            await MedicationTrackingService(self.db).get_or_create_today_log(
+                reminder.user_id, reminder.id
+            )
+        except Exception as e:
+            logger.warning(f"Could not create intake log for reminder {reminder.id}: {e}")
 
     async def process_due_reminders(self) -> int:
         """Process all due reminders. Called by scheduler every minute."""

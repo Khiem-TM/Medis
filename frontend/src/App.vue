@@ -51,6 +51,7 @@ watch(isAuthenticated, (value) => {
 
 onMounted(() => {
   syncConnectivity()
+  uiStore.updateTheme()
   window.addEventListener('online', syncConnectivity)
   window.addEventListener('offline', syncConnectivity)
 })

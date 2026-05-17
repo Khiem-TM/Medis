@@ -64,7 +64,7 @@ async function logout() {
       uiStore.mobileSidebarOpen ? 'translate-x-0' : '-translate-x-[120%] lg:translate-x-0',
     ]"
   >
-    <div class="flex items-center gap-3 border-b border-white/65 px-4 py-5 soft-divider">
+    <div class="flex items-center gap-3 px-4 py-5 soft-divider">
       <img src="@/assets/logo.png" alt="Medis Logo" class="w-12 h-12 object-contain rounded-2xl shadow-sm" />
       <div v-if="uiStore.sidebarOpen" class="min-w-0">
         <p class="text-lg font-bold tracking-tight text-on-surface">Medis</p>
@@ -72,19 +72,19 @@ async function logout() {
       </div>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4 no-scrollbar">
       <RouterLink
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
         class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all"
         :class="isActive(item.to)
-          ? 'bg-gradient-to-r from-primary/16 to-secondary/12 text-primary shadow-sm'
-          : 'text-on-surface-variant hover:bg-white/65 hover:text-on-surface'"
+          ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary shadow-sm ring-1 ring-primary/20'
+          : 'text-on-surface-variant hover:bg-surface-container-low/80 hover:text-on-surface'"
       >
         <span
           class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl transition"
-          :class="isActive(item.to) ? 'bg-white text-primary shadow-sm' : 'bg-white/55 text-outline group-hover:text-primary'"
+          :class="isActive(item.to) ? 'bg-surface-container-lowest text-primary shadow-sm' : 'bg-surface-container-low/60 text-outline group-hover:text-primary'"
         >
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" :d="iconPath(item.icon)" />
@@ -93,7 +93,7 @@ async function logout() {
         <span v-if="uiStore.sidebarOpen" class="min-w-0 flex-1 truncate">{{ item.label }}</span>
         <span
           v-if="uiStore.sidebarOpen && item.badge"
-          class="rounded-full bg-tertiary-fixed px-2 py-1 text-[11px] font-semibold text-tertiary"
+          class="rounded-full bg-tertiary-fixed/30 px-2 py-1 text-[11px] font-semibold text-tertiary"
         >
           {{ item.badge }}
         </span>

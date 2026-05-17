@@ -1,22 +1,32 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePrescriptionDetail, usePrescriptionInteractions } from '@/api/prescriptions.api'
+import { usePrescriptionDetail, usePrescriptionInteractions, useCompleteEarlyMutation } from '@/api/prescriptions.api'
+import { useToast } from '@/composables/useToast'
 import { formatDate } from '@/utils/format'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 const id = computed(() => route.params.id as string)
 const showInteractions = ref(false)
 
 const { data: prescription, isLoading } = usePrescriptionDetail(id)
 const { data: interactions, isLoading: loadingInteractions, refetch: fetchInteractions } = usePrescriptionInteractions(id)
+const { mutate: completeEarly, isPending: completingEarly } = useCompleteEarlyMutation()
 
 function checkInteractions() {
   showInteractions.value = true
   fetchInteractions()
+}
+
+function handleCompleteEarly() {
+  completeEarly(id.value, {
+    onSuccess: () => toast.success('Đã kết thúc sớm đơn thuốc'),
+    onError: (e) => toast.error((e as { message?: string })?.message || 'Không thể kết thúc sớm'),
+  })
 }
 
 const effectiveInteractions = computed(() => interactions.value ?? prescription.value?.interaction_check ?? null)
@@ -48,14 +58,55 @@ const interactionCount = computed(() => effectiveInteractions.value?.interaction
             <h1 class="text-xl font-bold text-on-surface">{{ prescription.name }}</h1>
             <p class="text-sm text-outline mt-0.5">Tạo ngày {{ formatDate(prescription.created_at) }}</p>
             <p v-if="prescription.notes" class="text-sm text-on-surface-variant mt-2">{{ prescription.notes }}</p>
+
+            <!-- Medication type + date range row -->
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <span :class="[
+                'px-2.5 py-0.5 rounded-full text-xs font-bold',
+                prescription.medication_type === 'chronic'
+                  ? 'bg-secondary-container text-secondary'
+                  : 'bg-primary-fixed text-primary',
+              ]">
+                {{ prescription.medication_type === 'chronic' ? 'Thường xuyên' : 'Theo kỳ' }}
+              </span>
+              <template v-if="prescription.medication_type === 'periodic'">
+                <span v-if="prescription.start_date" class="text-xs text-outline">
+                  {{ formatDate(prescription.start_date) }}
+                </span>
+                <span v-if="prescription.start_date && prescription.end_date" class="text-xs text-outline">→</span>
+                <span v-if="prescription.end_date" class="text-xs text-outline">
+                  {{ formatDate(prescription.end_date) }}
+                </span>
+                <span
+                  v-if="prescription.status === 'active' && prescription.days_remaining !== null"
+                  :class="[
+                    'text-xs font-semibold',
+                    prescription.days_remaining === 0 ? 'text-error' :
+                    prescription.days_remaining <= 3 ? 'text-error' :
+                    prescription.days_remaining <= 7 ? 'text-amber-500' : 'text-on-surface-variant',
+                  ]"
+                >
+                  ({{ prescription.days_remaining === 0 ? 'Hết hôm nay' : `còn ${prescription.days_remaining} ngày` }})
+                </span>
+              </template>
+            </div>
           </div>
-          <div class="flex items-center gap-2 flex-shrink-0">
+
+          <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
             <span :class="[
               'px-2.5 py-0.5 rounded-full text-xs font-bold',
               prescription.status === 'active' ? 'bg-tertiary-fixed text-tertiary' : 'bg-surface-container text-outline',
             ]">
               {{ prescription.status === 'active' ? 'Đang dùng' : 'Hoàn thành' }}
             </span>
+            <button
+              v-if="prescription.status === 'active' && prescription.medication_type === 'periodic'"
+              @click="handleCompleteEarly"
+              :disabled="completingEarly"
+              class="px-3 py-1.5 text-xs font-medium text-amber-600 border border-amber-500/30 rounded-lg hover:bg-amber-500 hover:text-white transition-colors disabled:opacity-50"
+            >
+              Kết thúc sớm
+            </button>
             <button
               @click="checkInteractions"
               class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"

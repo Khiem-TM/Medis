@@ -48,14 +48,24 @@ async def lifespan(app: FastAPI):
 
     # Start lightweight in-process reminder scheduler (fallback when Celery not available)
     async def _reminder_loop():
-        from app.tasks.reminder_tasks import trigger_due_reminders
+        from app.tasks.reminder_tasks import (
+            trigger_due_reminders,
+            trigger_expire_periodic_prescriptions,
+            trigger_mark_missed_intakes,
+        )
         import asyncio
+        tick = 0
         while True:
             try:
                 await trigger_due_reminders()
+                if tick % 60 == 0:  # ~every hour (60 × 60s)
+                    await trigger_mark_missed_intakes()
+                if tick % 1440 == 5:  # ~daily
+                    await trigger_expire_periodic_prescriptions()
             except Exception as e:
                 logger.error(f"Reminder scheduler error: {e}")
-            await asyncio.sleep(60)  # Run every 60 seconds
+            tick += 1
+            await asyncio.sleep(60)
 
     asyncio.create_task(_reminder_loop())
     logger.info("In-process reminder scheduler started")

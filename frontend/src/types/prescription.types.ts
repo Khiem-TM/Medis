@@ -13,11 +13,17 @@ export interface PrescriptionItem {
   market_product?: MarketDrugProduct | null
 }
 
+export type MedicationType = 'chronic' | 'periodic'
+
 export interface Prescription {
   id: string
   user_id: string
   name: string
   status: 'active' | 'completed'
+  medication_type: MedicationType
+  start_date: string | null
+  end_date: string | null
+  days_remaining: number | null
   notes: string | null
   items: PrescriptionItem[]
   interaction_check?: InteractionCheckResult | null
@@ -37,6 +43,9 @@ export interface CreatePrescriptionItemRequest {
 export interface CreatePrescriptionRequest {
   name: string
   status?: 'active' | 'completed'
+  medication_type?: MedicationType
+  start_date?: string
+  end_date?: string
   notes?: string
   items: CreatePrescriptionItemRequest[]
 }
@@ -44,6 +53,9 @@ export interface CreatePrescriptionRequest {
 export interface UpdatePrescriptionRequest {
   name?: string
   status?: 'active' | 'completed'
+  medication_type?: MedicationType
+  start_date?: string
+  end_date?: string
   notes?: string
   items?: CreatePrescriptionItemRequest[]
 }
@@ -53,4 +65,5 @@ export interface PrescriptionSearchParams {
   size?: number
   search?: string
   status?: 'active' | 'completed' | ''
+  medication_type?: MedicationType | ''
 }

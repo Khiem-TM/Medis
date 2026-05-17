@@ -10,7 +10,7 @@ from pydantic import (
     field_validator, model_validator,
 )
 
-from app.models.prescription import PrescriptionStatus
+from app.models.prescription import PrescriptionStatus, MedicationType
 from app.schemas.market_drug import MarketDrugProductListItem
 from app.schemas.drug import InteractionCheckResult
 from app.models.user import AuthProvider, UserRole
@@ -115,6 +115,9 @@ class PrescriptionCreate(BaseModel):
     name: str
     notes: Optional[str] = None
     status: Optional[PrescriptionStatus] = PrescriptionStatus.active
+    medication_type: MedicationType = MedicationType.periodic
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     items: List[PrescriptionItemCreate]
 
     @field_validator("items")
@@ -124,11 +127,25 @@ class PrescriptionCreate(BaseModel):
             raise ValueError("Prescription must have at least 1 item")
         return v
 
+    @model_validator(mode="after")
+    def validate_periodic_dates(self) -> "PrescriptionCreate":
+        if (
+            self.medication_type == MedicationType.periodic
+            and self.start_date
+            and self.end_date
+            and self.end_date < self.start_date
+        ):
+            raise ValueError("end_date phải sau hoặc bằng start_date")
+        return self
+
 
 class PrescriptionUpdate(BaseModel):
     name: Optional[str] = None
     notes: Optional[str] = None
     status: Optional[PrescriptionStatus] = None
+    medication_type: Optional[MedicationType] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     items: Optional[List[PrescriptionItemCreate]] = None
 
 
@@ -139,9 +156,19 @@ class PrescriptionListItem(BaseModel):
     id: int
     name: str
     status: PrescriptionStatus
+    medication_type: MedicationType = MedicationType.periodic
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     drug_count: int = 0  # Set thủ công ở service layer
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def days_remaining(self) -> Optional[int]:
+        if self.medication_type == MedicationType.periodic and self.end_date:
+            return max(0, (self.end_date - date.today()).days)
+        return None
 
 
 class PrescriptionResponse(BaseModel):
@@ -152,6 +179,9 @@ class PrescriptionResponse(BaseModel):
     user_id: int
     name: str
     status: PrescriptionStatus
+    medication_type: MedicationType = MedicationType.periodic
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     notes: Optional[str] = None
     items: List[PrescriptionItemResponse]
     interaction_check: Optional[InteractionCheckResult] = None
@@ -162,6 +192,13 @@ class PrescriptionResponse(BaseModel):
     @property
     def drug_count(self) -> int:
         return len(self.items)
+
+    @computed_field
+    @property
+    def days_remaining(self) -> Optional[int]:
+        if self.medication_type == MedicationType.periodic and self.end_date:
+            return max(0, (self.end_date - date.today()).days)
+        return None
 
 
 # ── Health Profile ─────────────────────────────────────────────────────────

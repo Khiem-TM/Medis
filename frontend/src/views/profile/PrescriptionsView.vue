@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
-import { usePrescriptions, useCreatePrescriptionMutation, useDeletePrescriptionMutation } from '@/api/prescriptions.api'
+import { usePrescriptions, useCreatePrescriptionMutation, useDeletePrescriptionMutation, useCompleteEarlyMutation } from '@/api/prescriptions.api'
 import { useRecommendationMutation } from '@/api/recommendations.api'
 import type { DrugSuggestion } from '@/api/recommendations.api'
 import { usePagination } from '@/composables/usePagination'
@@ -10,7 +10,7 @@ import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import { prescriptionSchema } from '@/schemas/prescription.schema'
 import { formatDate } from '@/utils/format'
-import type { PrescriptionSearchParams } from '@/types/prescription.types'
+import type { PrescriptionSearchParams, MedicationType } from '@/types/prescription.types'
 import AppPagination from '@/components/ui/AppPagination.vue'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -29,17 +29,20 @@ const { page, size, params: paginationParams, setPage, setSize } = usePagination
 
 const search = ref('')
 const statusFilter = ref<'' | 'active' | 'completed'>('')
+const activeTab = ref<'' | MedicationType>('')
 const deletingId = ref<string | null>(null)
 
 const queryParams = computed<PrescriptionSearchParams>(() => ({
   ...paginationParams.value,
   search: search.value || undefined,
   status: statusFilter.value || undefined,
+  medication_type: activeTab.value || undefined,
 }))
 
 const { data, isLoading } = usePrescriptions(queryParams)
 const { mutate: createPrescription, isPending: creating } = useCreatePrescriptionMutation()
 const { mutate: deletePrescription, isPending: deleting } = useDeletePrescriptionMutation()
+const { mutate: completeEarly, isPending: completingEarly } = useCompleteEarlyMutation()
 const { mutate: getRecommendations, isPending: loadingSuggestions } = useRecommendationMutation()
 
 const showModal = ref(false)
@@ -52,6 +55,9 @@ const form = reactive({
   name: '',
   notes: '',
   status: 'active' as 'active' | 'completed',
+  medication_type: 'periodic' as MedicationType,
+  start_date: '',
+  end_date: '',
   items: [{ market_product_id: undefined as number | undefined, drug_id: undefined as string | undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null as MarketDrugProduct | null, is_ai_suggestion: false }],
 })
 
@@ -59,6 +65,9 @@ function resetForm() {
   form.name = ''
   form.notes = ''
   form.status = 'active'
+  form.medication_type = 'periodic'
+  form.start_date = ''
+  form.end_date = ''
   form.items = [{ market_product_id: undefined, drug_id: undefined, drug_name: '', dosage: '', frequency: '', duration: '', selected_product: null, is_ai_suggestion: false }]
   Object.keys(formErrors).forEach((k) => delete formErrors[k])
   symptoms.value = ''
@@ -127,6 +136,9 @@ function submitForm() {
     name: form.name,
     notes: form.notes,
     status: form.status,
+    medication_type: form.medication_type,
+    start_date: form.start_date || undefined,
+    end_date: form.end_date || undefined,
     items: form.items.map((item) => ({
       market_product_id: item.market_product_id,
       drug_id: item.drug_id,
@@ -173,6 +185,13 @@ async function deleteItem(id: string) {
   })
 }
 
+function handleCompleteEarly(id: string) {
+  completeEarly(id, {
+    onSuccess: () => toast.success('Đã kết thúc sớm đơn thuốc'),
+    onError: (e) => toast.error((e as { message?: string })?.message || 'Không thể kết thúc sớm'),
+  })
+}
+
 const statusOptions = [
   { label: 'Tất cả', value: '' },
   { label: 'Đang dùng', value: 'active' },
@@ -213,6 +232,21 @@ const statusOptions = [
       <svg class="w-4 h-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
+    </div>
+
+    <!-- Medication type tabs -->
+    <div class="flex gap-1 p-1 bg-surface-container-low rounded-2xl w-fit">
+      <button
+        v-for="tab in [{ label: 'Tất cả', value: '' }, { label: 'Thường xuyên', value: 'chronic' }, { label: 'Theo kỳ', value: 'periodic' }]"
+        :key="tab.value"
+        @click="activeTab = tab.value as '' | MedicationType"
+        :class="[
+          'px-4 py-2 rounded-xl text-sm font-medium transition-all',
+          activeTab === tab.value
+            ? 'bg-card text-on-surface shadow-sm font-semibold'
+            : 'text-outline hover:text-on-surface-variant',
+        ]"
+      >{{ tab.label }}</button>
     </div>
 
     <!-- Table card -->
@@ -261,8 +295,10 @@ const statusOptions = [
           <thead>
             <tr class="bg-surface-container-low border-b border-outline-variant">
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tên đơn thuốc</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Loại</th>
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Số thuốc</th>
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center">Trạng thái</th>
+              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Hạn kết thúc</th>
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ngày tạo</th>
               <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
             </tr>
@@ -283,6 +319,16 @@ const statusOptions = [
                   <span class="text-sm font-semibold text-on-surface">{{ (row as any).name }}</span>
                 </div>
               </td>
+              <td class="px-5 py-4">
+                <span :class="[
+                  'px-2.5 py-0.5 rounded-full text-xs font-bold',
+                  (row as any).medication_type === 'chronic'
+                    ? 'bg-secondary-container text-secondary'
+                    : 'bg-primary-fixed text-primary',
+                ]">
+                  {{ (row as any).medication_type === 'chronic' ? 'Thường xuyên' : 'Theo kỳ' }}
+                </span>
+              </td>
               <td class="px-5 py-4 text-center">
                 <span class="text-sm font-bold text-on-surface-variant">{{ (row as any).drug_count ?? 0 }}</span>
               </td>
@@ -296,9 +342,37 @@ const statusOptions = [
                   {{ (row as any).status === 'active' ? 'Đang dùng' : 'Hoàn thành' }}
                 </span>
               </td>
+              <td class="px-5 py-4">
+                <template v-if="(row as any).medication_type === 'periodic'">
+                  <span
+                    v-if="(row as any).days_remaining !== null && (row as any).days_remaining !== undefined"
+                    :class="[
+                      'text-xs font-medium',
+                      (row as any).days_remaining === 0 ? 'text-error font-bold' :
+                      (row as any).days_remaining <= 3 ? 'text-error' :
+                      (row as any).days_remaining <= 7 ? 'text-amber-500' : 'text-on-surface-variant',
+                    ]"
+                  >
+                    {{ (row as any).days_remaining === 0 ? 'Hết hôm nay' : `còn ${(row as any).days_remaining} ngày` }}
+                  </span>
+                  <span v-else-if="(row as any).end_date" class="text-xs text-on-surface-variant">
+                    {{ formatDate((row as any).end_date) }}
+                  </span>
+                  <span v-else class="text-xs text-outline">—</span>
+                </template>
+                <span v-else class="text-xs text-outline">—</span>
+              </td>
               <td class="px-5 py-4 text-sm text-on-surface-variant">{{ formatDate((row as any).created_at) }}</td>
               <td class="px-5 py-4">
                 <div class="flex items-center gap-2 justify-end">
+                  <button
+                    v-if="(row as any).status === 'active' && (row as any).medication_type === 'periodic'"
+                    @click="handleCompleteEarly((row as any).id)"
+                    :disabled="completingEarly"
+                    class="px-3 py-1.5 text-xs font-medium text-amber-600 border border-amber-500/30 rounded-lg hover:bg-amber-500 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    Kết thúc sớm
+                  </button>
                   <button
                     @click="router.push(`/profile/prescriptions/${(row as any).id}`)"
                     class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
@@ -331,6 +405,15 @@ const statusOptions = [
         <div class="grid grid-cols-2 gap-4">
           <AppInput v-model="form.name" label="Tên đơn thuốc" placeholder="VD: Đơn thuốc tháng 4" :error="formErrors.name" required />
           <AppSelect v-model="form.status" label="Trạng thái" :options="[{ label: 'Đang dùng', value: 'active' }, { label: 'Hoàn thành', value: 'completed' }]" />
+        </div>
+        <AppSelect
+          v-model="form.medication_type"
+          label="Loại thuốc"
+          :options="[{ label: 'Theo kỳ (điều trị ngắn hạn, có hạn)', value: 'periodic' }, { label: 'Thường xuyên (mạn tính / bổ sung)', value: 'chronic' }]"
+        />
+        <div v-if="form.medication_type === 'periodic'" class="grid grid-cols-2 gap-4">
+          <AppInput v-model="form.start_date" type="date" label="Ngày bắt đầu" />
+          <AppInput v-model="form.end_date" type="date" label="Ngày kết thúc" :error="formErrors.end_date" />
         </div>
         <AppTextarea v-model="form.notes" label="Ghi chú" placeholder="Ghi chú thêm..." :rows="2" />
 

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAdminStats } from '@/api/admin.api'
 import { usePrescriptions } from '@/api/prescriptions.api'
 import { useActivityLogs } from '@/api/activity.api'
+import { useIntakeStats } from '@/api/intakes.api'
 import { useAuthStore } from '@/stores/auth.store'
 import { formatDateTime } from '@/utils/format'
 import AppSkeleton from '@/components/ui/AppSkeleton.vue'
@@ -16,6 +17,8 @@ const isAdmin = computed(() => authStore.isAdmin)
 const { data: stats } = useAdminStats(isAdmin)
 const prescriptionParams = ref({ page: 1, size: 5 })
 const { data: prescriptions, isLoading: loadingRx } = usePrescriptions(computed(() => prescriptionParams.value))
+const { data: weekStats, isLoading: loadingWeekStats } = useIntakeStats(ref('week'))
+const { data: monthStats, isLoading: loadingMonthStats } = useIntakeStats(ref('month'))
 const activityParams = ref({ page: 1, size: 5 })
 const { data: activityData, isLoading: loadingActivity } = useActivityLogs(computed(() => activityParams.value))
 
@@ -199,16 +202,26 @@ function getActivityMeta(action: ActivityAction): ActivityMeta {
           <div class="flex items-center gap-2 text-xs">
             <span class="flex-1 truncate" style="color: #5A6985;">Tuân thủ tuần này</span>
             <div class="w-16 h-1.5 rounded-full overflow-hidden flex-shrink-0" style="background: rgba(12,29,66,0.08);">
-              <div class="h-full rounded-full" style="width: 92%; background: #2563EB;"></div>
+              <div
+                class="h-full rounded-full"
+                :style="`width: ${weekStats ? Math.round(weekStats.adherence_rate * 100) : 0}%; background: #2563EB;`"
+              ></div>
             </div>
-            <b class="w-7 text-right font-bold tabular-nums" style="color: #0C1D42;">92%</b>
+            <b class="w-7 text-right font-bold tabular-nums" style="color: #0C1D42;">
+              {{ loadingWeekStats ? '—' : (weekStats ? Math.round(weekStats.adherence_rate * 100) + '%' : '—') }}
+            </b>
           </div>
           <div class="flex items-center gap-2 text-xs">
             <span class="flex-1 truncate" style="color: #5A6985;">Tháng này</span>
             <div class="w-16 h-1.5 rounded-full overflow-hidden flex-shrink-0" style="background: rgba(12,29,66,0.08);">
-              <div class="h-full rounded-full" style="width: 88%; background: #10B981;"></div>
+              <div
+                class="h-full rounded-full"
+                :style="`width: ${monthStats ? Math.round(monthStats.adherence_rate * 100) : 0}%; background: #10B981;`"
+              ></div>
             </div>
-            <b class="w-7 text-right font-bold tabular-nums" style="color: #0C1D42;">88%</b>
+            <b class="w-7 text-right font-bold tabular-nums" style="color: #0C1D42;">
+              {{ loadingMonthStats ? '—' : (monthStats ? Math.round(monthStats.adherence_rate * 100) + '%' : '—') }}
+            </b>
           </div>
         </div>
       </div>

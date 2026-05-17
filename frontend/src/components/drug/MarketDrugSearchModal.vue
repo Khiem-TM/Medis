@@ -72,79 +72,77 @@ function goToProduct(product: MarketDrugProduct) {
 
         <!-- Dialog -->
         <div
-          class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden"
-          style="border: 1px solid rgba(12,29,66,0.08);"
+          class="relative w-full max-w-xl bg-surface-container-lowest rounded-2xl shadow-2xl overflow-hidden border border-outline-variant/30"
         >
           <!-- Search input -->
-          <div class="flex items-center gap-3 px-4 py-3" style="border-bottom: 1px solid rgba(12,29,66,0.08);">
-            <svg class="w-5 h-5 flex-shrink-0" style="color: #8A95AC;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <div class="flex items-center gap-3 px-4 py-3 border-b soft-divider">
+            <svg class="w-5 h-5 flex-shrink-0 text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               ref="searchInput"
               v-model="query"
-              class="flex-1 bg-transparent outline-none text-sm"
-              style="color: #0C1D42;"
+              class="flex-1 bg-transparent outline-none text-sm text-on-surface"
               placeholder="Tìm thuốc theo tên thương mại, hoạt chất, số đăng ký..."
             />
             <div v-if="loading" class="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style="border-color: #1D4FD8; border-top-color: transparent;" />
-            <kbd class="text-xs px-1.5 py-0.5 rounded font-mono flex-shrink-0" style="background: rgba(12,29,66,0.07); color: #8A95AC;">Esc</kbd>
+            <kbd class="text-xs px-1.5 py-0.5 rounded font-mono flex-shrink-0 bg-surface-container-high text-on-surface-variant">Esc</kbd>
           </div>
 
           <!-- Results -->
           <div class="max-h-[60vh] overflow-y-auto">
             <!-- Items -->
             <template v-if="results.length > 0">
-              <p class="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide" style="color: #8A95AC;">Thuốc thị trường</p>
+              <p class="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-outline">Thuốc thị trường</p>
               <button
                 v-for="product in results"
                 :key="product.id"
                 type="button"
-                class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#F3F5F7]"
+                class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-container-low"
                 @click="goToProduct(product)"
               >
                 <!-- Image -->
-                <div class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden border" style="border-color: rgba(12,29,66,0.08); background: #F8FAFB;">
+                <div class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden border border-outline-variant/30 bg-surface-container-low">
                   <img
                     v-if="product.image_url"
                     :src="product.image_url"
                     :alt="product.product_name"
                     class="w-full h-full object-contain p-1"
                   />
-                  <svg v-else class="w-full h-full p-2" style="color: #B5BCCB;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <svg v-else class="w-full h-full p-2 text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
                   </svg>
                 </div>
 
                 <!-- Info -->
                 <div class="min-w-0 flex-1">
-                  <p class="text-sm font-medium truncate" style="color: #0C1D42;">{{ product.product_name }}</p>
-                  <p class="text-xs truncate mt-0.5" style="color: #8A95AC;">
+                  <p class="text-sm font-medium truncate text-on-surface">{{ product.product_name }}</p>
+                  <p class="text-xs truncate mt-0.5 text-on-surface-variant">
                     {{ [product.dosage_form, product.packaging].filter(Boolean).join(' · ') }}
                   </p>
                 </div>
 
                 <!-- Registration badge + status -->
                 <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                  <span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background: #EFF6FF; color: #1D4FD8;">
+                  <span class="text-xs px-1.5 py-0.5 rounded font-mono bg-primary-container/20 text-primary">
                     {{ product.registration_number }}
                   </span>
-                  <span v-if="product.is_expired" class="text-xs" style="color: #EF4444;">Hết hạn</span>
+                  <span v-if="product.is_expired" class="text-xs text-error">Hết hạn</span>
                 </div>
               </button>
             </template>
 
             <!-- Empty state (after typing) -->
             <div v-else-if="debounced.length > 0 && !loading" class="py-12 text-center">
-              <svg class="w-10 h-10 mx-auto mb-3" style="color: #B5BCCB;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <svg class="w-10 h-10 mx-auto mb-3 text-outline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <p class="text-sm" style="color: #8A95AC;">Không tìm thấy thuốc nào cho "<strong>{{ debounced }}</strong>"</p>
+              <p class="text-sm text-on-surface-variant">Không tìm thấy thuốc nào cho "<strong>{{ debounced }}</strong>"</p>
             </div>
 
             <!-- Idle state -->
             <div v-else-if="!debounced" class="py-10 text-center">
-              <p class="text-sm" style="color: #B5BCCB;">Nhập tên thuốc để tra cứu...</p>
+              <p class="text-sm text-outline">Nhập tên thuốc để tra cứu...</p>
             </div>
           </div>
         </div>

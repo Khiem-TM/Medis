@@ -17,6 +17,21 @@ export const useUiStore = defineStore('ui', () => {
   const commandPaletteOpen = ref(false)
   const isOffline = ref(!navigator.onLine)
   const toasts = ref<Toast[]>([])
+  const theme = ref<'light' | 'dark'>((localStorage.getItem('theme') as 'light' | 'dark') || 'light')
+
+  function toggleTheme() {
+    theme.value = theme.value === 'light' ? 'dark' : 'light'
+    localStorage.setItem('theme', theme.value)
+    updateTheme()
+  }
+
+  function updateTheme() {
+    if (theme.value === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
 
   function toggleSidebar() {
     sidebarOpen.value = !sidebarOpen.value
@@ -81,6 +96,9 @@ export const useUiStore = defineStore('ui', () => {
     commandPaletteOpen,
     isOffline,
     toasts,
+    theme,
+    toggleTheme,
+    updateTheme,
     toggleSidebar,
     setMobileSidebar,
     toggleMobileSidebar,

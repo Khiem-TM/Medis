@@ -36,6 +36,14 @@ try:
                 "task": "app.tasks.reminder_tasks.send_daily_summaries",
                 "schedule": crontab(hour=20, minute=0),
             },
+            "expire-periodic-prescriptions-daily": {
+                "task": "app.tasks.reminder_tasks.expire_periodic_prescriptions",
+                "schedule": crontab(hour=0, minute=5),
+            },
+            "mark-missed-intakes-hourly": {
+                "task": "app.tasks.reminder_tasks.mark_missed_intakes",
+                "schedule": crontab(minute=0),
+            },
         },
     )
 

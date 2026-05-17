@@ -55,7 +55,7 @@ async function logout() {
         <div class="flex items-center gap-3">
           <button
             type="button"
-            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/65 text-on-surface transition hover:bg-white"
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-container-low/60 text-on-surface transition hover:bg-surface-container-low"
             @click="toggleSidebar"
           >
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -65,7 +65,7 @@ async function logout() {
 
           <button
             type="button"
-            class="hidden min-w-[16rem] items-center gap-3 rounded-2xl bg-white/65 px-4 py-3 text-left text-sm text-outline transition hover:bg-white md:flex"
+            class="hidden min-w-[16rem] items-center gap-3 rounded-2xl bg-surface-container-low/60 px-4 py-3 text-left text-sm text-outline transition hover:bg-surface-container-low md:flex"
             @click="searchOpen = true"
           >
             <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -77,11 +77,25 @@ async function logout() {
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Theme Toggle -->
+          <button
+            type="button"
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-container-low/60 text-on-surface transition hover:bg-surface-container-low"
+            @click="uiStore.toggleTheme"
+          >
+            <svg v-if="uiStore.theme === 'light'" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg v-else class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </button>
+
           <!-- Notification Icon -->
           <div ref="notificationRef" class="relative">
             <button
               type="button"
-              class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/65 text-on-surface transition hover:bg-white"
+              class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-container-low/60 text-on-surface transition hover:bg-surface-container-low"
               @click="uiStore.setNotificationDropdown(!uiStore.notificationDropdownOpen)"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -103,7 +117,7 @@ async function logout() {
           <div ref="settingsMenuRef" class="relative">
             <button
               type="button"
-              class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/65 text-on-surface transition hover:bg-white"
+              class="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-container-low/60 text-on-surface transition hover:bg-surface-container-low"
               @click="settingsOpen = !settingsOpen"
             >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -118,7 +132,7 @@ async function logout() {
               <div class="mt-1 space-y-1">
                 <button
                   type="button"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-white/70"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-surface-container-lowest/50"
                   @click="settingsOpen = false"
                 >
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -128,13 +142,13 @@ async function logout() {
                 </button>
                 <button
                   type="button"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-white/70"
-                  @click="settingsOpen = false"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-surface-container-lowest/50"
+                  @click="uiStore.toggleTheme(); settingsOpen = false"
                 >
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   </svg>
-                  Giao diện
+                  Giao diện: {{ uiStore.theme === 'light' ? 'Sáng' : 'Tối' }}
                 </button>
               </div>
             </div>
@@ -144,7 +158,7 @@ async function logout() {
           <div ref="userMenuRef" class="relative">
             <button
               type="button"
-              class="flex h-11 w-11 items-center justify-center rounded-full bg-white/65 transition hover:bg-white overflow-hidden p-0.5 border-2 border-transparent hover:border-primary/20"
+              class="flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-low/60 transition hover:bg-surface-container-low overflow-hidden p-0.5 border-2 border-transparent hover:border-primary/20"
               @click="userMenuOpen = !userMenuOpen"
             >
               <AppAvatar :src="authStore.user?.avatar_url" :name="authStore.user?.full_name" size="sm" class="w-full h-full" />
@@ -154,15 +168,17 @@ async function logout() {
               v-if="userMenuOpen"
               class="glass-panel-strong absolute right-0 top-[calc(100%+0.75rem)] z-20 w-60 rounded-[1.4rem] p-2"
             >
-              <div class="rounded-2xl bg-white/65 px-4 py-3 text-center">
-                <AppAvatar :src="authStore.user?.avatar_url" :name="authStore.user?.full_name" size="md" class="mx-auto mb-2" />
-                <p class="truncate text-sm font-semibold text-on-surface">{{ userLabel }}</p>
-                <p class="mt-1 truncate text-xs text-outline">{{ authStore.user?.email }}</p>
+              <div class="rounded-2xl bg-surface-container-low/60 px-3 py-3 flex items-center gap-3">
+                <AppAvatar :src="authStore.user?.avatar_url" :name="authStore.user?.full_name" size="md" class="shrink-0" />
+                <div class="min-w-0 text-left">
+                  <p class="truncate text-sm font-semibold text-on-surface">{{ userLabel }}</p>
+                  <p class="mt-0.5 truncate text-xs text-outline">{{ authStore.user?.email }}</p>
+                </div>
               </div>
               <div class="mt-2 space-y-1">
                 <button
                   type="button"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-white/70"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-on-surface transition hover:bg-surface-container-lowest/50"
                   @click="router.push('/profile'); userMenuOpen = false"
                 >
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -172,7 +188,7 @@ async function logout() {
                 </button>
                 <button
                   type="button"
-                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-error transition hover:bg-error-container/60"
+                  class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm text-error transition hover:bg-error-container/20"
                   @click="logout"
                 >
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

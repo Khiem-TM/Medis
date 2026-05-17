@@ -44,6 +44,7 @@ class User(Base):
     reminders = relationship("MedicationReminder", back_populates="user", lazy="select", cascade="all, delete-orphan")
     health_baseline = relationship("UserHealthBaseline", back_populates="user", uselist=False, lazy="select", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", lazy="select", cascade="all, delete-orphan")
+    intake_logs = relationship("MedicationIntakeLog", back_populates="user", lazy="select", cascade="all, delete-orphan")
 
 
     def to_dict(self) -> dict:

@@ -6,8 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.database import get_db
 from app.models.user import User
-from app.schemas.reminder import ReminderCreate, ReminderUpdate, ReminderResponse
+from app.schemas.intake import ConfirmIntakeRequest, MedicationIntakeLogResponse
+from app.schemas.reminder import ReminderCreate, ReminderResponse, ReminderUpdate
 from app.services.reminder_service import ReminderService
+from app.services.tracking_service import MedicationTrackingService
 
 router = APIRouter(prefix="/users/me/reminders", tags=["💊 Nhắc nhở thuốc"])
 
@@ -63,3 +65,18 @@ async def today_schedule(
     db: AsyncSession = Depends(get_db),
 ):
     return await _svc(db).get_today_schedule(current_user.id)
+
+
+@router.post(
+    "/{reminder_id}/confirm",
+    response_model=MedicationIntakeLogResponse,
+    summary="Xác nhận đã uống thuốc",
+    description="Ghi nhận taken (≤30 phút) hoặc late (>30 phút so với giờ nhắc).",
+)
+async def confirm_intake(
+    reminder_id: int,
+    data: ConfirmIntakeRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await MedicationTrackingService(db).confirm_intake(current_user.id, reminder_id, data)

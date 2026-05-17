@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { api } from './axios'
 import type { MedicationReminder, CreateReminderRequest, UpdateReminderRequest } from '@/types/reminder.types'
+import type { MedicationIntakeLog } from '@/types/intake.types'
+import { intakeKeys } from './intakes.api'
 
 export const reminderKeys = {
   all: ['reminders'] as const,
@@ -16,6 +18,8 @@ export const remindersApi = {
   update: ({ id, data }: { id: number; data: UpdateReminderRequest }) =>
     api.put<MedicationReminder>(`/users/me/reminders/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/users/me/reminders/${id}`).then((r) => r.data),
+  confirmIntake: (reminderId: number, notes?: string) =>
+    api.post<MedicationIntakeLog>(`/users/me/reminders/${reminderId}/confirm`, { notes }).then((r) => r.data),
 }
 
 export function useReminders() {
@@ -47,5 +51,17 @@ export function useDeleteReminderMutation() {
   return useMutation({
     mutationFn: remindersApi.delete,
     onSuccess: () => qc.invalidateQueries({ queryKey: reminderKeys.all }),
+  })
+}
+
+export function useConfirmIntakeMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ reminderId, notes }: { reminderId: number; notes?: string }) =>
+      remindersApi.confirmIntake(reminderId, notes),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: reminderKeys.today() })
+      qc.invalidateQueries({ queryKey: intakeKeys.all })
+    },
   })
 }

@@ -179,7 +179,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
 </script>
 
 <template>
-  <div class="flex h-[calc(100vh-5rem)] -mx-6 -mb-8 overflow-hidden rounded-3xl border border-outline-variant bg-surface shadow-sm">
+  <div class="flex h-[calc(100vh-5rem)] -mx-6 -mb-8 overflow-hidden rounded-3xl border border-outline-variant bg-surface-container shadow-sm">
     <!-- Left sidebar: chat history (hidden on mobile) -->
     <ChatSidebar
       class="hidden lg:flex"
@@ -192,10 +192,10 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
     />
 
     <!-- Main chat area -->
-    <section class="flex-1 flex flex-col bg-white overflow-hidden">
+    <section class="flex-1 flex flex-col bg-surface-container-lowest overflow-hidden">
       <!-- Chat header -->
       <header
-        class="h-16 px-6 flex items-center justify-between border-b border-outline-variant bg-white/80 backdrop-blur-xl sticky top-0 z-10 flex-shrink-0"
+        class="h-16 px-6 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest/80 backdrop-blur-xl sticky top-0 z-10 flex-shrink-0"
       >
         <div class="flex items-center gap-3">
           <div
@@ -245,7 +245,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
       </div>
 
       <!-- Messages area -->
-      <div ref="messagesEl" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[#fdfcff]">
+      <div ref="messagesEl" class="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-container-lowest/30">
         <!-- Loading state -->
         <div v-if="loadingHistory" class="flex justify-center py-12">
           <AppSpinner size="lg" class="text-primary" />
@@ -266,14 +266,12 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
             />
           </div>
           <h1
-            class="text-3xl font-bold mb-3 tracking-tight animate-fade-in-up"
-            style="color: #0c1d42"
+            class="text-3xl font-bold mb-3 tracking-tight animate-fade-in-up text-on-surface"
           >
             Xin chào, tôi là Medis AI
           </h1>
           <p
-            class="text-[15px] mb-8 max-w-xl mx-auto leading-relaxed animate-fade-in-up delay-100"
-            style="color: #5a6985"
+            class="text-[15px] mb-8 max-w-xl mx-auto leading-relaxed animate-fade-in-up delay-100 text-on-surface-variant"
           >
             Tôi có thể giúp bạn giải đáp các thắc mắc về sức khỏe, phân tích triệu chứng hoặc hướng
             dẫn sử dụng thuốc.
@@ -282,15 +280,13 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full mx-auto text-left">
             <button
               @click="useSuggestion('Thuốc này uống trước hay sau ăn?')"
-              class="bg-white p-3.5 rounded-xl border border-[#E5E7EB] hover:border-[#00897B]/40 hover:bg-gray-50 hover:shadow-sm transition-all duration-300 group flex items-center gap-3 animate-fade-in-up delay-100"
+              class="bg-surface-container-lowest p-3.5 rounded-xl border border-outline-variant hover:border-primary/40 hover:bg-surface-container-low hover:shadow-sm transition-all duration-300 group flex items-center gap-3 animate-fade-in-up delay-100"
             >
               <div
-                class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                style="background: #f0faf9"
+                class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary-container/10"
               >
                 <svg
-                  class="w-4 h-4"
-                  style="color: #00897b"
+                  class="w-4 h-4 text-primary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -304,10 +300,10 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="font-bold text-sm mb-0.5 truncate" style="color: #0c1d42">
+                <h3 class="font-bold text-sm mb-0.5 truncate text-on-surface">
                   Cách dùng thuốc
                 </h3>
-                <p class="text-xs truncate" style="color: #5a6985">
+                <p class="text-xs truncate text-on-surface-variant">
                   "Thuốc này uống trước hay sau ăn?"
                 </p>
               </div>
@@ -427,11 +423,11 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
       </div>
 
       <!-- Input area -->
-      <footer class="px-6 py-4 bg-white flex-shrink-0">
+      <footer class="px-6 py-4 bg-surface-container-lowest flex-shrink-0">
         <!-- Input box -->
         <div class="max-w-4xl mx-auto relative">
           <div
-            class="bg-white rounded-[2rem] border border-[#E5E7EB] flex items-end gap-2 p-2 focus-within:border-[#00897B] focus-within:ring-1 focus-within:ring-[#00897B] transition-all shadow-sm"
+            class="bg-surface-container-lowest rounded-[2rem] border border-outline-variant flex items-end gap-2 p-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm"
           >
             <div class="flex-1 py-3 px-6">
               <textarea
@@ -439,7 +435,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
                 rows="1"
                 :disabled="sending"
                 placeholder="Nhập câu hỏi của bạn tại đây..."
-                class="w-full bg-transparent border-none outline-none focus:ring-0 text-[15px] text-[#0C1D42] placeholder:text-[#8A95AC] resize-none max-h-32 leading-relaxed disabled:opacity-50 p-0 m-0"
+                class="w-full bg-transparent border-none outline-none focus:ring-0 text-[15px] text-on-surface placeholder:text-outline resize-none max-h-32 leading-relaxed disabled:opacity-50 p-0 m-0"
                 @keydown="onKeydown"
                 @input="autoResize"
                 style="box-shadow: none"
@@ -483,7 +479,7 @@ const showEmpty = computed(() => !loadingHistory.value && localMessages.value.le
             </button>
           </div>
         </div>
-        <p class="text-[13px] mt-3 text-center font-medium" style="color: #8a95ac">
+        <p class="text-[13px] mt-3 text-center font-medium text-outline">
           Medis AI có thể mắc lỗi. Vui lòng kiểm tra lại các thông tin y tế quan trọng.
         </p>
       </footer>

@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { useQueryClient } from '@tanstack/vue-query'
 import { notificationsApi } from '@/api/notifications.api'
 import { WS_BASE_URL } from '@/api/axios'
 import type {
@@ -30,6 +31,7 @@ export const useNotificationStore = defineStore('notifications', () => {
   const unreadCountState = ref(0)
   const wsConnected = ref(false)
   const reconnectAttempts = ref(0)
+  const queryClient = useQueryClient()
 
   let socket: WebSocket | null = null
   let reconnectTimer: number | null = null
@@ -101,6 +103,9 @@ export const useNotificationStore = defineStore('notifications', () => {
     }
     if (data.type === 'notification') {
       ingest(toNotificationItem(data.payload))
+      if (data.payload.data?.intake_log_id) {
+        queryClient.invalidateQueries({ queryKey: ['intakes'] })
+      }
     }
   }
 
