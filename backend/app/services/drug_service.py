@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 _LIST_TTL = 300    # 5 phút
 _DETAIL_TTL = 600  # 10 phút
 _PAIR_TTL = 1800   # 30 phút
+_EXPLAIN_TTL = 86400  # 24 giờ
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -424,3 +425,273 @@ class InteractionService:
         buf = BytesIO()
         wb.save(buf)
         return buf.getvalue()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  InteractionExplainService
+# ══════════════════════════════════════════════════════════════════════════════
+
+class InteractionExplainService:
+    SYSTEM_PROMPT = """Bạn là dược sĩ lâm sàng chuyên giải thích tương tác thuốc cho người dùng phổ thông Việt Nam.
+
+NGUYÊN TẮC BẮT BUỘC:
+- Ngôn ngữ: Tiếng Việt hoàn toàn, cấp độ phổ thông (tránh thuật ngữ Latin nếu không có giải thích kèm)
+- Không phóng đại, không gây hoảng loạn không cần thiết
+- Chỉ dựa vào dữ liệu được cung cấp, không bịa thêm thông tin
+- Nếu nguồn là "model_predicted", hãy ghi rõ độ tin cậy trong confidence_note
+- Trả về JSON ONLY, đúng schema sau, không có text ngoài JSON:
+
+{
+  "severity": "Nghiêm trọng" | "Cần chú ý" | "Nhẹ",
+  "severity_color": "red" | "amber" | "yellow",
+  "summary": "<1 câu tóm tắt ngắn gọn nhất, tối đa 120 ký tự>",
+  "mechanism": "<giải thích cơ chế 2-3 câu, dùng ngôn ngữ đơn giản>",
+  "symptoms_to_watch": ["<triệu chứng 1>", "<triệu chứng 2>"],
+  "what_to_do": ["<hành động cụ thể 1>", "<hành động cụ thể 2>"],
+  "when_to_see_doctor": "<mô tả tình huống khẩn cấp cần gặp bác sĩ>",
+  "can_be_used_together": true | false | null,
+  "confidence_note": "<chỉ điền nếu nguồn là model_predicted, null nếu database>"
+}"""
+
+    USER_PROMPT_TEMPLATE = """Giải thích tương tác giữa 2 thuốc sau:
+
+THUỐC A: {drug_a_name}
+- Nhóm dược lý: {drug_a_categories}
+- Cơ chế tác dụng (targets): {drug_a_targets}
+- Enzyme chuyển hóa: {drug_a_enzymes}
+- Cảnh báo an toàn đã biết: {drug_a_warnings}
+
+THUỐC B: {drug_b_name}
+- Nhóm dược lý: {drug_b_categories}
+- Cơ chế tác dụng (targets): {drug_b_targets}
+- Enzyme chuyển hóa: {drug_b_enzymes}
+- Cảnh báo an toàn đã biết: {drug_b_warnings}
+
+DỮ LIỆU TƯƠNG TÁC ĐÃ PHÁT HIỆN:
+- Loại sự kiện: {event_name}
+- Mô tả sự kiện: {event_description}
+- Nhãn tương tác: {interaction_label}
+- Nguồn dữ liệu: {source_note}
+{confidence_line}
+
+Hãy giải thích tương tác này theo JSON schema đã quy định."""
+
+    def __init__(self, db: AsyncSession, redis: Redis):
+        self.db = db
+        self.redis = redis
+        from app.services.gemini_client import build_gemini_client
+        self.client = build_gemini_client()
+
+    def _normalize_ids(self, id1: str, id2: str) -> tuple[str, str]:
+        return (id1, id2) if id1 <= id2 else (id2, id1)
+
+    def _cache_key(self, id1: str, id2: str) -> str:
+        a, b = self._normalize_ids(id1, id2)
+        return f"cache:interaction_explain:{a}:{b}"
+
+    async def explain(self, drug_id_1: str, drug_id_2: str) -> "InteractionExplainResponse":
+        from app.schemas.interaction_explain import InteractionExplainResponse
+        from app.models.drug import DrugInteraction
+        from app.models.drug_event_type import DrugEventType
+        from app.models.drug_feature import DrugFeature
+
+        cache_key = self._cache_key(drug_id_1, drug_id_2)
+        cached = await self.redis.get(cache_key)
+        if cached:
+            resp = InteractionExplainResponse.model_validate_json(cached)
+            resp.from_cache = True
+            return resp
+
+        drug_service = DrugService(self.db, self.redis)
+        try:
+            drug_a = await drug_service.get_by_id(drug_id_1)
+            drug_b = await drug_service.get_by_id(drug_id_2)
+        except HTTPException:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Không tìm thấy một hoặc cả hai thuốc",
+            )
+
+        feat_a_result = await self.db.execute(
+            select(DrugFeature).where(DrugFeature.drug_id == drug_id_1)
+        )
+        feat_a = feat_a_result.scalar_one_or_none()
+
+        feat_b_result = await self.db.execute(
+            select(DrugFeature).where(DrugFeature.drug_id == drug_id_2)
+        )
+        feat_b = feat_b_result.scalar_one_or_none()
+
+        interaction_result = await self.db.execute(
+            select(DrugInteraction)
+            .where(
+                or_(
+                    and_(
+                        DrugInteraction.drug_id == drug_id_1,
+                        DrugInteraction.interacts_with_id == drug_id_2,
+                    ),
+                    and_(
+                        DrugInteraction.drug_id == drug_id_2,
+                        DrugInteraction.interacts_with_id == drug_id_1,
+                    ),
+                )
+            )
+            .options(selectinload(DrugInteraction.event_type))
+            .limit(1)
+        )
+        interaction = interaction_result.scalar_one_or_none()
+        event_type: DrugEventType | None = interaction.event_type if interaction else None
+
+        def fmt_list(items, fallback: str = "Không có thông tin") -> str:
+            return ", ".join(items) if items else fallback
+
+        def truncate(text: str | None, max_chars: int = 300) -> str:
+            if not text:
+                return "Không có thông tin"
+            return text[:max_chars] + "..." if len(text) > max_chars else text
+
+        event_name = "Không xác định"
+        event_description = "Không có mô tả"
+        interaction_label = "Không xác định"
+        source = "database"
+        confidence_score = None
+
+        if interaction:
+            interaction_label = interaction.interaction_label or "Không xác định"
+            source = interaction.source.value if interaction.source else "database"
+            confidence_score = interaction.confidence_score
+            if event_type:
+                event_name = event_type.event_name or "Không xác định"
+                event_description = event_type.description or "Không có mô tả"
+
+        source_note = (
+            "Dữ liệu từ cơ sở dữ liệu dược học đã được xác minh"
+            if source == "database"
+            else "Dự đoán từ mô hình AI (chưa được xác minh lâm sàng đầy đủ)"
+        )
+        confidence_line = (
+            f"- Độ tin cậy của dự đoán: {confidence_score:.0%}"
+            if confidence_score is not None else ""
+        )
+
+        user_prompt = self.USER_PROMPT_TEMPLATE.format(
+            drug_a_name=drug_a.generic_name,
+            drug_a_categories=fmt_list(drug_a.categories),
+            drug_a_targets=truncate(feat_a.targets if feat_a else None),
+            drug_a_enzymes=truncate(feat_a.enzymes if feat_a else None),
+            drug_a_warnings=fmt_list(
+                [w.warning_text for w in drug_a.warnings],
+                "Không có cảnh báo đặc biệt",
+            ),
+            drug_b_name=drug_b.generic_name,
+            drug_b_categories=fmt_list(drug_b.categories),
+            drug_b_targets=truncate(feat_b.targets if feat_b else None),
+            drug_b_enzymes=truncate(feat_b.enzymes if feat_b else None),
+            drug_b_warnings=fmt_list(
+                [w.warning_text for w in drug_b.warnings],
+                "Không có cảnh báo đặc biệt",
+            ),
+            event_name=event_name,
+            event_description=event_description,
+            interaction_label=interaction_label,
+            source_note=source_note,
+            confidence_line=confidence_line,
+        )
+
+        llm_data = await self._call_llm(user_prompt)
+        response = InteractionExplainResponse(
+            drug_a_id=drug_id_1,
+            drug_b_id=drug_id_2,
+            drug_a_name=drug_a.generic_name,
+            drug_b_name=drug_b.generic_name,
+            source=source,
+            from_cache=False,
+            **llm_data,
+        )
+
+        await self.redis.setex(cache_key, _EXPLAIN_TTL, response.model_dump_json())
+        return response
+
+    async def _call_llm(self, user_prompt: str) -> dict:
+        if not self.client:
+            return self._fallback_response("Dịch vụ Gemini chưa được cấu hình")
+
+        try:
+            raw = await self.client.generate_text(
+                self.SYSTEM_PROMPT,
+                [{"role": "user", "content": user_prompt}],
+                temperature=0.2,
+                max_tokens=800,
+            )
+            data = json.loads(self._extract_json(raw))
+            self._validate_llm_data(data)
+            allowed = {
+                "severity",
+                "severity_color",
+                "summary",
+                "mechanism",
+                "symptoms_to_watch",
+                "what_to_do",
+                "when_to_see_doctor",
+                "can_be_used_together",
+                "confidence_note",
+            }
+            return {key: data.get(key) for key in allowed if key in data}
+        except Exception as e:
+            logger.warning(f"InteractionExplainService LLM error: {e}")
+            return self._fallback_response()
+
+    def _extract_json(self, raw: str) -> str:
+        text = raw.strip()
+        if text.startswith("```"):
+            lines = text.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            text = "\n".join(lines).strip()
+
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1 or end <= start:
+            raise ValueError("Gemini response does not contain a JSON object")
+        return text[start:end + 1]
+
+    def _validate_llm_data(self, data: dict) -> None:
+        required = {
+            "severity",
+            "severity_color",
+            "summary",
+            "mechanism",
+            "symptoms_to_watch",
+            "what_to_do",
+            "when_to_see_doctor",
+            "can_be_used_together",
+        }
+        if not required.issubset(data.keys()):
+            raise ValueError("Missing required keys in LLM response")
+        if data["severity"] not in {"Nghiêm trọng", "Cần chú ý", "Nhẹ"}:
+            raise ValueError("Invalid severity in LLM response")
+        if data["severity_color"] not in {"red", "amber", "yellow"}:
+            raise ValueError("Invalid severity_color in LLM response")
+        if not isinstance(data["symptoms_to_watch"], list):
+            raise ValueError("Invalid symptoms_to_watch in LLM response")
+        if not isinstance(data["what_to_do"], list):
+            raise ValueError("Invalid what_to_do in LLM response")
+        if data["can_be_used_together"] not in {True, False, None}:
+            raise ValueError("Invalid can_be_used_together in LLM response")
+
+    def _fallback_response(self, note: str = "") -> dict:
+        return {
+            "severity": "Cần chú ý",
+            "severity_color": "amber",
+            "summary": "Không thể tạo giải thích tự động. Vui lòng tham khảo dược sĩ.",
+            "mechanism": note or "Hệ thống giải thích tạm thời không khả dụng.",
+            "symptoms_to_watch": [],
+            "what_to_do": [
+                "Tham khảo ý kiến dược sĩ hoặc bác sĩ trước khi dùng đồng thời hai thuốc này."
+            ],
+            "when_to_see_doctor": "Khi có bất kỳ triệu chứng bất thường nào sau khi dùng thuốc.",
+            "can_be_used_together": None,
+            "confidence_note": None,
+        }

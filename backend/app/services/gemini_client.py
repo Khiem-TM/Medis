@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import httpx
-
 from app.config import settings
 
 
 class GeminiClient:
     def __init__(self, api_key: str, model: str) -> None:
-        self.api_key = api_key
+        from google import genai
+
         self.model = model
-        self.base_url = "https://generativelanguage.googleapis.com/v1beta"
+        self.client = genai.Client(api_key=api_key)
 
     async def generate_text(
         self,
@@ -19,44 +18,35 @@ class GeminiClient:
         max_tokens: int = 800,
         temperature: float = 0.7,
     ) -> str:
-        contents = []
+        from google.genai import types
+
+        contents: list[types.Content] = []
         for message in messages:
             role = "model" if message["role"] == "assistant" else "user"
-            contents.append({
-                "role": role,
-                "parts": [{"text": message["content"]}],
-            })
-
-        payload = {
-            "systemInstruction": {
-                "parts": [{"text": system_prompt}],
-            },
-            "contents": contents,
-            "generationConfig": {
-                "temperature": temperature,
-                "maxOutputTokens": max_tokens,
-            },
-        }
-        url = f"{self.base_url}/models/{self.model}:generateContent"
-
-        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=10.0)) as client:
-            response = await client.post(
-                url,
-                headers={
-                    "x-goog-api-key": self.api_key,
-                    "Content-Type": "application/json",
-                },
-                json=payload,
+            content = message.get("content", "").strip()
+            if not content:
+                continue
+            contents.append(
+                types.Content(
+                    role=role,
+                    parts=[types.Part(text=content)],
+                )
             )
-            response.raise_for_status()
 
-        data = response.json()
-        candidates = data.get("candidates") or []
-        if not candidates:
-            raise RuntimeError("Gemini response has no candidates")
+        if not contents:
+            raise ValueError("Gemini request has no content")
 
-        parts = candidates[0].get("content", {}).get("parts") or []
-        text = "\n".join(part.get("text", "") for part in parts).strip()
+        response = await self.client.aio.models.generate_content(
+            model=self.model,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                systemInstruction=system_prompt,
+                temperature=temperature,
+                maxOutputTokens=max_tokens,
+            ),
+        )
+
+        text = (response.text or "").strip()
         if not text:
             raise RuntimeError("Gemini response has no text")
         return text
@@ -65,4 +55,7 @@ class GeminiClient:
 def build_gemini_client() -> GeminiClient | None:
     if not settings.GEMINI_API_KEY:
         return None
-    return GeminiClient(settings.GEMINI_API_KEY, settings.GEMINI_MODEL)
+    try:
+        return GeminiClient(settings.GEMINI_API_KEY, settings.GEMINI_MODEL)
+    except ImportError:
+        return None

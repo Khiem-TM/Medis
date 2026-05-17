@@ -1,7 +1,8 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, users, drugs, market_drugs, activity, chatbot, recommendations, admin, reminders, onboarding, notifications, health, intakes, vitals
+from app.api.v1 import ai, auth, users, drugs, market_drugs, activity, chatbot, recommendations, admin, reminders, onboarding, notifications, health, intakes, vitals
 
 api_router = APIRouter()
+api_router.include_router(ai.router)
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
 api_router.include_router(drugs.drug_router)

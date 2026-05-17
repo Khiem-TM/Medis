@@ -12,7 +12,6 @@ from sqlalchemy import delete as sql_delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.config import settings
 from app.models.chat_message import ChatMessage, ChatSession
 from app.models.health_baseline import UserHealthBaseline
 from app.models.health_profile import HealthProfile
@@ -21,7 +20,7 @@ from app.models.reminder import MedicationReminder
 from app.models.user import User
 from app.schemas.chatbot import ChatMessageResponse, ChatSendResponse, ChatSessionResponse, QuickSuggestion
 from app.schemas.user import PaginatedResponse, PaginationMeta
-from app.services.github_models_client import build_github_models_client
+from app.services.gemini_client import build_gemini_client
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ _QUOTA_LIMIT_REPLY = (
 )
 
 
-def _fallback_reply_for_openai_error(exc: Exception) -> str:
+def _fallback_reply_for_ai_error(exc: Exception) -> str:
     status_code = getattr(exc, "status_code", None)
     body = getattr(exc, "body", None)
     error_code = None
@@ -62,10 +61,10 @@ def _fallback_reply_for_openai_error(exc: Exception) -> str:
             error_code = error.get("code")
 
     if status_code == 429 or error_code == "insufficient_quota":
-        logger.warning("OpenAI quota unavailable: status=%s code=%s", status_code, error_code)
+        logger.warning("Gemini quota unavailable: status=%s code=%s", status_code, error_code)
         return _QUOTA_LIMIT_REPLY
 
-    logger.warning("OpenAI chatbot request unavailable: %s", exc)
+    logger.warning("Gemini chatbot request unavailable: %s", exc)
     return _UNAVAILABLE_REPLY
 
 
@@ -169,7 +168,7 @@ class ChatbotService:
     def __init__(self, db: AsyncSession, redis: Optional[Redis] = None) -> None:
         self.db = db
         self.redis = redis
-        self.client = build_github_models_client()
+        self.client = build_gemini_client()
 
     async def _get_session(self, user_id: int, session_id: int) -> ChatSession:
         session = await self.db.scalar(
@@ -374,7 +373,7 @@ class ChatbotService:
         redis: Optional[Redis] = None,
         request: Optional[Request] = None,
     ) -> ChatSendResponse:
-        """Send a context-aware chat message through GitHub Models.
+        """Send a context-aware chat message through Gemini.
 
         The optional db/redis parameters keep this method easy to call from
         controllers or tests that follow a functional service style.
@@ -414,8 +413,7 @@ class ChatbotService:
         ).scalars().all()
         history_rows = list(reversed(history_rows))
 
-        messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
-        # Convert persisted history into the OpenAI-compatible chat format.
+        messages: list[dict[str, str]] = []
         # The comprehension keeps only role/content so DB-only fields never
         # leak into the provider payload.
         messages.extend(
@@ -430,19 +428,18 @@ class ChatbotService:
         messages.append({"role": "user", "content": content})
 
         if self.client is None:
-            logger.warning("GitHub Models client is not configured; returning chatbot fallback")
+            logger.warning("Gemini client is not configured; returning chatbot fallback")
             reply = _UNAVAILABLE_REPLY
         else:
             try:
-                response = await self.client.chat.completions.create(
-                    model=settings.GITHUB_MODELS_MODEL,
-                    messages=messages,
+                reply = await self.client.generate_text(
+                    system_prompt,
+                    messages,
                     max_tokens=800,
                     temperature=0.7,
                 )
-                reply = response.choices[0].message.content or _UNAVAILABLE_REPLY
             except Exception as exc:
-                reply = _fallback_reply_for_openai_error(exc)
+                reply = _fallback_reply_for_ai_error(exc)
 
         now = datetime.now(timezone.utc)
         user_msg = ChatMessage(

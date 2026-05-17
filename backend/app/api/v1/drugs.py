@@ -17,7 +17,15 @@ from app.schemas.drug import (
     InteractionCheckRequest,
     InteractionCheckResult,
 )
-from app.services.drug_service import DrugService, InteractionService
+from app.schemas.interaction_explain import (
+    InteractionExplainRequest,
+    InteractionExplainResponse,
+)
+from app.services.drug_service import (
+    DrugService,
+    InteractionExplainService,
+    InteractionService,
+)
 
 # ── Drug router ────────────────────────────────────────────────────────────
 
@@ -176,3 +184,19 @@ async def export_interactions(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@interaction_router.post(
+    "/explain",
+    response_model=InteractionExplainResponse,
+    summary="Giải thích tương tác thuốc bằng AI",
+    description="Gọi LLM để giải thích tương tác giữa 2 thuốc bằng ngôn ngữ dễ hiểu. Kết quả được cache 24 giờ.",
+)
+async def explain_interaction(
+    request: InteractionExplainRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    service = InteractionExplainService(db, redis)
+    return await service.explain(request.drug_id_1, request.drug_id_2)

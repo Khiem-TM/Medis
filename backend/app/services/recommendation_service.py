@@ -14,7 +14,6 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.config import settings
 from app.models.drug import Drug, DrugInteraction
 from app.models.health_profile import HealthProfile
 from app.models.prescription import Prescription, PrescriptionStatus
@@ -24,7 +23,7 @@ from app.schemas.recommendation import (
     RecommendationRequest,
     RecommendationResponse,
 )
-from app.services.openai_client import build_async_openai_client
+from app.services.gemini_client import build_gemini_client
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +61,23 @@ Format:
 }}"""
 
 
+def _extract_json(raw: str) -> str:
+    text = raw.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("Gemini response does not contain a JSON object")
+    return text[start:end + 1]
+
+
 def _calc_age(dob: Optional[datetime]) -> Optional[int]:
     if not dob:
         return None
@@ -72,7 +88,7 @@ def _calc_age(dob: Optional[datetime]) -> Optional[int]:
 class RecommendationService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.client = build_async_openai_client()
+        self.client = build_gemini_client()
 
     async def recommend(
         self,
@@ -129,7 +145,7 @@ class RecommendationService:
             ) or "Không có"
             current_drug_ids = [item.drug_id for item in pres.items if item.drug_id]
 
-        # ── Step 2: Call OpenAI ──────────────────────────────────────────
+        # ── Step 2: Call Gemini ──────────────────────────────────────────
         prompt = _USER_PROMPT_TEMPLATE.format(
             age=age or "N/A",
             gender=gender or "N/A",
@@ -144,24 +160,15 @@ class RecommendationService:
                 detail="Tính năng gợi ý AI chưa được cấu hình",
             )
 
-        ai_response = await self.client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
+        raw = await self.client.generate_text(
+            _SYSTEM_PROMPT,
+            [{"role": "user", "content": prompt}],
             max_tokens=1200,
             temperature=0.3,
         )
 
-        raw = ai_response.choices[0].message.content.strip()
-        # Strip possible markdown fences
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[-1]
-            raw = raw.rsplit("```", 1)[0].strip()
-
         try:
-            parsed = json.loads(raw)
+            parsed = json.loads(_extract_json(raw))
         except json.JSONDecodeError:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

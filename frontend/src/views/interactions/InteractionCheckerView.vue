@@ -11,6 +11,7 @@ import type { DrugListItem } from '@/types/drug.types'
 import type { InteractionCheckResult, DrugInteraction } from '@/types/interaction.types'
 import type { MarketDrugProduct } from '@/types/market-drug.types'
 import AppSpinner from '@/components/ui/AppSpinner.vue'
+import InteractionExplainSheet from '@/components/drug/InteractionExplainSheet.vue'
 
 const route = useRoute()
 
@@ -21,7 +22,7 @@ const mode = ref<Mode>('market')
 const selectedDrugs = ref<DrugListItem[]>([])
 const genericResult = ref<InteractionCheckResult | null>(null)
 const { mutate: checkGeneric, isPending: checkingGeneric, error: genericError } = useInteractionCheckMutation()
-const { exporting, exportExcel } = useExcelExport()
+const { exportExcel } = useExcelExport()
 
 // Generic search
 const genericQuery = ref('')
@@ -706,6 +707,10 @@ const genericErrorMsg = computed(() => {
                   </div>
                 </div>
                 <div class="ia-iact-actions">
+                  <InteractionExplainSheet
+                    :drug-id1="ia.drug_id"
+                    :drug-id2="ia.interacts_with_id"
+                  />
                   <div :class="['ia-chevron', openIds[idx] ? 'open' : '']">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                   </div>

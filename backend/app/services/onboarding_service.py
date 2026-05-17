@@ -3,22 +3,38 @@ import logging
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.config import settings
 from app.models.health_baseline import UserHealthBaseline, KidneyFunction, LiverFunction
 from app.models.user import User
 from app.schemas.onboarding import (
     OnboardingStep1Request, OnboardingStep2Request, OnboardingStep3Request,
     HealthBaselineResponse, ParsedConditionsResponse, AllergyItem, MedicationItem
 )
-from app.services.openai_client import build_async_openai_client
+from app.services.gemini_client import build_gemini_client
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_json(raw: str) -> str:
+    text = raw.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("Gemini response does not contain a JSON object")
+    return text[start:end + 1]
 
 
 class OnboardingService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self.client = None
+        self.client = build_gemini_client()
 
     async def _get_or_create_baseline(self, user_id: int) -> UserHealthBaseline:
         result = await self.db.execute(
@@ -61,36 +77,29 @@ class OnboardingService:
         return HealthBaselineResponse.model_validate(baseline)
 
     async def parse_conditions_with_ai(self, text: str) -> ParsedConditionsResponse:
-        """Use GPT-4o-mini to parse Vietnamese free text into structured data."""
+        """Use Gemini to parse Vietnamese free text into structured data."""
         try:
-            client = self.client or build_async_openai_client()
+            client = self.client or build_gemini_client()
             self.client = client
             if client is None:
-                logger.warning("OpenAI API key is not configured; skipping onboarding AI parsing")
+                logger.warning("Gemini API key is not configured; skipping onboarding AI parsing")
                 return ParsedConditionsResponse(raw_text=text)
 
-            response = await self.client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
-                response_format={"type": "json_object"},
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "Bạn là dược sĩ lâm sàng. Phân tích văn bản tiếng Việt về sức khỏe người dùng. "
-                            "Trả về JSON với format sau:\n"
-                            '{"conditions": ["tên bệnh 1", "tên bệnh 2"], '
-                            '"allergies": [{"drug": "tên thuốc", "reaction": "phản ứng nếu có"}], '
-                            '"medications": [{"name": "tên thuốc", "dosage": "liều lượng nếu có", "frequency": "tần suất nếu có"}]}\n'
-                            "Chuẩn hóa tên bệnh sang tiếng Anh chuẩn y khoa (ví dụ: tiểu đường → Diabetes Mellitus Type 2). "
-                            "Nếu không rõ, để mảng rỗng."
-                        ),
-                    },
-                    {"role": "user", "content": f"Văn bản sức khỏe: {text}"},
-                ],
+            raw_text = await self.client.generate_text(
+                (
+                    "Bạn là dược sĩ lâm sàng. Phân tích văn bản tiếng Việt về sức khỏe người dùng. "
+                    "Trả về JSON ONLY với format sau:\n"
+                    '{"conditions": ["tên bệnh 1", "tên bệnh 2"], '
+                    '"allergies": [{"drug": "tên thuốc", "reaction": "phản ứng nếu có"}], '
+                    '"medications": [{"name": "tên thuốc", "dosage": "liều lượng nếu có", "frequency": "tần suất nếu có"}]}\n'
+                    "Chuẩn hóa tên bệnh sang tiếng Anh chuẩn y khoa (ví dụ: tiểu đường → Diabetes Mellitus Type 2). "
+                    "Nếu không rõ, để mảng rỗng."
+                ),
+                [{"role": "user", "content": f"Văn bản sức khỏe: {text}"}],
                 temperature=0.1,
                 max_tokens=600,
             )
-            raw = json.loads(response.choices[0].message.content)
+            raw = json.loads(_extract_json(raw_text))
             return ParsedConditionsResponse(
                 conditions=raw.get("conditions", []),
                 allergies=[AllergyItem(**a) if isinstance(a, dict) else AllergyItem(drug=a) for a in raw.get("allergies", [])],
