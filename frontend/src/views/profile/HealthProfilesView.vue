@@ -77,14 +77,6 @@ const baselineForm = reactive({
   health_goals_text: '',
 })
 
-const visitTabs = [
-  { key: 'timeline', label: 'Dòng thời gian' },
-  { key: 'table', label: 'Bảng danh sách' },
-]
-const mainTabs = computed(() => [
-  { key: 'baseline', label: 'Bệnh nền & dị ứng' },
-  { key: 'visits', label: 'Lịch sử khám', count: summary.value?.total_visits ?? 0 },
-])
 const organOptions = [
   { label: 'Bình thường', value: 'normal' },
   { label: 'Suy nhẹ', value: 'mild_impairment' },
@@ -97,22 +89,76 @@ const organLabels: Record<string, string> = {
   moderate_impairment: 'Suy trung bình',
   severe_impairment: 'Suy nặng',
 }
+const organColors: Record<string, string> = {
+  normal: 'background:rgba(16,185,129,0.1);color:#059669;',
+  mild_impairment: 'background:rgba(245,158,11,0.1);color:#D97706;',
+  moderate_impairment: 'background:rgba(249,115,22,0.1);color:#EA580C;',
+  severe_impairment: 'background:rgba(239,68,68,0.1);color:#DC2626;',
+}
+
+function bmi(h: number | null, w: number | null): string | null {
+  if (!h || !w) return null
+  const val = w / ((h / 100) ** 2)
+  return val.toFixed(1)
+}
+function bmiLabel(val: string | null): { label: string; style: string } {
+  if (!val) return { label: '—', style: 'background:rgba(15,23,42,0.06);color:#6B7280;' }
+  const n = parseFloat(val)
+  if (n < 18.5) return { label: 'Thiếu cân', style: 'background:rgba(0,104,93,0.1);color:#00685d;' }
+  if (n < 25) return { label: 'Bình thường', style: 'background:rgba(16,185,129,0.1);color:#059669;' }
+  if (n < 30) return { label: 'Thừa cân', style: 'background:rgba(245,158,11,0.1);color:#D97706;' }
+  return { label: 'Béo phì', style: 'background:rgba(239,68,68,0.1);color:#DC2626;' }
+}
+
+function openBaselineEditor() {
+  const data = baseline.value
+  if (data) {
+    baselineForm.height_cm = data.height_cm
+    baselineForm.weight_kg = data.weight_kg
+    baselineForm.blood_type = data.blood_type ?? ''
+    baselineForm.is_pregnant = data.is_pregnant ?? false
+    baselineForm.is_breastfeeding = data.is_breastfeeding ?? false
+    baselineForm.kidney_function = (data.kidney_function as KidneyFunction) ?? 'normal'
+    baselineForm.liver_function = (data.liver_function as LiverFunction) ?? 'normal'
+    baselineForm.chronic_conditions_text = data.chronic_conditions?.join(', ') ?? ''
+    baselineForm.allergies_text = data.allergies?.map((a: AllergyItem) => a.reaction ? `${a.drug} - ${a.reaction}` : a.drug).join('\n') ?? ''
+    baselineForm.current_medications_text = data.current_medications?.map((m: MedicationItem) => [m.name, m.dosage, m.frequency].filter(Boolean).join(' | ')).join('\n') ?? ''
+    baselineForm.health_goals_text = data.health_goals?.join(', ') ?? ''
+  }
+  showBaselineModal.value = true
+}
+
+function parseCommaList(text: string): string[] {
+  return text.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+function parseAllergies(text: string): AllergyItem[] {
+  return text.split('\n').map(line => {
+    const [drug = '', reaction] = line.split('-').map(p => p.trim())
+    return { drug, reaction: reaction || null }
+  }).filter(item => item.drug)
+}
+
+function parseMedications(text: string): MedicationItem[] {
+  return text.split('\n').map(line => {
+    const [name = '', dosage, frequency] = line.split('|').map(part => part.trim())
+    return { name, dosage: dosage || null, frequency: frequency || null }
+  }).filter(item => item.name)
+}
 
 function resetVisitForm() {
-  Object.keys(visitForm).forEach((key) => {
-    ;(visitForm as Record<string, string>)[key] = ''
-  })
-  Object.keys(visitFormErrors).forEach((key) => delete visitFormErrors[key])
+  Object.keys(visitForm).forEach(key => { (visitForm as Record<string, string>)[key] = '' })
+  Object.keys(visitFormErrors).forEach(key => delete visitFormErrors[key])
 }
 
 function validateVisitForm() {
-  Object.keys(visitFormErrors).forEach((key) => delete visitFormErrors[key])
+  Object.keys(visitFormErrors).forEach(key => delete visitFormErrors[key])
   try {
     healthProfileSchema.parse(visitForm)
     return true
   } catch (error) {
     if (error instanceof z.ZodError) {
-      error.issues.forEach((issue) => {
+      error.issues.forEach(issue => {
         if (issue.path[0]) visitFormErrors[issue.path[0] as string] = issue.message
       })
     }
@@ -142,47 +188,6 @@ function submitVisitForm() {
   })
 }
 
-function hydrateBaselineForm(baseline?: HealthBaselineStructured) {
-  baselineForm.height_cm = baseline?.height_cm ?? null
-  baselineForm.weight_kg = baseline?.weight_kg ?? null
-  baselineForm.blood_type = baseline?.blood_type ?? ''
-  baselineForm.chronic_conditions_text = baseline?.chronic_conditions.join(', ') ?? ''
-  baselineForm.allergies_text = baseline?.allergies
-    .map((item) => [item.drug, item.reaction].filter(Boolean).join(' - '))
-    .join('\n') ?? ''
-  baselineForm.current_medications_text = baseline?.current_medications
-    .map((item) => [item.name, item.dosage, item.frequency].filter(Boolean).join(' | '))
-    .join('\n') ?? ''
-  baselineForm.is_pregnant = baseline?.is_pregnant ?? false
-  baselineForm.is_breastfeeding = baseline?.is_breastfeeding ?? false
-  baselineForm.kidney_function = baseline?.kidney_function ?? 'normal'
-  baselineForm.liver_function = baseline?.liver_function ?? 'normal'
-  baselineForm.health_goals_text = baseline?.health_goals.join(', ') ?? ''
-}
-
-function openBaselineEditor() {
-  hydrateBaselineForm(summary.value?.baseline)
-  showBaselineModal.value = true
-}
-
-function parseCommaList(value: string) {
-  return value.split(',').map((item) => item.trim()).filter(Boolean)
-}
-
-function parseAllergies(value: string): AllergyItem[] {
-  return value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
-    const [drug = '', ...reactionParts] = line.split('-').map((part) => part.trim())
-    return { drug, reaction: reactionParts.join(' - ') || null }
-  }).filter((item) => item.drug)
-}
-
-function parseMedications(value: string): MedicationItem[] {
-  return value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
-    const [name = '', dosage, frequency] = line.split('|').map((part) => part.trim())
-    return { name, dosage: dosage || null, frequency: frequency || null }
-  }).filter((item) => item.name)
-}
-
 function submitBaselineForm() {
   const payload: UpdateHealthBaselineRequest = {
     height_cm: baselineForm.height_cm,
@@ -209,10 +214,7 @@ function submitBaselineForm() {
 async function deleteVisit(id: string) {
   deletingId.value = id
   const confirmed = await confirm()
-  if (!confirmed) {
-    deletingId.value = null
-    return
-  }
+  if (!confirmed) { deletingId.value = null; return }
   deleteHealthVisit(id, {
     onSuccess: () => toast.success('Đã xóa lần khám'),
     onError: () => toast.error('Không thể xóa lần khám này'),
@@ -221,248 +223,322 @@ async function deleteVisit(id: string) {
 }
 
 const baseline = computed(() => summary.value?.baseline)
-const hasStaticData = computed(() => {
-  const data = baseline.value
-  if (!data) return false
-  return Boolean(
-    data.height_cm || data.weight_kg || data.blood_type ||
-    data.chronic_conditions.length || data.allergies.length ||
-    data.current_medications.length || data.health_goals.length,
-  )
-})
+const bmiVal = computed(() => bmi(baseline.value?.height_cm ?? null, baseline.value?.weight_kg ?? null))
+const bmiMeta = computed(() => bmiLabel(bmiVal.value))
+
+const mainTabs = computed(() => [
+  { key: 'baseline', label: 'Sức Khoẻ Cơ Bản' },
+  { key: 'visits', label: 'Lịch Sử Khám', count: summary.value?.total_visits ?? 0 },
+])
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between flex-wrap gap-3">
+    <!-- Page Header -->
+    <div class="flex items-start justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-on-surface">Sức khỏe của tôi</h1>
-        <p class="text-sm text-outline mt-0.5">Quản lý bệnh nền, dị ứng và lịch sử khám bệnh</p>
+        <p class="text-xs font-semibold uppercase tracking-widest mb-1" style="color:#00685d;">Hồ sơ y tế</p>
+        <h1 class="text-3xl font-extrabold" style="color:#0A0F1E;">Hồ Sơ Sức Khoẻ</h1>
+        <p class="text-sm mt-1" style="color:#4B5563;">Thông tin nền tảng và lịch sử khám bệnh</p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <AppButton variant="outline" @click="openBaselineEditor">
+      <div class="flex items-center gap-2">
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all hover:bg-gray-50"
+          style="border-color:rgba(15,23,42,0.12);color:#1F2937;"
+          @click="openBaselineEditor"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           Cập nhật bệnh nền
-        </AppButton>
-        <AppButton variant="gradient" @click="showVisitModal = true; resetVisitForm()">
-          <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+        </button>
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+          style="background:linear-gradient(135deg,#00685d,#00897B);box-shadow:0 4px 14px rgba(0,104,93,0.28);"
+          @click="showVisitModal = true; resetVisitForm()"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Thêm lần khám
-        </AppButton>
+        </button>
       </div>
     </div>
 
-    <div v-if="loadingSummary" class="grid gap-4 md:grid-cols-4">
-      <AppSkeleton v-for="i in 4" :key="i" class="h-24 rounded-2xl" />
+    <!-- Summary stats -->
+    <div v-if="loadingSummary" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <AppSkeleton v-for="i in 4" :key="i" class="h-20 rounded-2xl" />
     </div>
-    <div v-else class="grid gap-4 md:grid-cols-4">
-      <div class="bg-card rounded-2xl border border-outline-variant p-4 shadow-sm">
-        <p class="text-xs text-outline mb-1">Lần khám</p>
-        <p class="text-2xl font-bold text-on-surface">{{ summary?.total_visits ?? 0 }}</p>
+    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="rounded-2xl p-4" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+        <p class="text-xs font-medium mb-1" style="color:#6B7280;">Tổng lần khám</p>
+        <p class="text-2xl font-extrabold" style="color:#0A0F1E;">{{ summary?.total_visits ?? 0 }}</p>
       </div>
-      <div class="bg-card rounded-2xl border border-outline-variant p-4 shadow-sm">
-        <p class="text-xs text-outline mb-1">Đơn thuốc đang dùng</p>
-        <p class="text-2xl font-bold text-on-surface">{{ summary?.active_prescriptions ?? 0 }}</p>
+      <div class="rounded-2xl p-4" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+        <p class="text-xs font-medium mb-1" style="color:#6B7280;">Đơn đang dùng</p>
+        <p class="text-2xl font-extrabold" style="color:#00685d;">{{ summary?.active_prescriptions ?? 0 }}</p>
       </div>
-      <div class="bg-card rounded-2xl border border-outline-variant p-4 shadow-sm">
-        <p class="text-xs text-outline mb-1">Nhắc thuốc hoạt động</p>
-        <p class="text-2xl font-bold text-on-surface">{{ summary?.active_reminders ?? 0 }}</p>
+      <div class="rounded-2xl p-4" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+        <p class="text-xs font-medium mb-1" style="color:#6B7280;">Nhắc thuốc hoạt động</p>
+        <p class="text-2xl font-extrabold" style="color:#0A0F1E;">{{ summary?.active_reminders ?? 0 }}</p>
       </div>
-      <div class="bg-card rounded-2xl border border-outline-variant p-4 shadow-sm">
-        <p class="text-xs text-outline mb-1">Khám gần nhất</p>
-        <p class="text-base font-semibold text-on-surface">{{ summary?.last_exam_date ? formatDate(summary.last_exam_date) : '—' }}</p>
+      <div class="rounded-2xl p-4" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+        <p class="text-xs font-medium mb-1" style="color:#6B7280;">Khám gần nhất</p>
+        <p class="text-sm font-bold" style="color:#0A0F1E;">{{ summary?.last_exam_date ? formatDate(summary.last_exam_date) : '—' }}</p>
       </div>
     </div>
 
-    <AppTabNav
-      :tabs="mainTabs"
-      :model-value="activeTab"
-      @update:model-value="activeTab = $event as 'baseline' | 'visits'"
-    />
+    <!-- Tab nav -->
+    <div class="flex gap-1 p-1 rounded-xl w-fit" style="background:rgba(15,23,42,0.05);">
+      <button
+        v-for="tab in mainTabs"
+        :key="tab.key"
+        @click="activeTab = tab.key as 'baseline' | 'visits'"
+        :class="['flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all', activeTab === tab.key ? 'bg-white shadow-sm' : 'hover:bg-white/60']"
+        :style="activeTab === tab.key ? 'color:#0A0F1E;' : 'color:#4B5563;'"
+      >
+        {{ tab.label }}
+        <span v-if="tab.count !== undefined && tab.count > 0" class="text-xs font-bold px-1.5 py-0.5 rounded-full" :style="activeTab === tab.key ? 'background:rgba(0,104,93,0.1);color:#00685d;' : 'background:rgba(15,23,42,0.08);color:#6B7280;'">
+          {{ tab.count }}
+        </span>
+      </button>
+    </div>
 
-    <section v-if="activeTab === 'baseline'" class="space-y-5">
-      <div v-if="loadingSummary" class="space-y-3">
-        <AppSkeleton v-for="i in 3" :key="i" class="h-24 rounded-2xl" />
+    <!-- Baseline tab -->
+    <section v-if="activeTab === 'baseline'">
+      <div v-if="loadingSummary" class="space-y-4">
+        <AppSkeleton v-for="i in 3" :key="i" class="h-36 rounded-2xl" />
       </div>
 
-      <div v-else-if="baseline" class="grid gap-5 lg:grid-cols-[1fr_340px]">
+      <div v-else-if="baseline" class="grid gap-5 lg:grid-cols-[1fr_320px]">
+        <!-- Left column -->
         <div class="space-y-5">
-          <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-3 mb-4">
-              <h2 class="text-base font-semibold text-on-surface">Bệnh nền & tình trạng cần lưu ý</h2>
-              <AppButton size="sm" variant="ghost" @click="openBaselineEditor">Sửa</AppButton>
+          <!-- Biometric hero -->
+          <div class="rounded-2xl overflow-hidden" style="background:linear-gradient(135deg,rgba(0,104,93,0.07),rgba(0,104,93,0.04));border:1px solid rgba(0,104,93,0.15);">
+            <div class="p-5">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-widest mb-0.5" style="color:#00685d;">Chỉ số cơ thể</p>
+                  <h2 class="text-lg font-bold" style="color:#0A0F1E;">Chỉ số nền</h2>
+                </div>
+                <span class="px-3 py-1.5 rounded-full text-sm font-bold" :style="bmiMeta.style">
+                  BMI {{ bmiVal }} · {{ bmiMeta.label }}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,0.7);">
+                  <p class="text-2xl font-extrabold" style="color:#0A0F1E;">{{ baseline.height_cm ?? '—' }}</p>
+                  <p class="text-xs mt-0.5" style="color:#6B7280;">Chiều cao (cm)</p>
+                </div>
+                <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,0.7);">
+                  <p class="text-2xl font-extrabold" style="color:#0A0F1E;">{{ baseline.weight_kg ?? '—' }}</p>
+                  <p class="text-xs mt-0.5" style="color:#6B7280;">Cân nặng (kg)</p>
+                </div>
+                <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,0.7);">
+                  <p class="text-2xl font-extrabold" style="color:#DC2626;">{{ baseline.blood_type ?? '—' }}</p>
+                  <p class="text-xs mt-0.5" style="color:#6B7280;">Nhóm máu</p>
+                </div>
+                <div class="rounded-xl p-3 text-center" style="background:rgba(255,255,255,0.7);">
+                  <p class="text-sm font-bold pt-1" style="color:#0A0F1E;">{{ baseline.is_pregnant ? 'Thai kỳ' : baseline.is_breastfeeding ? 'Cho con bú' : '—' }}</p>
+                  <p class="text-xs mt-0.5" style="color:#6B7280;">Tình trạng</p>
+                </div>
+              </div>
             </div>
-            <div v-if="baseline.chronic_conditions.length" class="flex flex-wrap gap-2">
-              <span
-                v-for="condition in baseline.chronic_conditions"
-                :key="condition"
-                class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-semibold text-primary"
-              >
-                {{ condition }}
+          </div>
+
+          <!-- Organ function -->
+          <div class="rounded-2xl p-5" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-semibold" style="color:#0A0F1E;">Chức năng cơ quan</h2>
+              <span class="text-xs" style="color:#9CA3AF;">Cập nhật gần nhất</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl p-3" style="background:rgba(15,23,42,0.02);border:1px solid rgba(15,23,42,0.06);">
+                <p class="text-xs font-medium mb-2" style="color:#6B7280;">Chức năng thận</p>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold" :style="organColors[baseline.kidney_function] ?? organColors.normal">
+                  {{ organLabels[baseline.kidney_function] }}
+                </span>
+              </div>
+              <div class="rounded-xl p-3" style="background:rgba(15,23,42,0.02);border:1px solid rgba(15,23,42,0.06);">
+                <p class="text-xs font-medium mb-2" style="color:#6B7280;">Chức năng gan</p>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold" :style="organColors[baseline.liver_function] ?? organColors.normal">
+                  {{ organLabels[baseline.liver_function] }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conditions & allergies -->
+          <div class="rounded-2xl p-5" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-semibold" style="color:#0A0F1E;">Bệnh nền & Dị ứng</h2>
+              <button class="text-sm font-semibold" style="color:#00685d;" @click="openBaselineEditor">Sửa</button>
+            </div>
+
+            <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:#9CA3AF;">Bệnh nền</p>
+            <div v-if="baseline.chronic_conditions?.length" class="flex flex-wrap gap-2 mb-4">
+              <span v-for="c in baseline.chronic_conditions" :key="c" class="px-3 py-1 rounded-full text-sm font-medium" style="background:rgba(57,73,171,0.1);color:#3949AB;">
+                {{ c }}
               </span>
             </div>
-            <div v-else class="text-sm text-outline">Chưa có bệnh nền được ghi nhận.</div>
-          </div>
+            <p v-else class="text-sm mb-4" style="color:#9CA3AF;">Chưa có bệnh nền được ghi nhận.</p>
 
-          <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <h2 class="text-base font-semibold text-on-surface mb-4">Dị ứng thuốc</h2>
-            <div v-if="baseline.allergies.length" class="space-y-2">
-              <div
-                v-for="allergy in baseline.allergies"
-                :key="`${allergy.drug}-${allergy.reaction}`"
-                class="rounded-xl bg-error-container/60 px-4 py-3"
-              >
-                <p class="text-sm font-semibold text-on-surface">{{ allergy.drug }}</p>
-                <p v-if="allergy.reaction" class="text-xs text-on-surface-variant mt-0.5">{{ allergy.reaction }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color:#9CA3AF;">Dị ứng thuốc</p>
+            <div v-if="baseline.allergies?.length" class="space-y-2">
+              <div v-for="a in baseline.allergies" :key="a.drug" class="rounded-xl px-4 py-3" style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);">
+                <p class="text-sm font-semibold" style="color:#DC2626;">{{ a.drug }}</p>
+                <p v-if="a.reaction" class="text-xs mt-0.5" style="color:#4B5563;">{{ a.reaction }}</p>
               </div>
             </div>
-            <div v-else class="text-sm text-outline">Chưa ghi nhận dị ứng thuốc.</div>
+            <p v-else class="text-sm" style="color:#9CA3AF;">Chưa ghi nhận dị ứng thuốc.</p>
           </div>
 
-          <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <h2 class="text-base font-semibold text-on-surface mb-4">Thuốc đang dùng tự khai báo</h2>
-            <div v-if="baseline.current_medications.length" class="space-y-2">
-              <div
-                v-for="medication in baseline.current_medications"
-                :key="`${medication.name}-${medication.dosage}-${medication.frequency}`"
-                class="rounded-xl bg-surface-container-low px-4 py-3"
-              >
-                <p class="text-sm font-semibold text-on-surface">{{ medication.name }}</p>
-                <p class="text-xs text-on-surface-variant mt-0.5">
-                  {{ [medication.dosage, medication.frequency].filter(Boolean).join(' · ') || 'Chưa có liều/tần suất' }}
-                </p>
+          <!-- Current medications -->
+          <div class="rounded-2xl p-5" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+            <h2 class="font-semibold mb-4" style="color:#0A0F1E;">Thuốc đang dùng (tự khai báo)</h2>
+            <div v-if="baseline.current_medications?.length" class="space-y-2">
+              <div v-for="m in baseline.current_medications" :key="m.name" class="flex items-center gap-3 px-4 py-3 rounded-xl" style="background:rgba(15,23,42,0.02);border:1px solid rgba(15,23,42,0.06);">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(0,104,93,0.08);">
+                  <svg class="w-4 h-4" style="color:#00685d;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold" style="color:#0A0F1E;">{{ m.name }}</p>
+                  <p class="text-xs" style="color:#6B7280;">{{ [m.dosage, m.frequency].filter(Boolean).join(' · ') || 'Chưa có liều / tần suất' }}</p>
+                </div>
               </div>
             </div>
-            <div v-else class="text-sm text-outline">Chưa có thuốc tự khai báo trong hồ sơ nền.</div>
-            <button class="mt-4 text-sm font-semibold text-primary hover:underline" @click="router.push('/profile/prescriptions')">
-              Quản lý đơn thuốc cá nhân
+            <p v-else class="text-sm" style="color:#9CA3AF;">Chưa có thuốc tự khai báo.</p>
+            <button class="mt-3 text-sm font-semibold" style="color:#00685d;" @click="router.push('/profile/prescriptions')">
+              Quản lý đơn thuốc cá nhân →
             </button>
           </div>
         </div>
 
-        <aside class="space-y-5">
-          <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <h2 class="text-base font-semibold text-on-surface mb-4">Chỉ số nền</h2>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Chiều cao</p>
-                <p class="text-sm font-semibold text-on-surface">{{ baseline.height_cm ? `${baseline.height_cm} cm` : '—' }}</p>
-              </div>
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Cân nặng</p>
-                <p class="text-sm font-semibold text-on-surface">{{ baseline.weight_kg ? `${baseline.weight_kg} kg` : '—' }}</p>
-              </div>
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Nhóm máu</p>
-                <p class="text-sm font-semibold text-on-surface">{{ baseline.blood_type ?? '—' }}</p>
-              </div>
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Thai kỳ</p>
-                <p class="text-sm font-semibold text-on-surface">{{ baseline.is_pregnant ? 'Đang mang thai' : baseline.is_breastfeeding ? 'Cho con bú' : '—' }}</p>
-              </div>
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Chức năng thận</p>
-                <p class="text-sm font-semibold text-on-surface">{{ organLabels[baseline.kidney_function] }}</p>
-              </div>
-              <div class="rounded-xl bg-surface-container-low p-3">
-                <p class="text-xs text-outline">Chức năng gan</p>
-                <p class="text-sm font-semibold text-on-surface">{{ organLabels[baseline.liver_function] }}</p>
+        <!-- Right column -->
+        <div class="space-y-5">
+          <!-- Health goals -->
+          <div class="rounded-2xl p-5" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+            <h2 class="font-semibold mb-4" style="color:#0A0F1E;">Mục tiêu sức khoẻ</h2>
+            <div v-if="baseline.health_goals?.length" class="space-y-2">
+              <div v-for="goal in baseline.health_goals" :key="goal" class="flex items-center gap-3 py-2">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.1);">
+                  <svg class="w-3 h-3" style="color:#059669;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span class="text-sm" style="color:#1F2937;">{{ goal }}</span>
               </div>
             </div>
+            <p v-else class="text-sm" style="color:#9CA3AF;">Chưa có mục tiêu sức khoẻ.</p>
           </div>
 
-          <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <h2 class="text-base font-semibold text-on-surface mb-4">Mục tiêu sức khỏe</h2>
-            <div v-if="baseline.health_goals.length" class="flex flex-wrap gap-2">
-              <span
-                v-for="goal in baseline.health_goals"
-                :key="goal"
-                class="rounded-full bg-tertiary-fixed px-3 py-1.5 text-xs font-semibold text-tertiary"
-              >
-                {{ goal }}
-              </span>
+          <!-- Quick links -->
+          <div class="rounded-2xl p-5" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
+            <h2 class="font-semibold mb-3" style="color:#0A0F1E;">Truy cập nhanh</h2>
+            <div class="space-y-2">
+              <button class="w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-gray-50 text-left" style="border:1px solid rgba(15,23,42,0.06);" @click="router.push('/profile/prescriptions')">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(0,104,93,0.08);">
+                  <svg class="w-4 h-4" style="color:#00685d;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" style="color:#0A0F1E;">Đơn thuốc cá nhân</p>
+                  <p class="text-xs" style="color:#6B7280;">{{ summary?.active_prescriptions ?? 0 }} đơn đang dùng</p>
+                </div>
+                <svg class="w-4 h-4" style="color:#9CA3AF;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+              <button class="w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-gray-50 text-left" style="border:1px solid rgba(15,23,42,0.06);" @click="router.push('/schedule')">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(16,185,129,0.08);">
+                  <svg class="w-4 h-4" style="color:#059669;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" style="color:#0A0F1E;">Lịch uống thuốc</p>
+                  <p class="text-xs" style="color:#6B7280;">{{ summary?.active_reminders ?? 0 }} nhắc đang hoạt động</p>
+                </div>
+                <svg class="w-4 h-4" style="color:#9CA3AF;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
             </div>
-            <p v-else class="text-sm text-outline">Chưa có mục tiêu sức khỏe.</p>
           </div>
-        </aside>
+        </div>
       </div>
 
-      <div v-else-if="!hasStaticData" class="bg-card rounded-2xl border border-outline-variant p-12 text-center shadow-sm">
-        <p class="text-sm text-outline">Chưa có dữ liệu sức khỏe nền.</p>
-        <button class="mt-2 text-sm text-primary hover:underline" @click="openBaselineEditor">Cập nhật ngay</button>
+      <!-- Empty baseline -->
+      <div v-else class="flex flex-col items-center justify-center py-20 rounded-2xl border" style="background:white;border-color:rgba(15,23,42,0.08);">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style="background:rgba(0,104,93,0.08);">
+          <svg class="w-8 h-8" style="color:#00685d;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <p class="text-base font-semibold mb-1" style="color:#0A0F1E;">Chưa có dữ liệu sức khỏe nền</p>
+        <p class="text-sm mb-4" style="color:#6B7280;">Thêm thông tin để được tư vấn thuốc chính xác hơn</p>
+        <button class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(135deg,#00685d,#00897B);" @click="openBaselineEditor">
+          Cập nhật ngay
+        </button>
       </div>
     </section>
 
+    <!-- Visits tab -->
     <section v-else class="space-y-5">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="relative flex-1 min-w-48">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-outline pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            v-model="search"
-            type="text"
-            placeholder="Tìm kiếm lần khám..."
-            class="w-full pl-9 pr-3 py-2 bg-card border border-outline-variant rounded-xl text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-          />
+      <!-- Summary bar -->
+      <div class="flex items-center justify-between p-4 rounded-2xl" style="background:white;border:1px solid rgba(15,23,42,0.08);">
+        <div class="flex items-center gap-6 text-sm" style="color:#4B5563;">
+          <span><strong style="color:#0A0F1E;">{{ summary?.total_visits ?? 0 }}</strong> lần khám</span>
+          <span v-if="summary?.last_exam_date">Lần gần nhất: <strong style="color:#0A0F1E;">{{ formatDate(summary.last_exam_date) }}</strong></span>
+          <span><strong style="color:#00685d;">{{ summary?.active_prescriptions ?? 0 }}</strong> đơn thuốc đang dùng</span>
         </div>
-        <AppTabNav
-          :tabs="visitTabs"
-          :model-value="visitViewMode"
-          @update:model-value="visitViewMode = $event as 'timeline' | 'table'"
-        />
+        <!-- Search -->
+        <div class="relative w-56">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style="color:#9CA3AF;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input v-model="search" type="text" placeholder="Tìm kiếm..." class="w-full pl-9 pr-3 py-2 rounded-xl text-sm focus:outline-none" style="background:rgba(15,23,42,0.04);border:1px solid rgba(15,23,42,0.08);color:#0A0F1E;" />
+        </div>
       </div>
 
       <div v-if="loadingVisits" class="space-y-4">
         <AppSkeleton v-for="i in 3" :key="i" class="h-28 rounded-2xl" />
       </div>
 
-      <div v-else-if="!visitsData?.items.length" class="bg-card rounded-2xl border border-outline-variant p-12 text-center shadow-sm">
-        <svg class="w-12 h-12 text-outline/40 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <p class="text-sm text-outline">Chưa có lịch sử khám bệnh nào</p>
-        <button class="mt-2 text-sm text-primary hover:underline" @click="showVisitModal = true; resetVisitForm()">Thêm lần khám đầu tiên</button>
+      <div v-else-if="!visitsData?.items.length" class="flex flex-col items-center justify-center py-20 rounded-2xl border" style="background:white;border-color:rgba(15,23,42,0.08);">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style="background:rgba(0,104,93,0.08);">
+          <svg class="w-7 h-7" style="color:#00685d;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <p class="text-base font-semibold mb-1" style="color:#0A0F1E;">Chưa có lịch sử khám bệnh</p>
+        <p class="text-sm mb-4" style="color:#6B7280;">Thêm lần khám đầu tiên để bắt đầu theo dõi sức khoẻ</p>
+        <button class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(135deg,#00685d,#00897B);" @click="showVisitModal = true; resetVisitForm()">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Thêm lần khám đầu tiên
+        </button>
       </div>
 
-      <div v-else-if="visitViewMode === 'timeline'" class="relative">
-        <div class="absolute left-5 top-0 bottom-0 w-0.5 bg-outline-variant/40" />
-        <div class="space-y-6">
-          <div v-for="(profile, idx) in visitsData.items" :key="profile.id" class="relative pl-14">
-            <div :class="[
-              'absolute left-3 top-5 w-5 h-5 rounded-full border-2 border-card flex items-center justify-center',
-              idx === 0 ? 'bg-primary' : 'bg-surface-container-high',
-            ]">
-              <div :class="['w-2 h-2 rounded-full', idx === 0 ? 'bg-white' : 'bg-outline']" />
+      <!-- Timeline -->
+      <div v-else class="relative">
+        <div class="absolute left-6 top-0 bottom-0 w-0.5" style="background:rgba(0,104,93,0.15);" />
+        <div class="space-y-5">
+          <div v-for="(profile, idx) in visitsData.items" :key="profile.id" class="relative pl-16">
+            <!-- Timeline dot -->
+            <div class="absolute left-4 top-6 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center" :style="idx === 0 ? 'background:#00685d;box-shadow:0 0 0 3px rgba(0,104,93,0.2);' : 'background:#D1D5DB;'">
+              <div class="w-1.5 h-1.5 rounded-full bg-white" />
+            </div>
+            <!-- Date on rail -->
+            <div class="absolute left-0 top-5 w-10 text-center">
+              <span class="text-xs font-bold" style="color:#00685d;font-size:9px;line-height:1.2;">
+                {{ formatDate(profile.exam_date).slice(3) }}
+              </span>
             </div>
 
-            <div class="bg-card rounded-2xl border border-outline-variant p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="rounded-2xl p-5 transition-all hover:shadow-md" style="background:white;border:1px solid rgba(15,23,42,0.08);box-shadow:0 1px 3px rgba(15,23,42,0.05);">
               <div class="flex items-start justify-between gap-3 flex-wrap">
-                <div>
-                  <p class="text-xs text-outline mb-1">{{ formatDate(profile.exam_date) }}</p>
-                  <h3 class="text-base font-semibold text-on-surface">{{ profile.diagnosis_name }}</h3>
-                  <div class="flex flex-wrap gap-3 mt-2 text-xs text-on-surface-variant">
-                    <span v-if="profile.facility">{{ profile.facility }}</span>
-                    <span v-if="profile.doctor">{{ profile.doctor }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-medium mb-1" style="color:#6B7280;">{{ formatDate(profile.exam_date) }}</p>
+                  <h3 class="text-base font-bold" style="color:#0A0F1E;">{{ profile.diagnosis_name }}</h3>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs" style="color:#4B5563;">
+                    <span v-if="profile.facility">Cơ sở: <strong style="color:#1F2937;">{{ profile.facility }}</strong></span>
+                    <span v-if="profile.doctor">Bác sĩ: <strong style="color:#1F2937;">{{ profile.doctor }}</strong></span>
                   </div>
-                  <p v-if="profile.conclusion" class="mt-2 text-sm text-on-surface-variant line-clamp-2">
-                    {{ profile.conclusion }}
-                  </p>
+                  <p v-if="profile.conclusion" class="mt-2 text-sm line-clamp-2" style="color:#4B5563;">{{ profile.conclusion }}</p>
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <button
                     @click="router.push(`/profile/health/${profile.id}`)"
-                    class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
-                  >
-                    Xem chi tiết
-                  </button>
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+                    style="border-color:rgba(0,104,93,0.25);color:#00685d;background:rgba(0,104,93,0.05);"
+                  >Xem chi tiết</button>
                   <button
                     @click="deleteVisit(profile.id as string)"
                     :disabled="deleting && deletingId === profile.id"
-                    class="px-3 py-1.5 text-xs font-medium text-error border border-error/30 rounded-lg hover:bg-error hover:text-white transition-colors disabled:opacity-50"
-                  >
-                    Xóa
-                  </button>
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all disabled:opacity-50"
+                    style="border-color:rgba(239,68,68,0.3);color:#EF4444;"
+                  >Xóa</button>
                 </div>
               </div>
             </div>
@@ -470,49 +546,12 @@ const hasStaticData = computed(() => {
         </div>
       </div>
 
-      <div v-else class="bg-card rounded-2xl border border-outline-variant overflow-hidden shadow-sm">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-surface-container-low border-b border-outline-variant">
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Chẩn đoán</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ngày khám</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Cơ sở y tế</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Bác sĩ</th>
-              <th class="px-5 py-3 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant/50">
-            <tr v-for="profile in visitsData.items" :key="profile.id" class="hover:bg-surface-container-low/50 transition-colors">
-              <td class="px-5 py-4 text-sm font-medium text-on-surface">{{ profile.diagnosis_name }}</td>
-              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ formatDate(profile.exam_date) }}</td>
-              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ profile.facility ?? '—' }}</td>
-              <td class="px-5 py-4 text-sm text-on-surface-variant">{{ profile.doctor ?? '—' }}</td>
-              <td class="px-5 py-4">
-                <div class="flex items-center gap-2 justify-end">
-                  <button
-                    @click="router.push(`/profile/health/${profile.id}`)"
-                    class="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary hover:text-white transition-colors"
-                  >
-                    Xem
-                  </button>
-                  <button
-                    @click="deleteVisit(profile.id as string)"
-                    :disabled="deleting && deletingId === profile.id"
-                    class="px-3 py-1.5 text-xs font-medium text-error border border-error/30 rounded-lg hover:bg-error hover:text-white transition-colors disabled:opacity-50"
-                  >
-                    Xóa
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div v-if="visitsData?.meta" class="px-5 border-t border-outline-variant">
-          <AppPagination :meta="visitsData.meta" :model-value="page" show-size-selector :size="size" @update:model-value="setPage" @update:size="setSize" />
-        </div>
+      <div v-if="visitsData?.meta && visitsData.meta.total_pages > 1" class="rounded-2xl border px-5" style="background:white;border-color:rgba(15,23,42,0.08);">
+        <AppPagination :meta="visitsData.meta" :model-value="page" show-size-selector :size="size" @update:model-value="setPage" @update:size="setSize" />
       </div>
     </section>
 
+    <!-- Baseline modal -->
     <AppModal :open="showBaselineModal" title="Cập nhật bệnh nền & dị ứng" size="lg" @close="showBaselineModal = false">
       <form @submit.prevent="submitBaselineForm" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
@@ -522,32 +561,32 @@ const hasStaticData = computed(() => {
         <div class="grid grid-cols-2 gap-4">
           <AppInput v-model="baselineForm.blood_type" label="Nhóm máu" placeholder="VD: O+" />
           <div>
-            <label class="text-sm font-medium text-on-surface block mb-1.5">Chức năng thận</label>
-            <select v-model="baselineForm.kidney_function" class="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="text-sm font-medium block mb-1.5" style="color:#0A0F1E;">Chức năng thận</label>
+            <select v-model="baselineForm.kidney_function" class="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none" style="background:rgba(15,23,42,0.04);border:1px solid rgba(15,23,42,0.1);color:#0A0F1E;">
               <option v-for="opt in organOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium text-on-surface block mb-1.5">Chức năng gan</label>
-          <select v-model="baselineForm.liver_function" class="w-full px-3 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <label class="text-sm font-medium block mb-1.5" style="color:#0A0F1E;">Chức năng gan</label>
+          <select v-model="baselineForm.liver_function" class="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none" style="background:rgba(15,23,42,0.04);border:1px solid rgba(15,23,42,0.1);color:#0A0F1E;">
             <option v-for="opt in organOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
           </select>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <label class="flex items-center gap-3 rounded-xl border border-outline-variant px-4 py-3 text-sm text-on-surface">
-            <input v-model="baselineForm.is_pregnant" type="checkbox" class="rounded border-outline-variant" />
+          <label class="flex items-center gap-3 rounded-xl border px-4 py-3 text-sm cursor-pointer" style="border-color:rgba(15,23,42,0.1);color:#0A0F1E;">
+            <input v-model="baselineForm.is_pregnant" type="checkbox" class="rounded" />
             Đang mang thai
           </label>
-          <label class="flex items-center gap-3 rounded-xl border border-outline-variant px-4 py-3 text-sm text-on-surface">
-            <input v-model="baselineForm.is_breastfeeding" type="checkbox" class="rounded border-outline-variant" />
+          <label class="flex items-center gap-3 rounded-xl border px-4 py-3 text-sm cursor-pointer" style="border-color:rgba(15,23,42,0.1);color:#0A0F1E;">
+            <input v-model="baselineForm.is_breastfeeding" type="checkbox" class="rounded" />
             Đang cho con bú
           </label>
         </div>
         <AppTextarea v-model="baselineForm.chronic_conditions_text" label="Bệnh nền" placeholder="Nhập cách nhau bằng dấu phẩy, ví dụ: Tăng huyết áp, Đái tháo đường type 2" :rows="2" />
         <AppTextarea v-model="baselineForm.allergies_text" label="Dị ứng thuốc" placeholder="Mỗi dòng một dị ứng, ví dụ: Penicillin - nổi mẩn" :rows="3" />
         <AppTextarea v-model="baselineForm.current_medications_text" label="Thuốc đang dùng tự khai báo" placeholder="Mỗi dòng: Tên thuốc | liều | tần suất" :rows="3" />
-        <AppTextarea v-model="baselineForm.health_goals_text" label="Mục tiêu sức khỏe" placeholder="Nhập cách nhau bằng dấu phẩy" :rows="2" />
+        <AppTextarea v-model="baselineForm.health_goals_text" label="Mục tiêu sức khoẻ" placeholder="Nhập cách nhau bằng dấu phẩy" :rows="2" />
       </form>
       <template #footer>
         <AppButton variant="ghost" @click="showBaselineModal = false">Hủy</AppButton>
@@ -555,6 +594,7 @@ const hasStaticData = computed(() => {
       </template>
     </AppModal>
 
+    <!-- Visit modal -->
     <AppModal :open="showVisitModal" title="Thêm lần khám" size="lg" @close="showVisitModal = false">
       <form @submit.prevent="submitVisitForm" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
